@@ -2,7 +2,7 @@ import React from "react";
 import { BrowserRouter as Router, Routes, Route, useLocation } from "react-router-dom";
 import Navbar from "./components/Navbar";
 import Profile from "./pages/Profile";
-import ChangePhone from "./components/changePhone";
+import ChangePhone from "./components/ChangePhone";
 import ForgotPassword from "./pages/ForgotPassword";
 import ResetPassword from "./pages/ResetPassword";
 import ExplorePage from "./pages/ExplorePage";
