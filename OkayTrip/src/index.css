@@ -1,0 +1,97 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* *{
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+} */
+body{
+  font-family: 'Poppins', sans-serif;
+  /* font-size: 14px; */
+  /* line-height: 21px; */
+  /* font-weight: 400; */
+  color: #515151;
+}
+/* Blur Effect */
+.blur {
+  filter: blur(10px);
+  transition: filter 0.5s ease-out;
+}
+
+/* Scale-Up Effect */
+.scale-up {
+  transform: scale(1.1);
+  transition: transform 0.5s ease-out;
+}
+@keyframes slideIn {
+  from {
+    transform: translateX(100%);
+  }
+  to {
+    transform: translateX(0);
+  }
+}
+
+@keyframes HeaderSaleLine_animateIcon {
+  0% {
+    transform: translateX(-100%); /* Start completely off-screen to the left */
+  }
+  100% {
+    transform: translateX(100%); /* Move completely off-screen to the right */
+  }
+}
+
+.animate-sale-icon {
+  animation: HeaderSaleLine_animateIcon 4s linear infinite;
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 20%; /* Adjust the width for a proper strip */
+  height: 100%; /* Full height of the sale bar */
+  background: linear-gradient(to right, rgba(255, 255, 255, 0.8), rgba(255, 255, 255, 0));
+  opacity: 0.7;
+}
+
+  @keyframes zoom-in {
+    0% {
+      transform: scale(0.8);
+      opacity: 0;
+    }
+    100% {
+      transform: scale(1);
+      opacity: 1;
+    }
+  }
+  
+  @keyframes zoom-out {
+    0% {
+      transform: scale(1);
+      opacity: 1;
+    }
+    100% {
+      transform: scale(0.8);
+      opacity: 0;
+    }
+  }
+  
+  .animate-zoom-in {
+    animation: zoom-in 0.3s ease-out forwards;
+  }
+  .scrollbar-hide {
+    -ms-overflow-style: none; /* IE and Edge */
+    scrollbar-width: none; /* Firefox */
+  }
+  
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none; /* Chrome, Safari, and Opera */
+  }
+  div{
+    box-sizing: border-box !important;
+  }
+  /* .container{
+    max-width: 1080px;
+    margin: 0 auto;
+    width: 84vw;
+  } */

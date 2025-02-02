@@ -1,0 +1,13 @@
+@keyframes HeaderSaleLine_animateIcon {
+    0% {
+      transform: translateX(-100%);
+    }
+    100% {
+      transform: translateX(100%);
+    }
+  }
+  
+  .animate-sale-icon {
+    animation: HeaderSaleLine_animateIcon 4s linear infinite;
+  }
+  
