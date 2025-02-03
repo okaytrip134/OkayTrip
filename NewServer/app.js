@@ -7,27 +7,7 @@ require("dotenv").config();
 const app = express();
 const path = require("path");
 
-// Middleware
-const allowedOrigins = ["https://www.okaytrip.in", "https://okaytrip.in"];
-
-app.use((req, res, next) => {
-    // Check if the request origin is allowed
-    const origin = req.headers.origin;
-    if (allowedOrigins.includes(origin)) {
-        res.setHeader("Access-Control-Allow-Origin", origin); // Ensures only one value is sent
-    }
-
-    res.setHeader("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
-    res.setHeader("Access-Control-Allow-Headers", "Authorization, Content-Type");
-    res.setHeader("Access-Control-Allow-Credentials", "true");
-
-    // Handle preflight requests
-    if (req.method === "OPTIONS") {
-        return res.sendStatus(204);
-    }
-
-    next();
-});
+app.use(cors());
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
