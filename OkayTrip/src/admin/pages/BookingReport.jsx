@@ -9,7 +9,7 @@ const BookingReport = () => {
   useEffect(() => {
     const fetchBookings = async () => {
       try {
-        const { data } = await axios.get("http://localhost:8000/api/admin/bookings", {
+        const { data } = await axios.get(`${import.meta.env.VITE_APP_API_URL}/api/admin/bookings`, {
           headers: { Authorization: `Bearer ${localStorage.getItem("adminToken")}` },
         });
         setBookings(data.bookings);

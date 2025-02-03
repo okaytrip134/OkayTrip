@@ -30,7 +30,7 @@ const PackageForm = ({ onClose, fetchPackages, selectedPackage }) => {
     // Fetch categories for dropdown
     const fetchCategories = async () => {
       try {
-        const { data } = await axios.get("http://localhost:8000/api/admin/categories/", {
+        const { data } = await axios.get(`${import.meta.env.VITE_APP_API_URL}/api/admin/categories/`, {
           headers: { Authorization: `Bearer ${adminToken}` },
         });
         setCategories(data);
@@ -115,11 +115,11 @@ const PackageForm = ({ onClose, fetchPackages, selectedPackage }) => {
 
     try {
       if (selectedPackage) {
-        await axios.put(`http://localhost:8000/api/admin/packages/${selectedPackage._id}`, packageData, {
+        await axios.put(`${import.meta.env.VITE_APP_API_URL}/api/admin/packages/${selectedPackage._id}`, packageData, {
           headers: { Authorization: `Bearer ${adminToken}` },
         });
       } else {
-        await axios.post("http://localhost:8000/api/admin/packages/create", packageData, {
+        await axios.post(`${import.meta.env.VITE_APP_API_URL}/api/admin/packages/create`, packageData, {
           headers: { Authorization: `Bearer ${adminToken}` },
         });
       }

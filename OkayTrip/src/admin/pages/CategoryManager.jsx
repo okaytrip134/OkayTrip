@@ -16,7 +16,7 @@ const CategoryManager = () => {
   const fetchCategories = async () => {
     try {
       const { data } = await axios.get(
-        "http://localhost:8000/api/admin/categories/?isAdmin=true",
+        `${import.meta.env.VITE_APP_API_URL}/api/admin/categories/?isAdmin=true`,
         {
           headers: { Authorization: `Bearer ${adminToken}` },
         }
@@ -42,7 +42,7 @@ const CategoryManager = () => {
 
     try {
       const { data } = await axios.post(
-        "http://localhost:8000/api/admin/categories/create",
+        `${import.meta.env.VITE_APP_API_URL}/api/admin/categories/create`,
         formData,
         {
           headers: {
@@ -66,7 +66,7 @@ const CategoryManager = () => {
   const handleToggleCategory = async (id, isActive) => {
     try {
       const { data } = await axios.put(
-        `http://localhost:8000/api/admin/categories/${id}/status`,
+        `${import.meta.env.VITE_APP_API_URL}/api/admin/categories/${id}/status`,
         { isActive: !isActive },
         {
           headers: { Authorization: `Bearer ${adminToken}` },
@@ -84,7 +84,7 @@ const CategoryManager = () => {
   const handleToggleTrending = async (id, isTrending) => {
     try {
       const { data } = await axios.put(
-        `http://localhost:8000/api/admin/categories/${id}/trending`,
+        `${import.meta.env.VITE_APP_API_URL}/api/admin/categories/${id}/trending`,
         { isTrending: !isTrending },
         {
           headers: { Authorization: `Bearer ${adminToken}` },

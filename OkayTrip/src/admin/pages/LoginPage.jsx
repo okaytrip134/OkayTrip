@@ -11,7 +11,7 @@ const LoginPage = () => {
   const handleLogin = async (e) => {
     e.preventDefault();
     try {
-      const response = await axios.post("http://localhost:8000/api/admin/auth/login", {
+      const response = await axios.post(`${import.meta.env.VITE_APP_API_URL}/api/admin/auth/login`, {
         email,
         password,
       });

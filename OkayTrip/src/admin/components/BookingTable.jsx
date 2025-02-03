@@ -4,7 +4,7 @@ import axios from "axios";
 const BookingTable = ({ bookings }) => {
   const handleDownloadReport = async () => {
     try {
-      const response = await axios.get("http://localhost:8000/api/admin/bookings/download", {
+      const response = await axios.get(`${import.meta.env.VITE_APP_API_URL}/api/admin/bookings/download`, {
         headers: { Authorization: `Bearer ${localStorage.getItem("adminToken")}` },
         responseType: "blob",
       });

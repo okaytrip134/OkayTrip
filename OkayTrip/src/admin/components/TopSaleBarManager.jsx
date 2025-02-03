@@ -11,7 +11,7 @@ const TopSaleBarManager = () => {
   const fetchSaleBars = async () => {
     const token = localStorage.getItem("adminToken");
     try {
-      const response = await axios.get("http://localhost:8000/api/admin/top-sale-bar", {
+      const response = await axios.get(`${import.meta.env.VITE_APP_API_URL}/api/admin/top-sale-bar`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       setSaleBars(response.data);
@@ -25,7 +25,7 @@ const TopSaleBarManager = () => {
     const token = localStorage.getItem("adminToken");
     try {
       await axios.post(
-        "http://localhost:8000/api/admin/top-sale-bar/add-or-update",
+        `${import.meta.env.VITE_APP_API_URL}/api/admin/top-sale-bar/add-or-update`,
         { message, startDate, endDate, active },
         { headers: { Authorization: `Bearer ${token}` } }
       );
@@ -38,7 +38,7 @@ const TopSaleBarManager = () => {
   const handleDelete = async (id) => {
     const token = localStorage.getItem("adminToken");
     try {
-      await axios.delete(`http://localhost:8000/api/admin/top-sale-bar/${id}`, {
+      await axios.delete(`${import.meta.env.VITE_APP_API_URL}/api/admin/top-sale-bar/${id}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       fetchSaleBars();
