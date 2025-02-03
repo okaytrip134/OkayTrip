@@ -77,7 +77,7 @@ const AddressDetails = () => {
       setIsLoading(true);
       const token = localStorage.getItem("userToken");
       await axios.put(
-        `http://localhost:8000/api/user/profile/address`,
+        `${import.meta.env.VITE_APP_API_URL}/api/user/profile/address`,
         formData,
         {
           headers: { Authorization: `Bearer ${token}` },
