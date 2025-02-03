@@ -5,7 +5,7 @@ export const fetchAllUsers = async () => {
     const token = localStorage.getItem("adminToken");
     if (!token) throw new Error("No admin token found!");
 
-    const response = await axios.get("http://localhost:8000/api/admin/users", {
+    const response = await axios.get(`${import.meta.env.VITE_APP_API_URL}/api/admin/users`, {
       headers: {
         Authorization: `Bearer ${token}`,
       },
