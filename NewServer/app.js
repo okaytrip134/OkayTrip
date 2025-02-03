@@ -10,7 +10,12 @@ const path = require("path");
 
 
 // Middleware
-app.use(cors());
+app.use(cors({
+  origin: ["https://www.okaytrip.in", "https://okaytrip.in"], // Allow both frontend URLs
+  methods: ["GET", "POST", "PUT", "DELETE"],
+  allowedHeaders: ["Content-Type", "Authorization"],
+  credentials: true
+}));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
