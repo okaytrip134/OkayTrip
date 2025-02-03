@@ -11,7 +11,7 @@ const path = require("path");
 
 // Middleware
 app.use(cors({
-  origin: ["https://www.okaytrip.in", "https://okaytrip.in"], // Allow both frontend URLs
+  origin: ["https://www.api.okaytrip.in", "https://api.okaytrip.in"], // Allow both frontend URLs
   methods: ["GET", "POST", "PUT", "DELETE"],
   allowedHeaders: ["Content-Type", "Authorization"],
   credentials: true
