@@ -8,7 +8,7 @@ const adminAuth = require("../../middlewares/adminAuth");
 router.post("/create", adminAuth, upload.single("svgFile"), createCategory);
 
 // Get all categories
-router.get("/", adminAuth, getCategories);
+router.get("/", getCategories);
 
 // Toggle category status
 router.put("/:id/status", adminAuth, toggleCategoryStatus);

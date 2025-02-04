@@ -14,16 +14,14 @@ const HorizontalMenu = () => {
 
   useEffect(() => {
     const fetchCategories = async () => {
-      const adminToken = localStorage.getItem("adminToken");
-      if (!adminToken) {
-        console.error("Admin token is missing. Please log in.");
-        return;
-      }
+      // const adminToken = localStorage.getItem("adminToken");
+      // if (!adminToken) {
+      //   console.error("Admin token is missing. Please log in.");
+      //   return;
+      // }
 
       try {
-        const { data } = await axios.get(`${import.meta.env.VITE_APP_API_URL}/api/admin/categories/`, {
-          headers: { Authorization: `Bearer ${adminToken}` },
-        });
+        const { data } = await axios.get(`${import.meta.env.VITE_APP_API_URL}/api/admin/categories/`)
         setCategories(data.filter((category) => category.isActive));
         setActiveCategory("explore");
         setTimeout(updateScrollStatus, 0);
