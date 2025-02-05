@@ -276,12 +276,8 @@ const ExplorePage = () => {
                           style={{
                             width: 'calc(100% - 61px)'
                           }}
-                          onClick={(e) => {
-                            e.stopPropagation(); // Prevent navigation to package details
-                            handleBooking(pkg._id); // Handle booking logic
-                          }}
                         >
-                          <span className="  ">Book Now</span>
+                          <span className="  ">View Details</span>
                         </div>
                       </div>
                     </div>
