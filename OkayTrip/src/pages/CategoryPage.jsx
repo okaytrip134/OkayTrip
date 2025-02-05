@@ -44,6 +44,7 @@ const BlurImage = ({ src, alt }) => {
 const CategoryPage = () => {
   const API_URL = "http://localhost:8000";
   const { categoryId } = useParams();
+  const [category, setCategory] = useState(""); // Store Category Name
   const [packages, setPackages] = useState([]);
   const [loading, setLoading] = useState(true);
   const [page, setPage] = useState(1);
@@ -78,6 +79,21 @@ const CategoryPage = () => {
     },
     [loading, hasMore]
   );
+
+  useEffect(() => {
+    const fetchCategoryName = async () => {
+      try {
+        const { data } = await axios.get(`${import.meta.env.VITE_APP_API_URL}/api/admin/categories/`);
+        const categoryData = data.find(cat => cat._id === categoryId);
+        setCategory(categoryData?.name || "Unknown Category");
+      } catch (error) {
+        console.error("Error fetching category details:", error.message);
+        setCategory("Unknown Category");
+      }
+    };
+  
+    fetchCategoryName();
+  }, [categoryId]);
 
   useEffect(() => {
     const fetchPackages = async () => {
@@ -115,7 +131,7 @@ const CategoryPage = () => {
 
   return (
     <div className="px-8 lg:px-32 py-8 bg-gray-50 min-h-screen max-w-[1440px] mx-auto">
-      <h1 className="text-2xl font-bold mb-6">Packages in this Category</h1>
+     <h1 className="text-2xl font-bold mb-6">Tours In {category}</h1>
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
         {packages.map((pkg, index) => {
           const packageProps =
