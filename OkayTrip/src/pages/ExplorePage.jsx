@@ -43,13 +43,33 @@ const ExplorePage = () => {
     const fetchData = async () => {
       try {
         const { data: categoriesData } = await axios.get(
-          `${import.meta.env.VITE_APP_API_URL}/api/admin/categories/`,
-          {
-            headers: { Authorization: `Bearer ${adminToken}` },
-          }
+          `${import.meta.env.VITE_APP_API_URL}/api/admin/categories/`
         );
+
+        // ✅ Filter only active categories
         const activeCategories = categoriesData.filter((category) => category.isActive);
-        setCategories(activeCategories);
+        const filteredCategories = [];
+
+        // ✅ Fetch packages for each category & filter only categories with packages
+        for (const category of activeCategories) {
+          try {
+            const { data: categoryPackages } = await axios.get(
+              `${import.meta.env.VITE_APP_API_URL}/api/admin/packages/category/${category._id}`
+            );
+
+            if (categoryPackages.length > 0) {
+              filteredCategories.push(category);
+              setPackages((prev) => ({
+                ...prev,
+                [category._id]: categoryPackages,
+              }));
+            }
+          } catch (error) {
+            console.error(`Error fetching packages for category ${category._id}:`, error.message);
+          }
+        }
+
+        setCategories(filteredCategories); // ✅ Update only categories with packages
       } catch (error) {
         console.error("Error fetching categories:", error.message);
       }
@@ -118,7 +138,10 @@ const ExplorePage = () => {
 
   return (
     <div className="px-8 lg:px-32 py-8 bg-gray-50 min-h-screen max-w-[1440px] mx-auto">
-      {categories.map((category) => (
+                  {categories.length === 0 ? (
+                <div className="text-center py-10 text-gray-500">No categories available.</div>
+            ) : (
+      categories.map((category) => (
         <div
           key={category._id}
           id={`category-${category._id}`}
@@ -288,7 +311,8 @@ const ExplorePage = () => {
             </button>
           </div>
         </div>
-      ))}
+      ))
+    )}
     {/* <Footer/>  */}
     </div>
   );
