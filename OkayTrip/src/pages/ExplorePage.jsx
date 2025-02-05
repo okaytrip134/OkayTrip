@@ -165,7 +165,7 @@ const ExplorePage = () => {
   return (
     <div className="px-8 lg:px-32 py-8 bg-gray-50 min-h-screen max-w-[1440px] mx-auto">
                   {categories.length === 0 ? (
-                <div className="text-center py-10 text-gray-500">No categories available.</div>
+                <div></div>
             ) : (
       categories.map((category) => (
         <div
