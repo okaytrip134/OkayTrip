@@ -28,6 +28,7 @@ const ExplorePage = () => {
   const adminToken = localStorage.getItem("adminToken");
   const [showAuthPopup, setShowAuthPopup] = useState(false);
   const [selectedPackageId, setSelectedPackageId] = useState(null); // Store package ID
+  const [visibleLeftButtons, setVisibleLeftButtons] = useState({}); // Track left button visibility
   const navigate = useNavigate();
   const userToken = localStorage.getItem("userToken");
 
@@ -128,14 +129,39 @@ const ExplorePage = () => {
     return () => observer.disconnect();
   }, [categories, loadedCategories]);
 
+  useEffect(() => {
+    categories.forEach((category) => {
+      const carousel = document.getElementById(`carousel-${category._id}`);
+
+      if (carousel) {
+        // ✅ Listen for scroll events to dynamically update left button visibility
+        const handleScroll = () => {
+          setVisibleLeftButtons((prev) => ({
+            ...prev,
+            [category._id]: carousel.scrollLeft > 0, // Show button if scrolled right
+          }));
+        };
+
+        carousel.addEventListener("scroll", handleScroll);
+        return () => carousel.removeEventListener("scroll", handleScroll);
+      }
+    });
+  }, [categories]);
+
   const scrollCarousel = (categoryId, direction) => {
     const carousel = document.getElementById(`carousel-${categoryId}`);
-    carousel.scrollBy({
-      left: direction === 'left' ? -300 : 300,
-      behavior: "smooth"
+    if (!carousel) return;
+
+    const scrollAmount = 300;
+    const newScrollPosition = direction === "left"
+      ? carousel.scrollLeft - scrollAmount
+      : carousel.scrollLeft + scrollAmount;
+
+    carousel.scrollTo({
+      left: newScrollPosition,
+      behavior: "smooth",
     });
   };
-
   return (
     <div className="px-8 lg:px-32 py-8 bg-gray-50 min-h-screen max-w-[1440px] mx-auto">
                   {categories.length === 0 ? (
@@ -160,12 +186,14 @@ const ExplorePage = () => {
 
           {/* Carousel */}
           <div className="relative">
-            <button
-              className="absolute left-[-32px] top-[30%] border-[1px] border-solid border-gray-500 transform -translate-y-1/2 z-[4] bg-[hsla(0,0%,100%,.7)] p-5 rounded-full shadow hover:bg-gray-100"
-              onClick={() => scrollCarousel(category._id, 'left')}
-            >
-              <FaChevronLeft size={16} />
-            </button>
+          {visibleLeftButtons[category._id] && (
+                <button
+                  className="absolute left-[-32px] top-[30%] border-[1px] border-solid border-gray-500 transform -translate-y-1/2 z-[4] bg-[hsla(0,0%,100%,.7)] p-5 rounded-full shadow hover:bg-gray-100"
+                  onClick={() => scrollCarousel(category._id, 'left')}
+                >
+                  <FaChevronLeft size={16} />
+                </button>
+              )}
 
             <div
               id={`carousel-${category._id}`}
