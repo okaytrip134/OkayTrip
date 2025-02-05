@@ -41,7 +41,7 @@ const Footer = () => {
           <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
             {/* 🔹 About Thrillophilia */}
             <div className="border-r-2">
-              <h3 className="text-lg font-bold text-gray-900 mb-3">ABOUT THRILLOPHILIA</h3>
+              <h3 className="text-lg font-bold text-gray-900 mb-3">ABOUT OkayTrip</h3>
               <ul className="text-gray-600 space-y-2">
                 <li><a href="#" className="hover:text-gray-900">About Us</a></li>
                 <li><a href="#" className="hover:text-gray-900">We Are Hiring</a></li>
