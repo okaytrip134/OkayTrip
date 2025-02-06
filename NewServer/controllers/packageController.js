@@ -187,3 +187,23 @@ exports.togglePackageStatus = async (req, res) => {
     res.status(500).json({ message: "Internal server error." });
   }
 };
+exports.updatePackageSeats = async (req, res) => {
+  const { packageId } = req.params;
+  const { totalSeats } = req.body;
+
+  try {
+    const packageData = await Package.findById(packageId);
+    if (!packageData) {
+      return res.status(404).json({ message: "Package not found" });
+    }
+
+    // ✅ Admin updates seat count
+    packageData.totalSeats = totalSeats;
+    await packageData.save();
+
+    res.status(200).json({ message: "Package seat count updated successfully!" });
+  } catch (error) {
+    console.error("Error updating package seat count:", error);
+    res.status(500).json({ message: "Internal server error." });
+  }
+};

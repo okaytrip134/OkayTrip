@@ -35,7 +35,6 @@ const UserAuth = ({ onClose }) => {
 
       const { data } = await axios.post(endpoint, payload);
       if (isLogin) {
-        alert("Login Successful!");
         localStorage.setItem("userToken", data.token);
         localStorage.setItem("userName", data.user.name);
       } else {

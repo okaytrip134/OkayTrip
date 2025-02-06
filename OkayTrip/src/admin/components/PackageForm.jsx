@@ -122,6 +122,13 @@ const PackageForm = ({ onClose, fetchPackages, selectedPackage }) => {
         await axios.post(`${import.meta.env.VITE_APP_API_URL}/api/admin/packages/create`, packageData, {
           headers: { Authorization: `Bearer ${adminToken}` },
         });
+        // ✅ If only seats are updated, update them separately
+        if (formData.totalSeats !== selectedPackage.totalSeats) {
+          await axios.put(`http://localhost:8000/api/admin/packages/${selectedPackage._id}/update-seats`,
+            { totalSeats: formData.totalSeats },
+            { headers: { Authorization: `Bearer ${adminToken}` } }
+          );
+        }
       }
       fetchPackages();
       onClose();
@@ -276,7 +283,7 @@ const PackageForm = ({ onClose, fetchPackages, selectedPackage }) => {
               <div>
                 <h3 className="text-lg font-bold">Itinerary</h3>
                 <div className="flex space-x-2 mb-2">
-                <input
+                  <input
                     type="text"
                     placeholder="Title (e.g., Visit Burj Khalifa)"
                     value={newItineraryEntry.title}
@@ -338,7 +345,7 @@ const PackageForm = ({ onClose, fetchPackages, selectedPackage }) => {
             </div>
           </form>
         </div>
-      </div> 
+      </div>
     </div>
   );
 };

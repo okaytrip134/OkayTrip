@@ -70,6 +70,17 @@ const PackageManager = () => {
       console.error("Error toggling package status:", error);
     }
   };
+  const handleUpdateSeats = async (id, newSeats) => {
+    try {
+      await axios.put(`http://localhost:8000/api/admin/packages/${id}/update-seats`,
+        { totalSeats: newSeats },
+        { headers: { Authorization: `Bearer ${adminToken}` } }
+      );
+      fetchPackages(currentPage); // Refresh packages after updating seats
+    } catch (error) {
+      console.error("Error updating seat count:", error);
+    }
+  };
 
   useEffect(() => {
     fetchPackages(currentPage);
@@ -144,7 +155,20 @@ const PackageManager = () => {
                   <td className="border p-2">{pkg.title}</td>
                   <td className="border p-2">{pkg.categoryId?.name || "Unknown Category"}</td>
                   <td className="border p-2">₹{pkg.discountedPrice}</td>
-                  <td className="border p-2">{pkg.totalSeats}</td>
+                  <td className="border p-2">
+                    <input
+                      type="number"
+                      min="0"
+                      value={pkg.totalSeats}
+                      onChange={(e) => {
+                        const newSeats = parseInt(e.target.value, 10);
+                        if (newSeats >= 0) {
+                          handleUpdateSeats(pkg._id, newSeats);
+                        }
+                      }}
+                      className="w-16 border p-1 rounded text-center"
+                    />
+                  </td>
                   <td className="border p-2">{pkg.duration}</td>
                   <td className="border p-2">{new Date(pkg.startDate).toLocaleDateString()}</td>
                   <td className="border p-2">{new Date(pkg.endDate).toLocaleDateString()}</td>
