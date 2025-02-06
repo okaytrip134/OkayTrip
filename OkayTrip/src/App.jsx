@@ -12,6 +12,7 @@ import BookingPage from "./pages/BookingPage";
 import PaymentPage from "./pages/PaymentPage";
 import ProfileBookings from "./pages/ProfileBooking";
 import Footer from "./components/Footer";
+import ScrollToTop from "./components/ScrollToTop";
 
 function App() {
   return (
@@ -27,6 +28,7 @@ const AppContent = () => {
   return (
     <div className="App">
       <NavWithConditionalNavbar />
+      <ScrollToTop/>
       <div className="content">
         <Routes>
           <Route path="/" element={<ExplorePage />} />

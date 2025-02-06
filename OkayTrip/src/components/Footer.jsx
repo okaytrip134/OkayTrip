@@ -1,31 +1,45 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { FaFacebookF, FaInstagram, FaTwitter, FaLinkedinIn, FaYoutube } from "react-icons/fa";
+import { useNavigate } from "react-router-dom";
+import logo from '../assets/Logo/Trip ok new 2 white.png';
 
 const Footer = () => {
-    const [categories, setCategories] = useState([]);
+  const [packages, setPackages] = useState([]);
+  const navigate = useNavigate();
 
-  // ✅ Fetch Packages & Extract Categories
   useEffect(() => {
     const fetchPackages = async () => {
       try {
-        const { data } = await axios.get("http://localhost:8000/api/admin/packages");
-        
-        // Extract unique categories with images
-        const uniqueCategories = [];
-        const categoryMap = new Map();
+        // Fetch all active categories
+        const { data: categories } = await axios.get(`${import.meta.env.VITE_APP_API_URL}/api/admin/categories/`);
 
-        data.packages.forEach((pkg) => {
-          if (!categoryMap.has(pkg.categoryId)) {
-            categoryMap.set(pkg.categoryId, {
-              id: pkg.categoryId,
-              name: pkg.categoryName,
-              image: pkg.images[0], // ✅ First uploaded image from package
+        if (!categories || categories.length === 0) {
+          console.error("No categories found.");
+          return;
+        }
+
+        const allPackages = [];
+
+        for (const category of categories) {
+          const { data: categoryPackages } = await axios.get(
+            `${import.meta.env.VITE_APP_API_URL}/api/admin/packages/category/${category._id}`
+          );
+
+          if (categoryPackages.length > 0) {
+            allPackages.push({
+              categoryId: category._id,
+              name: category.name,
+              image: categoryPackages[0].images && categoryPackages[0].images.length > 0
+                ? categoryPackages[0].images[0]  // ✅ Always select the first image
+                : "/fallback-image.png",
             });
           }
-        });
+        }
 
-        setCategories(Array.from(categoryMap.values()));
+        // Shuffle & Limit to 9 packages
+        setPackages(allPackages.sort(() => 0.5 - Math.random()).slice(0, 9));
+
       } catch (error) {
         console.error("Error fetching packages:", error);
       }
@@ -33,19 +47,20 @@ const Footer = () => {
 
     fetchPackages();
   }, []);
+
   return (
     <footer className="bg-gray-900 text-white">
-      {/* ✅ Main Footer Content */}
       <div className="max-w-[1440px] mx-auto py-10 px-6">
         <div className="bg-white rounded-xl shadow-lg p-8 max-w-[1080px] mx-auto">
           <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+
             {/* 🔹 About Thrillophilia */}
             <div className="border-r-2">
-              <h3 className="text-lg font-bold text-gray-900 mb-3">ABOUT OKAYTRIP</h3>
+              <h3 className="text-lg font-bold text-gray-900 mb-3">ABOUT THRILLOPHILIA</h3>
               <ul className="text-gray-600 space-y-2">
                 <li><a href="#" className="hover:text-gray-900">About Us</a></li>
+                <li><a href="#" className="hover:text-gray-900">We Are Hiring</a></li>
                 <li><a href="#" className="hover:text-gray-900">Terms & Conditions</a></li>
-                <li><a href="#" className="hover:text-gray-900">Refund Policies</a></li>
                 <li><a href="#" className="hover:text-gray-900">Privacy Policies</a></li>
                 <li><a href="#" className="hover:text-gray-900">Copyright Policies</a></li>
                 <li><a href="#" className="hover:text-gray-900">Support</a></li>
@@ -80,16 +95,20 @@ const Footer = () => {
             <div>
               <h3 className="text-lg font-bold text-gray-900 mb-3">TRAVEL DESTINATIONS</h3>
               <div className="grid grid-cols-3 gap-2">
-                {["Delhi", "Kolkata", "Bihar", "Rajasthan", "Agra", "Jaipur", "Banglore", "Kerla"].map((dest, index) => (
-                  <div key={index} className="relative group cursor-pointer">
+                {packages.map((pkg, index) => (
+                  <div
+                    key={pkg.categoryId || `package-${index}`}
+                    className="relative group cursor-pointer overflow-hidden"
+                    onClick={() => navigate(`/category/${pkg.categoryId}`)}
+                  >
                     <img
-                      src={`/images/${dest.toLowerCase()}.jpg`} // Add actual image URLs
-                      alt={dest}
-                      className="w-full h-16 object-cover rounded-md"
+                      src={`${import.meta.env.VITE_APP_API_URL}${pkg.image}`}
+                      alt={pkg.name}
+                      className="w-full h-16 object-cover transition-transform duration-300 ease-in-out group-hover:scale-110"
                     />
-                    <span className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50 text-white text-sm font-bold">
-                      {dest}
-                    </span>
+                    <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-20 text-white text-sm font-bold">
+                      {pkg.name}
+                    </div>
                   </div>
                 ))}
               </div>
@@ -97,9 +116,22 @@ const Footer = () => {
           </div>
         </div>
       </div>
+      {/* ✅ Footer Logo */}
+      <div className="footer_footerlogo relative mb-10 max-w-[1080px] mx-auto flex items-center justify-center px-4">
+        {/* Left Line */}
+        <div className="hidden sm:block absolute left-0 sm:w-[30%] md:w-[35%] lg:w-[38%] h-[2px] bg-gray-500"></div>
+
+        {/* Logo */}
+        <a href="/" className="block max-w-[175px] w-full mx-auto my-0 cursor-pointer">
+          <img src={logo} alt="OkayTrip" className="w-full" />
+        </a>
+
+        {/* Right Line */}
+        <div className="hidden sm:block absolute right-0 sm:w-[30%] md:w-[35%] lg:w-[38%] h-[2px] bg-gray-500"></div>
+      </div>
 
       {/* ✅ Bottom Footer */}
-      <div className="text-center py-6 border-t border-gray-700 max-w-[1080px] mx-auto">
+      <div className="text-center pb-6 max-w-[1080px] mx-auto">
         <div className="flex justify-center space-x-6 mb-4">
           <FaFacebookF className="text-white text-xl cursor-pointer hover:text-gray-400 transition" />
           <FaInstagram className="text-white text-xl cursor-pointer hover:text-gray-400 transition" />

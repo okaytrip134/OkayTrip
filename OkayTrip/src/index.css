@@ -2,18 +2,53 @@
 @tailwind components;
 @tailwind utilities;
 
-/* *{
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-} */
+@import url('https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap');
+
+@font-face {
+  font-family: 'Helvetica';
+  src: url('./assets/fonts/Helvetica.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'Helvetica Bold';
+  src: url('./assets/fonts/Helvetica-Bold.ttf') format('truetype');
+  font-weight: bold;
+}
+
+@font-face {
+  font-family: 'Helvetica Oblique';
+  src: url('./assets/fonts/Helvetica-Oblique.ttf') format('truetype');
+  font-style: oblique;
+}
+
+@font-face {
+  font-family: 'Helvetica Light';
+  src: url('./assets/fonts/helvetica-light-587ebe5a59211.ttf') format('truetype');
+  font-weight: 300;
+}
+
+@font-face {
+  font-family: 'Helvetica Compressed';
+  src: url('./assets/fonts/helvetica-compressed-5871d14b6903a.otf') format('opentype');
+}
+
+@font-face {
+  font-family: 'Helvetica Rounded Bold';
+  src: url('./assets/fonts/helvetica-rounded-bold-5871d05ead8de.otf') format('opentype');
+  font-weight: bold;
+}
+
 body{
-  font-family: 'Poppins', sans-serif;
-  /* font-size: 14px; */
-  /* line-height: 21px; */
-  /* font-weight: 400; */
+  font-family:  'Helvetica', sans-serif;
   color: #515151;
 }
+
+/* body{
+  font-family: 'Poppins', sans-serif;
+  color: #515151;
+} */
 /* Blur Effect */
 .blur {
   filter: blur(10px);
