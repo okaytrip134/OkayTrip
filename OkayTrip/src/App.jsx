@@ -13,6 +13,10 @@ import PaymentPage from "./pages/PaymentPage";
 import ProfileBookings from "./pages/ProfileBooking";
 import Footer from "./components/Footer";
 import ScrollToTop from "./components/ScrollToTop";
+import RefundPolicy from "./pages/RefundPolicy";
+import PrivacyPolicy from "./pages/PrivacyPolicy";
+import TermsConditions from "./pages/Term&conditions";
+import CopyrightPolicy from "./pages/CopyRightPolicy";
 
 function App() {
   return (
@@ -40,7 +44,11 @@ const AppContent = () => {
           <Route path="/payment" element={<PaymentPage />} />
           <Route path="/forgot-password" element={<ForgotPassword />} />
           <Route path="/reset-password/:token" element={<ResetPassword />} />
-          <Route path="/profile-bookings" element={<ProfileBookings />} />
+          <Route path="/profile-bookings" element={<ProfileBookings />} />  
+          <Route path="/refund-policy" element={<RefundPolicy/>}/>
+          <Route path="/privacy-policy" element={<PrivacyPolicy/>}/>
+          <Route path="/term-and-conditions" element={<TermsConditions/>}/>
+          <Route path="/copyright-policy" element= {<CopyrightPolicy/>}/>
         </Routes>
       </div>
       {/* Conditionally render Footer */}

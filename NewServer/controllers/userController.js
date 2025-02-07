@@ -37,19 +37,22 @@ exports.loginUser = async (req, res) => {
       return res.status(404).json({ message: "User not found" });
     }
 
-    const isMatch = await bcrypt.compare(password, user.password); // Compare plain password with stored hash
+    const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) {
       return res.status(400).json({ message: "Invalid email or password" });
     }
 
+    // ✅ Set expiry time for the token
+    const expiresIn = 10 * 60 * 60; // 10 hours in seconds
     const token = jwt.sign(
-      { id: user._id, email: user.email, role:user.role },
+      { id: user._id, email: user.email, role: user.role },
       process.env.JWT_SECRET,
-      { expiresIn: "10h" }
+      { expiresIn }
     );
 
     res.status(200).json({
       token,
+      expiresIn, // ✅ Send expiry time in response
       user: { name: user.name, email: user.email, phone: user.phone },
     });
   } catch (error) {

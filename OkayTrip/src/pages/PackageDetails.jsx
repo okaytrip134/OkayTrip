@@ -357,7 +357,7 @@ const PackageDetailsPage = () => {
                   {/* Highlights List */}
                   <ul className="space-y-3 pl-1">
                     {packageData.tripHighlights.map((highlight, index) => (
-                      <li key={index} className="flex items-start text-gray-700 text-lg font-mono">
+                      <li key={index} className="flex items-start text-gray-700 text-lg">
                         <span className="mr-2 text-green-500">✔</span>
                         {highlight}
                       </li>

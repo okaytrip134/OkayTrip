@@ -29,63 +29,53 @@ const Navbar = () => {
     setShowPopup(!showPopup);
   };
 
+  // ✅ Logout Function
   const handleLogout = () => {
     localStorage.removeItem("userToken");
     localStorage.removeItem("userName");
-    localStorage.removeItem("tokenExpiry"); // ✅ Remove token expiry time
+    localStorage.removeItem("tokenExpiry"); 
     setIsLoggedIn(false);
     setUserName("");
     setShowDropdown(false);
-    toast.info("Logged out successfully!", { position: "top-right" }); // ✅ Logout Notification
-    navigate("/"); // Redirect to home after logout
+    toast.info("Logged out successfully!", { position: "top-right" }); 
+    navigate("/"); 
   };
-
   
-  useEffect(() => {
-    const checkUserAuthentication = async () => {
-      const token = localStorage.getItem("userToken");
-      const name = localStorage.getItem("userName");
-      const tokenExpiry = localStorage.getItem("tokenExpiry");
-
-      if (token && tokenExpiry) {
-        const currentTime = Date.now();
-        
-        if (currentTime > tokenExpiry) {
-          console.warn("Token expired, logging out...");
-          handleLogout();
-          return;
-        }
-
-        try {
-          // ✅ Verify token only if it's still valid
-          const response = await axios.get(
-            `${import.meta.env.VITE_APP_API_URL}/api/auth/verify-token`,
-            { headers: { Authorization: `Bearer ${token}` } }
-          );
-
-          if (response.data.valid) {
-            setIsLoggedIn(true);
-            setUserName(name || "User");
-          } else {
-            handleLogout();
-          }
-        } catch (error) {
-          console.error("Token verification failed:", error);
-          handleLogout();
-        }
-      } else {
-        setIsLoggedIn(false);
-        setUserName("");
-      }
-    };
-
-    checkUserAuthentication();
-
-    if (localStorage.getItem("showLogin")) {
-      setShowAuthPopup(true);
-      localStorage.removeItem("showLogin"); 
+  const checkTokenExpiry = () => {
+    const token = localStorage.getItem("userToken");
+    const name = localStorage.getItem("userName");
+    const tokenExpiry = localStorage.getItem("tokenExpiry");
+  
+    if (!token || !tokenExpiry) {
+      setIsLoggedIn(false);
+      setUserName("");
+      return;
     }
-  }, []); // Run only on component mount
+  
+    const expiryTime = Number(tokenExpiry); // Convert string to number
+    const currentTime = Date.now();
+  
+    console.log("Current Time:", currentTime, "Stored Expiry:", expiryTime); // Debugging
+  
+    if (currentTime >= expiryTime) {
+      console.warn("Token expired, logging out...");
+      handleLogout();
+    } else {
+      setIsLoggedIn(true);
+      setUserName(name || "User");
+    }
+  };
+  
+  // ✅ Run only when the component mounts
+  useEffect(() => {
+    checkTokenExpiry();
+  
+    // ✅ Periodically check token expiry every 1 minute
+    const interval = setInterval(checkTokenExpiry, 60000);
+  
+    return () => clearInterval(interval); // Cleanup on unmount
+  }, []);
+  
 
   const places = [
     "destinations",
@@ -235,10 +225,8 @@ const Navbar = () => {
               setUserName(localStorage.getItem("userName")); 
               toast.success("Login Successful!", { position: "top-center" });
             } 
-          }} 
-          />
+          }} />
         )}
-
         {/* Search Popup */}
         {showPopup && <SearchPopup onClose={togglePopup} />}
       </header>

@@ -9,10 +9,13 @@ const authMiddleware = async (req, res, next) => {
 
   try {
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    req.user = decoded; // Attach the user data (id, email, etc.) to req.user
+    req.user = decoded;
     next();
   } catch (error) {
     console.error("Error verifying token:", error);
+    if (error.name === "TokenExpiredError") {
+      return res.status(401).json({ message: "Token has expired" });
+    }
     res.status(401).json({ message: "Token is not valid" });
   }
 };

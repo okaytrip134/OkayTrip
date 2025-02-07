@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { FaFacebookF, FaInstagram, FaTwitter, FaLinkedinIn, FaYoutube } from "react-icons/fa";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import logo from '../assets/Logo/Trip ok new 2 white.png';
 
 const Footer = () => {
@@ -56,13 +56,13 @@ const Footer = () => {
 
             {/* 🔹 About Thrillophilia */}
             <div className="border-r-2">
-              <h3 className="text-lg font-bold text-gray-900 mb-3">ABOUT OKAYTRIP</h3>
+              <h3 className="text-base font-bold text-gray-900 mb-3">ABOUT OKAYTRIP</h3>
               <ul className="text-gray-600 space-y-2">
                 <li><a href="#" className="hover:text-gray-900">About Us</a></li>
-                <li><a href="#" className="hover:text-gray-900">We Are Hiring</a></li>
-                <li><a href="#" className="hover:text-gray-900">Terms & Conditions</a></li>
-                <li><a href="#" className="hover:text-gray-900">Privacy Policies</a></li>
-                <li><a href="#" className="hover:text-gray-900">Copyright Policies</a></li>
+                <li><Link to="//refund-policy" className="hover:text-gray-900">Refund Polocies</Link></li>
+                <li><Link to="/term-and-conditions" className="hover:text-gray-900">Terms & Conditions</Link></li>
+                <li><Link to="/privacy-policy" className="hover:text-gray-900">Privacy Policies</Link></li>
+                <li><Link to="/copyright-policy" className="hover:text-gray-900">Copyright Policies</Link></li>
                 <li><a href="#" className="hover:text-gray-900">Support</a></li>
                 <li className="text-red-600 font-bold flex items-center">
                   Beware of Frauds <span className="ml-2">⚠️</span>

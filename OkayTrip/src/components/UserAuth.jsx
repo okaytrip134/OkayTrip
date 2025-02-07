@@ -20,6 +20,7 @@ const UserAuth = ({ onClose }) => {
   const handleSubmit = async () => {
     try {
       setError(""); // Reset error
+  
       const payload = isLogin
         ? { email: formData.email, password: formData.password }
         : {
@@ -28,24 +29,38 @@ const UserAuth = ({ onClose }) => {
             password: formData.password,
             phone: formData.phone,
           };
-
+  
       const endpoint = isLogin
         ? `${import.meta.env.VITE_APP_API_URL}/api/user/auth/login`
         : `${import.meta.env.VITE_APP_API_URL}/api/user/auth/register`;
-
+  
       const { data } = await axios.post(endpoint, payload);
+  
+      console.log("Response from API:", data); // Debugging
+  
       if (isLogin) {
+        if (!data.token) {
+          throw new Error("Login failed: No token received");
+        }
+  
         localStorage.setItem("userToken", data.token);
         localStorage.setItem("userName", data.user.name);
+  
+        // Extract expiry from JWT
+        const decodedToken = JSON.parse(atob(data.token.split(".")[1]));
+        const expiryTime = decodedToken.exp * 1000; // Convert to milliseconds
+        localStorage.setItem("tokenExpiry", expiryTime);
+  
+        console.log("Token Expiry Set:", expiryTime); // Debugging
       } else {
         alert("Signup Successful!");
       }
-
+  
       onClose(); // Close the modal on success
     } catch (error) {
+      console.error("Login Error:", error);
       setError(
-        error.response?.data?.message ||
-          "Something went wrong. Please try again."
+        error.response?.data?.message || "Something went wrong. Please try again."
       );
     }
   };
