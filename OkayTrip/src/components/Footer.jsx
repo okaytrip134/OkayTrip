@@ -59,7 +59,7 @@ const Footer = () => {
               <h3 className="text-base font-bold text-gray-900 mb-3">ABOUT OKAYTRIP</h3>
               <ul className="text-gray-600 space-y-2">
                 <li><a href="#" className="hover:text-gray-900">About Us</a></li>
-                <li><Link to="//refund-policy" className="hover:text-gray-900">Refund Polocies</Link></li>
+                <li><Link to="/refund-policy" className="hover:text-gray-900">Refund Polocies</Link></li>
                 <li><Link to="/term-and-conditions" className="hover:text-gray-900">Terms & Conditions</Link></li>
                 <li><Link to="/privacy-policy" className="hover:text-gray-900">Privacy Policies</Link></li>
                 <li><Link to="/copyright-policy" className="hover:text-gray-900">Copyright Policies</Link></li>
