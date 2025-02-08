@@ -53,7 +53,7 @@ const UserAuth = ({ onClose }) => {
   
         console.log("Token Expiry Set:", expiryTime); // Debugging
       } else {
-        toast.success("Signup successful!");
+        toast.success("Signup successful!!");
       }
   
       onClose(); // Close the modal on success
