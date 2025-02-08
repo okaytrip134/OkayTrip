@@ -9,8 +9,8 @@ import SearchPopup from "./SearchPopup";
 import UserAuth from "./UserAuth";
 import TopSaleBar from "./TopsaleBar";
 import HorizontalMenu from "./HorizontalMenu";
-import { toast, ToastContainer } from "react-toastify"; // ✅ Import Toast Notification
-import "react-toastify/dist/ReactToastify.css"; // 
+import { toast } from "react-hot-toast"; // ✅ Import from react-hot-toast
+import { Toaster } from "react-hot-toast"; // ✅ Toaster Component
 
 const Navbar = () => {
   const [showPopup, setShowPopup] = useState(false);
@@ -33,30 +33,30 @@ const Navbar = () => {
   const handleLogout = () => {
     localStorage.removeItem("userToken");
     localStorage.removeItem("userName");
-    localStorage.removeItem("tokenExpiry"); 
+    localStorage.removeItem("tokenExpiry");
     setIsLoggedIn(false);
     setUserName("");
     setShowDropdown(false);
-    toast.info("Logged out successfully!", { position: "top-right" }); 
-    navigate("/"); 
+    toast.success("Logged out successfully!"); // ✅ react-hot-toast notification
+    navigate("/");
   };
-  
+
   const checkTokenExpiry = () => {
     const token = localStorage.getItem("userToken");
     const name = localStorage.getItem("userName");
     const tokenExpiry = localStorage.getItem("tokenExpiry");
-  
+
     if (!token || !tokenExpiry) {
       setIsLoggedIn(false);
       setUserName("");
       return;
     }
-  
+
     const expiryTime = Number(tokenExpiry); // Convert string to number
     const currentTime = Date.now();
-  
+
     console.log("Current Time:", currentTime, "Stored Expiry:", expiryTime); // Debugging
-  
+
     if (currentTime >= expiryTime) {
       console.warn("Token expired, logging out...");
       handleLogout();
@@ -65,17 +65,17 @@ const Navbar = () => {
       setUserName(name || "User");
     }
   };
-  
+
   // ✅ Run only when the component mounts
   useEffect(() => {
     checkTokenExpiry();
-  
+
     // ✅ Periodically check token expiry every 1 minute
     const interval = setInterval(checkTokenExpiry, 60000);
-  
+
     return () => clearInterval(interval); // Cleanup on unmount
   }, []);
-  
+
 
   const places = [
     "destinations",
@@ -131,7 +131,7 @@ const Navbar = () => {
 
   return (
     <>
-      <ToastContainer autoClose={2000} /> {/* ✅ Toast Notification Container */}
+      <Toaster position="top-right" reverseOrder={false} /> {/* ✅ react-hot-toast Toaster */}
       <TopSaleBar />
       <header
         className={`bg-white top-0 z-50 border-b-2 ${isSticky ? "sticky" : ""
@@ -218,13 +218,13 @@ const Navbar = () => {
 
         {/* Login/Signup Popup */}
         {showAuthPopup && (
-          <UserAuth onClose={() => { 
-            setShowAuthPopup(false); 
-            if (localStorage.getItem("userToken")) { 
-              setIsLoggedIn(true); 
-              setUserName(localStorage.getItem("userName")); 
-              toast.success("Login Successful!", { position: "top-center" });
-            } 
+          <UserAuth onClose={() => {
+            setShowAuthPopup(false);
+            if (localStorage.getItem("userToken")) {
+              setIsLoggedIn(true);
+              setUserName(localStorage.getItem("userName"));
+              toast.success("Login Successful!");
+            }
           }} />
         )}
         {/* Search Popup */}

@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import axios from "axios";
-
+import toast, { Toaster } from "react-hot-toast"; // Import react-hot-toast
 const UserAuth = ({ onClose }) => {
   const API_URL = "http://localhost:8000";
   const [isLogin, setIsLogin] = useState(true); // Toggle between Login and Signup
@@ -53,14 +53,14 @@ const UserAuth = ({ onClose }) => {
   
         console.log("Token Expiry Set:", expiryTime); // Debugging
       } else {
-        alert("Signup Successful!");
+        toast.success("Signup successful!");
       }
   
       onClose(); // Close the modal on success
     } catch (error) {
       console.error("Login Error:", error);
-      setError(
-        error.response?.data?.message || "Something went wrong. Please try again."
+      toast.error(
+        error.response?.data?.message || "Invalid credentials. Please try again."
       );
     }
   };
@@ -71,6 +71,7 @@ const UserAuth = ({ onClose }) => {
 
   return (
     <div className="fixed h-full md:h-auto inset-0 bg-black bg-opacity-20 z-50 flex justify-center items-center">
+       <Toaster position="top-right" /> {/* Toast Notification Container */}
       <div className="bg-white rounded-lg shadow-lg w-11/12 max-w-4xl flex overflow-hidden relative">
         {/* Close Button */}
         <button
