@@ -69,6 +69,14 @@ const DashboardPage = () => {
             <li>
               <button
                 className="w-full text-left px-4 py-2 text-gray-700 hover:bg-gray-200"
+                onClick={() => navigate("/admin/dashboard/banner-manager")}
+              >
+                Banners
+              </button>
+            </li>
+            <li>
+              <button
+                className="w-full text-left px-4 py-2 text-gray-700 hover:bg-gray-200"
                 onClick={handleLogout}
               >
                 Logout

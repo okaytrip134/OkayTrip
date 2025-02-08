@@ -8,6 +8,7 @@ const adminAuth = require("../../middlewares/adminAuth");
 const categoryRoutes = require("./categoryRoutes");
 const packageRoutes = require("./packageRoutes");
 const bookingRoutes = require("./bookingRoutes"); // Import the new route
+const bannerRoutes = require("./bannerRoutes");
 
 // Add all admin routes
 router.use("/auth", authRouter); // Admin authentication routes
@@ -17,5 +18,5 @@ router.delete("/users/:id", authMiddleware, adminAuth, deleteUser); // Add delet
 router.use("/categories", categoryRoutes);
 router.use("/packages", packageRoutes);
 router.use("/bookings", bookingRoutes); // Add the booking route
-
+router.use("/banner", bannerRoutes);
 module.exports = router;

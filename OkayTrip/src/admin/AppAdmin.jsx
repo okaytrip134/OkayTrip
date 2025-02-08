@@ -8,6 +8,7 @@ import CategoryManager from "./pages/CategoryManager";
 import PackageManager from "./pages/PackageManager";
 import BookingReport from "./pages/BookingReport";
 import AdminBookings from "./pages/AdminBookings";
+import AdminBannerManager from "./pages/AdminBannerManager";
 
 const AppAdmin = () => {
   return (
@@ -21,6 +22,8 @@ const AppAdmin = () => {
           <Route path="Categories" element= {<CategoryManager/>}/>
           <Route path="Packages" element={<PackageManager/>} />
           <Route path="booking-report" element= {<AdminBookings/>}/>
+          <Route path="banner-manager" element= {<AdminBannerManager/>}/>
+
         </Route>
         <Route path="*" element={<div>404 Not Found</div>} />
       </Routes>
