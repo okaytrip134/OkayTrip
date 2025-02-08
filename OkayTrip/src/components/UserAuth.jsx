@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import axios from "axios";
 import toast, { Toaster } from "react-hot-toast"; // Import react-hot-toast
 const UserAuth = ({ onClose }) => {
@@ -12,6 +12,27 @@ const UserAuth = ({ onClose }) => {
     phone: "",
   });
   const [error, setError] = useState("");
+  const [bannerData, setBannerData] = useState({
+    title: "Welcome to Our Platform",
+    subtitle: "Experience seamless login and signup with our user-friendly portal.",
+    imageUrl: "https://via.placeholder.com/500x500", // Placeholder for initial state
+  });
+  useEffect(() => {
+    // Fetch Banner Data
+    const fetchBannerData = async () => {
+      try {
+        const { data } = await axios.get(`${import.meta.env.VITE_APP_API_URL}/api/admin/banner`);
+        if (data.banner) {
+          setBannerData(data.banner);
+        }
+      } catch (error) {
+        console.error("Error fetching banner data:", error);
+        toast.error("Failed to fetch banner data.");
+      }
+    };
+    fetchBannerData();
+  }, []);
+
 
   const handleInputChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -82,17 +103,17 @@ const UserAuth = ({ onClose }) => {
         </button>
 
         {/* Left Section: Image */}
+        {/* Left Section: Image */}
         <div className="hidden md:block w-1/2 relative">
           <img
-            src="https://img.freepik.com/free-photo/traveller-sitting-rock-holding-camera-take-photo-doi-pha-mon-mountains-chiang-rai-thailand_335224-1078.jpg?t=st=1736686599~exp=1736690199~hmac=48eb3dec62154164e91b3fe540974349192fecfa29b37fdc8eb14a69527986fa&w=996"
+             src={`${import.meta.env.VITE_APP_API_URL}${bannerData.imageUrl}`}
             alt="Login Illustration"
             className="w-full h-full object-cover"
           />
-          <div className="absolute top-0 left-0 w-full h-full bg-black bg-opacity-30 flex flex-col justify-center items-center text-center text-white px-4">
-            <h2 className="text-3xl font-bold mb-2">Welcome to Our Platform</h2>
-            <p className="text-lg">
-              Experience seamless login and signup with our user-friendly portal.
-            </p>
+            <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-t from-black/50 via-black/ to-transparent"></div>
+          <div className="absolute top-0 left-0 w-full h-full bg-black bg-opacity-30 flex flex-col justify-end items-start text-left text-white px-4">
+          <h2 className="text-3xl font-bold mb-2">{bannerData.title}</h2>
+          <p className="text-lg">{bannerData.subtitle}</p>
           </div>
         </div>
 

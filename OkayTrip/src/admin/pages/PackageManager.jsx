@@ -54,7 +54,6 @@ const PackageManager = () => {
       console.error("Error deleting package:", error);
     }
   };
-
   // Toggle package status
   const handleToggleStatus = async (id, isActive) => {
     try {
@@ -72,7 +71,7 @@ const PackageManager = () => {
   };
   const handleUpdateSeats = async (id, newSeats) => {
     try {
-      await axios.put(`http://localhost:8000/api/admin/packages/${id}/update-seats`,
+      await axios.put(`${import.meta.env.VITE_APP_API_URL}/api/admin/packages/${id}/update-seats`,
         { totalSeats: newSeats },
         { headers: { Authorization: `Bearer ${adminToken}` } }
       );

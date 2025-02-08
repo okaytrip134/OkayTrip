@@ -207,3 +207,35 @@ exports.updatePackageSeats = async (req, res) => {
     res.status(500).json({ message: "Internal server error." });
   }
 };
+// Delete a package along with its images
+exports.deletePackage = async (req, res) => {
+  const { packageId } = req.params;
+
+  try {
+    const packageData = await Package.findById(packageId);
+    if (!packageData) {
+      return res.status(404).json({ message: "Package not found." });
+    }
+
+    // Delete associated images from the filesystem
+    packageData.images.forEach((imagePath) => {
+      const fullPath = path.join(__dirname, `../../${imagePath}`);
+      if (fs.existsSync(fullPath)) {
+        try {
+          fs.unlinkSync(fullPath); // Remove the file
+          console.log(`Deleted: ${fullPath}`);
+        } catch (err) {
+          console.error(`Error deleting file: ${fullPath}`, err);
+        }
+      }
+    });
+
+    // Delete the package from the database
+    await Package.findByIdAndDelete(packageId);
+
+    res.status(200).json({ message: "Package and associated images deleted successfully!" });
+  } catch (error) {
+    console.error("Error deleting package:", error);
+    res.status(500).json({ message: "Internal server error." });
+  }
+};
