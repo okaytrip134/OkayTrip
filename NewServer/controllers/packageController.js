@@ -34,8 +34,17 @@ exports.createPackage = async (req, res) => {
       description: item.description,
     }));
 
-    // Save Image Paths
-    const images = req.files.map((file) => `/uploads/packages/${file.filename}`);
+    // ✅ Optimize Images with sharp
+    const images = [];
+    for (const file of req.files) {
+      const optimizedPath = `uploads/packages/optimized-${file.filename}`;
+      await sharp(file.path)
+        .resize(800)
+        .toFile(optimizedPath);
+
+      images.push(`/${optimizedPath}`);
+      fs.unlinkSync(file.path);
+    }
 
     const newPackage = new Package({
       categoryId,
@@ -141,17 +150,6 @@ exports.updatePackage = async (req, res) => {
       title: item.title,
       description: item.description,
     }));
-    // ✅ Optimize Images with sharp
-    const images = [];
-    for (const file of req.files) {
-      const optimizedPath = `uploads/packages/optimized-${file.filename}`;
-      await sharp(file.path)
-        .resize(800)
-        .toFile(optimizedPath);
-
-      images.push(`/${optimizedPath}`);
-      fs.unlinkSync(file.path);
-    }
 
     // Update fields
     packageData.categoryId = categoryId || packageData.categoryId;
