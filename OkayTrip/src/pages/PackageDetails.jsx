@@ -11,7 +11,7 @@ import mobiileEndImage from '../assets/end_of_trip_mobile.avif'
 import "react-responsive-carousel/lib/styles/carousel.min.css";
 import { Carousel } from "react-responsive-carousel";
 import UserAuth from "../components/UserAuth";
-import { FaChevronCircleLeft, FaChevronLeft, FaChevronRight } from "react-icons/fa";
+import { FaAngleDown, FaAngleUp, FaChevronCircleLeft, FaChevronLeft, FaChevronRight } from "react-icons/fa";
 
 
 const PackageDetailsPage = () => {
@@ -142,10 +142,10 @@ const PackageDetailsPage = () => {
                     {/* Price Section */}
                     <div className="LeadForm_priceWrapper flex items-center mt-2">
                       <div className="package_actual_price font-semibold text-[16px] text-gray-900 mr-2">
-                        INR {packageData.discountedPrice}
+                        ₹ {packageData.discountedPrice}
                       </div>
                       <div className="package_dicounted_price line-through text-[12px] text-gray-500">
-                        INR {packageData.realPrice}
+                        ₹ {packageData.realPrice}
                       </div>
 
                       {/* Save Price Tag */}
@@ -262,9 +262,8 @@ const PackageDetailsPage = () => {
           <div className="TourPackage_body_left">
             <div className="TourPackage_body_left_title">
               {/* Title and Details */}
-              <h1 className="title_package"
+              <h1 className="title_package text-[1.2rem] md:text-[1.5rem]"
                 style={{
-                  fontSize: "2.5rem",
                   fontWeight: "700",
                   lineHeight: "45px",
                   color: "#000",
@@ -392,7 +391,7 @@ const PackageDetailsPage = () => {
                             alt={`Package Image ${index}`}
                             className="w-full h-[400px] object-cover rounded-lg"
                           />
-      
+
                           {/* ✅ Slide Number */}
                           <div className="absolute bottom-3 right-3 bg-black bg-opacity-50 text-white px-3 py-1 rounded-full text-sm">
                             {index + 1}/{packageData.images.length}
@@ -423,46 +422,38 @@ const PackageDetailsPage = () => {
                   </div>
                   <div className="space-y-4">
                     {packageData.itinerary.map((day, index) => (
-                      <div key={index}>
+                      <div key={index} className="bg-white border border-gray-200 rounded-lg shadow-sm">
                         <div
-                          className="flex items-center justify-between p-4 bg-white border border-gray-200 rounded-lg shadow-sm cursor-pointer"
+                          className="flex items-center justify-between p-4  cursor-pointer"
                           onClick={() => toggleDropdown(index)}
                         >
                           {/* Left Section: Day Label & Title */}
-                          <div className="flex items-start flex-col">
-                            <div className="first_section flex">
-                              <span className="bg-[#BF500E] text-white text-sm font-semibold px-3 py-1 rounded-full mr-3">
-                                DAY {index + 1}
-                              </span>
-
-                              <h4 className="text-lg font-semibold text-gray-800">
-                                {day.title}
-                              </h4>
-                            </div>
-
-                            {openIndex === index && (
-                              <div className="LineDivider_tourPackageDivider my-8 mx-0 w-[95%] h-[1px] border-t-[1px] border-t-[#e0e0e0]"></div>
-
-                            )}
-
-                            <div className="second_section flex">
-                              {/* Description Section - Conditional Rendering */}
-                              {openIndex === index && (
-                                <div className="p-4 rounded-lg text-gray-600 mt-2">
-                                  <p>{day.description}</p>
-                                </div>
-                              )}
-                            </div>
-
+                          <div className="flex items-center">
+                            <span className="bg-[#BF500E] text-white text-sm font-semibold px-3 py-1 rounded-full mr-3">
+                              DAY {index + 1}
+                            </span>
+                            <h4 className="text-lg font-semibold text-gray-800">{day.title}</h4>
                           </div>
 
                           {/* Right Section: Dropdown Icon */}
-                          <span className={`text-gray-500 transition-transform ${openIndex === index ? "rotate-180" : ""}`}>
-                            ▼
+                          <span
+                            className={`text-gray-500 transition-transform ${openIndex === index ? "rotate-180" : ""
+                              }`}
+                          >
+                            <FaAngleDown/>
                           </span>
+
                         </div>
 
-
+                        {/* Conditional Description Rendering */}
+                        {openIndex === index && (
+                          <>
+                            <div className="my-4 mx-4 h-px bg-gray-200"></div>
+                            <div className="p-4 rounded-lg text-gray-600">
+                              <p>{day.description}</p>
+                            </div>
+                          </>
+                        )}
                       </div>
                     ))}
                   </div>
@@ -518,7 +509,7 @@ const PackageDetailsPage = () => {
                             color: '#202020'
                           }}
                         >
-                          INR {packageData.discountedPrice}
+                          ₹ {packageData.discountedPrice}
                         </div>
                       </div>
                       <div className="package_dicounted_price line-through"
@@ -528,7 +519,7 @@ const PackageDetailsPage = () => {
                           color: '#515151',
                         }}
                       >
-                        INR {packageData.realPrice}
+                        ₹ {packageData.realPrice}
                       </div>
                     </div>
                   </div>
@@ -616,7 +607,7 @@ const PackageDetailsPage = () => {
                           color: '#202020'
                         }}
                       >
-                        INR {packageData.discountedPrice}
+                        ₹ {packageData.discountedPrice}
                       </div>
                       <div className="package_dicounted_price line-through"
                         style={{
@@ -628,7 +619,7 @@ const PackageDetailsPage = () => {
                           color: '#515151',
                         }}
                       >
-                        INR {packageData.realPrice}
+                        ₹ {packageData.realPrice}
                       </div>
                       <span className="LeadForm_SavePrice_leftBorderICon h-[24px] ml-[5px]"><svg width="4" height="24" viewBox="0 0 4 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M2.65992 3L0 6L2.65992 9L0 12L2.65992 15L0 18L2.65992 21L0 24H3.5V0H0L2.65992 3Z" fill="#E5F1E8"></path></svg>
                       </span>

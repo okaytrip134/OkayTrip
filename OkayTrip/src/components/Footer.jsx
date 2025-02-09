@@ -56,8 +56,22 @@ const Footer = () => {
 
             {/* 🔹 About Thrillophilia */}
             <div className="border-r-2">
-              <h3 className="text-base font-bold text-gray-900 mb-3">ABOUT OKAYTRIP</h3>
-              <ul className="text-gray-600 space-y-2">
+              <h3 className=" mb-3 mt-3"
+                style={{
+                  fontSize: '12px',
+                  fontWeight: '600',
+                  color: '#424242',
+                  lineHeight: '18px',
+                  letterSpacing: '1.6px'
+                }}>ABOUT OKAYTRIP</h3>
+              <ul className="text-gray-600 space-y-2 uppercase"
+                style={{
+                  fontSize: '10px',
+                  fontWeight: '500',
+                  lineHeight: '16px',
+                  letterSpacing: '1.3px'
+                }}
+              >
                 <li><a href="#" className="hover:text-gray-900">About Us</a></li>
                 <li><Link to="/refund-policy" className="hover:text-gray-900">Refund Polocies</Link></li>
                 <li><Link to="/term-and-conditions" className="hover:text-gray-900">Terms & Conditions</Link></li>
@@ -72,12 +86,40 @@ const Footer = () => {
 
             {/* 🔹 For Suppliers & Brands */}
             <div className="border-r-2">
-              <h3 className="text-lg font-bold text-gray-900 mb-3">FOR SUPPLIERS</h3>
-              <ul className="text-gray-600 space-y-2">
+            <h3 className=" mb-3 mt-3"
+                style={{
+                  fontSize: '12px',
+                  fontWeight: '600',
+                  color: '#424242',
+                  lineHeight: '18px',
+                  letterSpacing: '1.6px'
+                }}>FOR SUPPLIERS</h3>
+              <ul className="text-gray-600 space-y-2 uppercase"
+                style={{
+                  fontSize: '10px',
+                  fontWeight: '500',
+                  lineHeight: '16px',
+                  letterSpacing: '1.3px'
+                }}
+              >
                 <li><a href="#" className="hover:text-gray-900">List Your Activities</a></li>
               </ul>
-              <h3 className="text-lg font-bold text-gray-900 mt-4 mb-3">FOR BRANDS</h3>
-              <ul className="text-gray-600 space-y-2">
+              <h3 className=" mb-3 mt-3"
+                style={{
+                  fontSize: '12px',
+                  fontWeight: '600',
+                  color: '#424242',
+                  lineHeight: '18px',
+                  letterSpacing: '1.6px'
+                }}>FOR BRANDS</h3>
+              <ul className="text-gray-600 space-y-2 uppercase"
+                style={{
+                  fontSize: '10px',
+                  fontWeight: '500',
+                  lineHeight: '16px',
+                  letterSpacing: '1.3px'
+                }}
+              >
                 <li><a href="#" className="hover:text-gray-900">Partner With Us</a></li>
                 <li><a href="#" className="hover:text-gray-900">Destination Marketing</a></li>
               </ul>
@@ -85,15 +127,36 @@ const Footer = () => {
 
             {/* 🔹 For Travellers */}
             <div className="border-r-2">
-              <h3 className="text-lg font-bold text-gray-900 mb-3">FOR TRAVELLERS</h3>
-              <ul className="text-gray-600 space-y-2">
+            <h3 className=" mb-3 mt-3"
+                style={{
+                  fontSize: '12px',
+                  fontWeight: '600',
+                  color: '#424242',
+                  lineHeight: '18px',
+                  letterSpacing: '1.6px'
+                }}>FOR TRAVELLERS</h3>
+              <ul className="text-gray-600 space-y-2 uppercase"
+                style={{
+                  fontSize: '10px',
+                  fontWeight: '500',
+                  lineHeight: '16px',
+                  letterSpacing: '1.3px'
+                }}
+              >
                 <li><a href="#" className="hover:text-gray-900">Gift an Experience</a></li>
               </ul>
             </div>
 
             {/* 🔹 Travel Destinations */}
             <div>
-              <h3 className="text-lg font-bold text-gray-900 mb-3">TRAVEL DESTINATIONS</h3>
+            <h3 className=" mb-3 mt-3"
+                style={{
+                  fontSize: '12px',
+                  fontWeight: '600',
+                  color: '#424242',
+                  lineHeight: '18px',
+                  letterSpacing: '1.6px'
+                }}>TRAVEL DESTINATIONS</h3>
               <div className="grid grid-cols-3 gap-2">
                 {packages.map((pkg, index) => (
                   <div
