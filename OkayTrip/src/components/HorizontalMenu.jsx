@@ -69,7 +69,7 @@ const HorizontalMenu = () => {
   };
 
   return (
-    <div className="sticky bg-white top-0 z-10 border-b-[1px] py-4 px-4 lg:pr-[5.5rem] lg:pl-32 flex items-center justify-between">
+    <div className="sticky bg-white top-0 z-10 border-b-[1px] max-w-[1440px] mx-auto flex items-center justify-between px-4 py-4 md:px-[50px] lg:px-[100px]">
       {/* Left Scroll Button */}
       {scrollPosition > 0 && (
         <button

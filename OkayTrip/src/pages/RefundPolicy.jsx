@@ -60,7 +60,7 @@ const RefundPolicy = () => {
           ⚠️ Exclusions and Limitations
         </h2>
         <h4 className="text-base font-semibold text-gray-800 mb-4">Please note the following exclusions and limitations:</h4>
-        <ul className="list-disc list-inside text-gray-700 space-y-2">
+        <ul className="list-disc list-inside text-gray-700 s    pace-y-2">
           <li><strong>Non-Refundable Fees:</strong> Certain fees such as booking fees, service charges, and administrative fees are non-refundable. These fees are clearly specified at the time of booking.</li>
           <li><strong>Non-Refundable Components:</strong> Certain trip components such as flights, pre-paid accommodations, and activities may not be refundable due to restrictions imposed by the service providers (e.g., airlines, hotels). In these cases, customers may be eligible for a credit or voucher, but not a cash refund.</li>
           <li><strong>Group Bookings & Package Deals:</strong> For group bookings or package deals, specific refund terms may apply based on the agreement made at the time of booking. These terms may differ from individual booking policies and are subject to the terms of the vendors involved.</li>

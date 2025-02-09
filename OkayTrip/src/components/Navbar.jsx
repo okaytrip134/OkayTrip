@@ -137,7 +137,7 @@ const Navbar = () => {
         className={`bg-white top-0 z-50 border-b-2 ${isSticky ? "sticky" : ""
           }`}
       >
-        <div className="container mx-auto flex items-center justify-between px-4 py-4 md:px-[50px] lg:px-[100px]">
+        <div className="max-w-[1440px] mx-auto flex items-center justify-between px-4 py-4 md:px-[50px] lg:px-[100px]">
           {/* Logo */}
           <div className="flex items-center">
             <Link to="/">

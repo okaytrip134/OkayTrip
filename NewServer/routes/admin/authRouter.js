@@ -25,7 +25,7 @@ router.post("/login", async (req, res) => {
     const token = jwt.sign(
       { id: admin._id, role: "admin" }, // Explicitly include role
       JWT_SECRET,
-      { expiresIn: "7h" }
+      { expiresIn: "10h" }
     );
     res.status(200).json({ token, message: "Login successful" });
   } catch (error) {

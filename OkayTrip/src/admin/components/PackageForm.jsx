@@ -98,11 +98,13 @@ const PackageForm = ({ onClose, fetchPackages, selectedPackage }) => {
       setNewItineraryEntry({ title: "", description: "" });
     }
   };
-
+  const [loading, setLoading] = useState(false);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setLoading(true);
     const packageData = new FormData();
+
     for (let key in formData) {
       if (key === "images") {
         formData[key].forEach((file) => packageData.append("images", file));
@@ -115,14 +117,17 @@ const PackageForm = ({ onClose, fetchPackages, selectedPackage }) => {
 
     try {
       if (selectedPackage) {
-        await axios.put(`${import.meta.env.VITE_APP_API_URL}/api/admin/packages/${selectedPackage._id}`, packageData, {
-          headers: { Authorization: `Bearer ${adminToken}` },
-        });
+        await axios.put(
+          `${import.meta.env.VITE_APP_API_URL}/api/admin/packages/${selectedPackage._id}`,
+          packageData,
+          { headers: { Authorization: `Bearer ${adminToken}` } }
+        );
       } else {
-        await axios.post(`${import.meta.env.VITE_APP_API_URL}/api/admin/packages/create`, packageData, {
-          headers: { Authorization: `Bearer ${adminToken}` },
-        });
-        // ✅ If only seats are updated, update them separately
+        await axios.post(
+          `${import.meta.env.VITE_APP_API_URL}/api/admin/packages/create`,
+          packageData,
+          { headers: { Authorization: `Bearer ${adminToken}` } }
+        );
         if (formData.totalSeats !== selectedPackage.totalSeats) {
           await axios.put(`http://localhost:8000/api/admin/packages/${selectedPackage._id}/update-seats`,
             { totalSeats: formData.totalSeats },
@@ -130,10 +135,14 @@ const PackageForm = ({ onClose, fetchPackages, selectedPackage }) => {
           );
         }
       }
-      fetchPackages();
-      onClose();
+
+      fetchPackages(); // Refresh the package list
+      onClose(); // Close the form modal
+      setFormData({}); // Reset the form
     } catch (error) {
       console.error("Error saving package:", error);
+    } finally {
+      setLoading(false); // Ensure loading is reset
     }
   };
 
