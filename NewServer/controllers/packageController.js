@@ -141,7 +141,6 @@ exports.updatePackage = async (req, res) => {
       title: item.title,
       description: item.description,
     }));
-
     // ✅ Optimize Images with sharp
     const images = [];
     for (const file of req.files) {
