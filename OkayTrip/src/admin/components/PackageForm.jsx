@@ -30,7 +30,7 @@ const PackageForm = ({ onClose, fetchPackages, selectedPackage }) => {
     // Fetch categories for dropdown
     const fetchCategories = async () => {
       try {
-        const { data } = await axios.get(`${import.meta.env.VITE_APP_API_URL}/api/admin/categories/`, {
+        const { data } = await axios.get("http://localhost:8000/api/admin/categories/", {
           headers: { Authorization: `Bearer ${adminToken}` },
         });
         setCategories(data);
@@ -98,6 +98,7 @@ const PackageForm = ({ onClose, fetchPackages, selectedPackage }) => {
       setNewItineraryEntry({ title: "", description: "" });
     }
   };
+
   const [loading, setLoading] = useState(false);
 
   const handleSubmit = async (e) => {
@@ -128,12 +129,6 @@ const PackageForm = ({ onClose, fetchPackages, selectedPackage }) => {
           packageData,
           { headers: { Authorization: `Bearer ${adminToken}` } }
         );
-        if (formData.totalSeats !== selectedPackage.totalSeats) {
-          await axios.put(`http://localhost:8000/api/admin/packages/${selectedPackage._id}/update-seats`,
-            { totalSeats: formData.totalSeats },
-            { headers: { Authorization: `Bearer ${adminToken}` } }
-          );
-        }
       }
 
       fetchPackages(); // Refresh the package list
@@ -145,7 +140,6 @@ const PackageForm = ({ onClose, fetchPackages, selectedPackage }) => {
       setLoading(false); // Ensure loading is reset
     }
   };
-
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
       <div className="bg-white rounded-lg shadow-lg w-full max-w-3xl max-h-[90vh] overflow-auto">
@@ -347,9 +341,10 @@ const PackageForm = ({ onClose, fetchPackages, selectedPackage }) => {
               </button>
               <button
                 type="submit"
-                className="bg-orange-500 text-white px-4 py-2 rounded hover:bg-orange-600"
+                className={`bg-orange-500 text-white px-4 py-2 rounded ${loading ? "opacity-50" : "hover:bg-orange-600"}`}
+                disabled={loading}
               >
-                Save
+                {loading ? "Saving..." : "Save"}
               </button>
             </div>
           </form>
