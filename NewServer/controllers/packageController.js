@@ -146,13 +146,10 @@ exports.updatePackage = async (req, res) => {
     for (const file of req.files) {
       const optimizedPath = `uploads/packages/optimized-${file.filename}`;
       await sharp(file.path)
-        .resize(800) // Resize image to 800px width while maintaining aspect ratio
+        .resize(800)
         .toFile(optimizedPath);
 
-      // Add optimized image path to images array
       images.push(`/${optimizedPath}`);
-
-      // Delete original image to save space
       fs.unlinkSync(file.path);
     }
 
