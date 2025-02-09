@@ -1,10 +1,12 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { FiLoader, FiCheckCircle, FiXCircle, FiClock, FiCreditCard, FiEye } from "react-icons/fi";
+import BookingDetailsPopup from "../components/BookingDetailsPopup"; // Import the popup component
 
 const ProfileBookings = () => {
   const [bookings, setBookings] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [selectedBooking, setSelectedBooking] = useState(null); // State for the selected booking
 
   useEffect(() => {
     const fetchBookings = async () => {
@@ -22,6 +24,13 @@ const ProfileBookings = () => {
 
     fetchBookings();
   }, []);
+  const handleViewDetails = (booking) => {
+    setSelectedBooking(booking); // Open the popup with the selected booking
+  };
+
+  const handleClosePopup = () => {
+    setSelectedBooking(null); // Close the popup
+  };
 
   return (
     <div className="max-w-6xl mx-auto px-4 py-8 min-h-screen">
@@ -57,9 +66,8 @@ const ProfileBookings = () => {
                 {bookings.map((booking, index) => (
                   <tr
                     key={booking._id}
-                    className={`border-b transition hover:bg-gray-50 ${
-                      index % 2 === 0 ? "bg-white" : "bg-gray-50"
-                    }`}
+                    className={`border-b transition hover:bg-gray-50 ${index % 2 === 0 ? "bg-white" : "bg-gray-50"
+                      }`}
                   >
                     {/* ✅ Package Name */}
                     <td className="py-4 px-6 text-sm text-gray-900 font-medium">
@@ -81,15 +89,14 @@ const ProfileBookings = () => {
                     {/* ✅ Status with Color Badge */}
                     <td className="py-4 px-6">
                       <span
-                        className={`flex items-center px-3 py-1 text-xs font-semibold rounded-full w-max ${
-                          booking.status === "Confirmed"
+                        className={`flex items-center px-3 py-1 text-xs font-semibold rounded-full w-max ${booking.status === "Confirmed"
                             ? "bg-green-100 text-green-700"
                             : booking.status === "Pending"
-                            ? "bg-yellow-100 text-yellow-700"
-                            : booking.status === "Canceled"
-                            ? "bg-red-100 text-red-700"
-                            : "bg-gray-200 text-gray-700"
-                        }`}
+                              ? "bg-yellow-100 text-yellow-700"
+                              : booking.status === "Canceled"
+                                ? "bg-red-100 text-red-700"
+                                : "bg-gray-200 text-gray-700"
+                          }`}
                       >
                         {booking.status === "Confirmed" && <FiCheckCircle className="mr-2" />}
                         {booking.status === "Pending" && <FiClock className="mr-2" />}
@@ -102,7 +109,7 @@ const ProfileBookings = () => {
                     <td className="py-4 px-6 text-center">
                       <button
                         className="flex items-center justify-center bg-orange-500 hover:bg-orange-600 text-white px-4 py-2 rounded-md transition"
-                        onClick={() => (window.location.href = `/package/${booking.packageId?._id}`)}
+                        onClick={() => handleViewDetails(booking)}
                       >
                         <FiEye className="mr-2" />
                         View Details
@@ -133,15 +140,14 @@ const ProfileBookings = () => {
                 {/* ✅ Status Badge */}
                 <div className="mt-3">
                   <span
-                    className={`inline-flex items-center px-3 py-1 text-sm font-semibold rounded-full ${
-                      booking.status === "Confirmed"
+                    className={`inline-flex items-center px-3 py-1 text-sm font-semibold rounded-full ${booking.status === "Confirmed"
                         ? "bg-green-100 text-green-700"
                         : booking.status === "Pending"
-                        ? "bg-yellow-100 text-yellow-700"
-                        : booking.status === "Canceled"
-                        ? "bg-red-100 text-red-700"
-                        : "bg-gray-200 text-gray-700"
-                    }`}
+                          ? "bg-yellow-100 text-yellow-700"
+                          : booking.status === "Canceled"
+                            ? "bg-red-100 text-red-700"
+                            : "bg-gray-200 text-gray-700"
+                      }`}
                   >
                     {booking.status}
                   </span>
@@ -150,7 +156,7 @@ const ProfileBookings = () => {
                 {/* ✅ View Details Button */}
                 <button
                   className="mt-4 w-full bg-orange-500 hover:bg-orange-600 text-white py-2 rounded-md transition"
-                  onClick={() => (window.location.href = `/package/${booking.packageId?._id}`)}
+                  onClick={() => handleViewDetails(booking)}
                 >
                   View Details
                 </button>
@@ -158,6 +164,9 @@ const ProfileBookings = () => {
             ))}
           </div>
         </div>
+      )}
+      {selectedBooking && (
+        <BookingDetailsPopup booking={selectedBooking} onClose={handleClosePopup} />
       )}
     </div>
   );
