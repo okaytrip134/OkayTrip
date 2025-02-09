@@ -30,7 +30,7 @@ const PackageForm = ({ onClose, fetchPackages, selectedPackage }) => {
     // Fetch categories for dropdown
     const fetchCategories = async () => {
       try {
-        const { data } = await axios.get("http://localhost:8000/api/admin/categories/", {
+        const { data } = await axios.get(`${import.meta.env.VITE_APP_API_URL}/api/admin/categories/`, {
           headers: { Authorization: `Bearer ${adminToken}` },
         });
         setCategories(data);
