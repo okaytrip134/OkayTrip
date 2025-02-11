@@ -8,7 +8,7 @@ const {
   updatePackage,
   togglePackageStatus,
   deletePackage
-} = require("../../controllers/packageController/");
+} = require("../../controllers/packageController");
 const adminAuth = require("../../middlewares/authMiddleware");
 const multer = require("multer");
 
