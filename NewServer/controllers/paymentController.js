@@ -14,7 +14,7 @@ exports.initiatePayment = async (req, res) => {
   try {
     const { packageId, packageTitle, amount, paymentType } = req.body;
     const userId = req.user.id;
-    const bookingId = `BOOK${Date.now()}`;
+    const bookingId = `OKAY${Date.now()}`;
 
     if (!amount) {
       return res.status(400).json({ success: false, message: "Amount is required" });

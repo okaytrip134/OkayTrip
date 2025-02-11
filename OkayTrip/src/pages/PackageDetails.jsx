@@ -526,7 +526,7 @@ const PackageDetailsPage = () => {
                   <div className="package_pricing_rightsection relative">
                     <div className="package_seat flex gap-[5px] items-center cursor-pointer font-semibold text-black">
                       Avilable Seat :
-                      <span className="text-[#515151] font-bold">{packageData.totalSeats}</span>
+                      <span className="text-[#515151] font-bold">{packageData.availableSeats}</span>
                     </div>
                     <div className="packagepricing_dealwrapper"
                       style={{

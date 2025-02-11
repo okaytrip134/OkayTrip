@@ -141,7 +141,7 @@ const Navbar = () => {
           {/* Logo */}
           <div className="flex items-center">
             <Link to="/">
-              <img src={logo} alt="Logo" className="h-12 md:h-[2.5rem] lg:h-[3rem]" />
+              <img src={logo} alt="Logo" className="h-8 md:h-[2.5rem] lg:h-[3rem]" />
             </Link>
           </div>
 
@@ -174,11 +174,11 @@ const Navbar = () => {
                 className="flex items-center space-x-2 cursor-pointer"
                 onClick={() => setShowDropdown(!showDropdown)}
               >
-                <div className="bg-orange-500 text-white rounded-full h-8 w-8 flex items-center justify-center text-sm font-bold">
+                <div className="bg-orange-500 text-white rounded-full h-6 w-6 md:h-8 md:w-8 flex items-center justify-center text-sm font-bold">
                   {userName.slice(0, 1).toUpperCase()}
                 </div>
                 <div className="flex items-center">
-                  <span className="text-gray-700 font-medium">Hi, {userName.slice(0, 7)}</span>
+                  <span className="text-gray-700 font-medium text-[10px] md:text-[15px]">Hi, {userName.slice(0, 7)}</span>
                   <RiArrowDropDownFill className="text-xl ml-1" />
                 </div>
               </div>

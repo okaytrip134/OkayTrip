@@ -3,25 +3,23 @@ const Package = require("../models/package");
 
 exports.confirmBooking = async (req, res) => {
   try {
-    const { packageId, bookingId, paymentId, amount, paymentType } = req.body;
-    const userId = req.user.id; 
-
-    // ✅ Check if package exists
+    const { packageId, bookingId, paymentId, amount, paymentType, seatsToBook } = req.body;
+    const userId = req.user.id;
+    if (!seatsToBook || seatsToBook <= 0) {
+      return res.status(400).json({ message: "Invalid number of seats to book." });
+    }
     const packageData = await Package.findById(packageId);
     if (!packageData) {
       return res.status(404).json({ success: false, message: "Package not found" });
     }
 
-    // ✅ Check if seats are available
-    if (packageData.totalSeats <= 0) {
-      return res.status(400).json({ success: false, message: "No seats available for this package" });
+    if (packageData.availableSeats < seatsToBook) {
+      return res.status(400).json({ message: "Not enough available seats." });
     }
 
-    // ✅ Reduce seat count
-    packageData.totalSeats -= 1;
+    packageData.availableSeats -= seatsToBook;
     await packageData.save();
-
-    // ✅ Create booking entry
+    
     const newBooking = new Booking({
       userId,
       packageId,
@@ -29,9 +27,8 @@ exports.confirmBooking = async (req, res) => {
       paymentId,
       amount,
       paymentType,
-      status: "Confirmed",
+      seatsBooked: seatsToBook,
     });
-
     await newBooking.save();
 
     res.json({ success: true, message: "Booking Confirmed", booking: newBooking });
@@ -41,14 +38,13 @@ exports.confirmBooking = async (req, res) => {
   }
 };
 exports.getUserBookings = async (req, res) => {
-    try {
-      const userId = req.user.id; // Extract user ID from auth middleware
-      const bookings = await Booking.find({ userId }).populate("packageId");
-  
-      res.json({ success: true, bookings });
-    } catch (error) {
-      console.error("Error fetching user bookings:", error);
-      res.status(500).json({ success: false, message: "Failed to fetch bookings" });
-    }
-  };
-  
+  try {
+    const userId = req.user.id; // Extract user ID from auth middleware
+    const bookings = await Booking.find({ userId }).populate("packageId");
+
+    res.json({ success: true, bookings });
+  } catch (error) {
+    console.error("Error fetching user bookings:", error);
+    res.status(500).json({ success: false, message: "Failed to fetch bookings" });
+  }
+};

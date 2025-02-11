@@ -7,7 +7,6 @@ const {
   getPackageById,
   updatePackage,
   togglePackageStatus,
-  updatePackageSeats,
   deletePackage
 } = require("../../controllers/packageController");
 const adminAuth = require("../../middlewares/adminAuth");
@@ -26,13 +25,12 @@ const storage = multer.diskStorage({
 const upload = multer({ storage });
 
 // Admin routes
-router.post("/create", adminAuth, upload.array("images", 40), createPackage); // Create a new package
-router.get("/", getAllPackages); // Get all packages (Explore Page)
-router.get("/category/:categoryId", getPackagesByCategory); // Get packages by category
-router.get("/details/:packageId", getPackageById); // Get single package details
-router.put("/:packageId", adminAuth, upload.array("images", 40), updatePackage); // Update a package
-router.put("/:packageId/status", adminAuth, togglePackageStatus); // Deactivate/Activate a package
-router.put("/:packageId/update-seats", adminAuth, updatePackageSeats);
-router.delete("/:packageId", adminAuth, deletePackage); // Delete a package and associated images
+router.post("/create", adminAuth, upload.array("images", 40), createPackage);
+router.get("/", getAllPackages); 
+router.get("/category/:categoryId", getPackagesByCategory); 
+router.get("/details/:packageId", getPackageById);
+router.put("/:packageId", adminAuth, upload.array("images", 40), updatePackage);
+router.put("/:packageId/status", adminAuth, togglePackageStatus); 
+router.delete("/:packageId", adminAuth, deletePackage); 
 
 module.exports = router;

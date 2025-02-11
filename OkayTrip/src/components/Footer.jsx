@@ -54,9 +54,8 @@ const Footer = () => {
         <div className="bg-white rounded-xl shadow-lg p-8 max-w-[1080px] mx-auto">
           <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
 
-            {/* 🔹 About Thrillophilia */}
             <div className="border-r-2">
-              <h3 className=" mb-3 mt-3"
+              <h3 className=" mb-3"
                 style={{
                   fontSize: '12px',
                   fontWeight: '600',
@@ -72,12 +71,12 @@ const Footer = () => {
                   letterSpacing: '1.3px'
                 }}
               >
-                <li><a href="#" className="hover:text-gray-900">About Us</a></li>
-                <li><Link to="/refund-policy" className="hover:text-gray-900">Refund Polocies</Link></li>
-                <li><Link to="/term-and-conditions" className="hover:text-gray-900">Terms & Conditions</Link></li>
-                <li><Link to="/privacy-policy" className="hover:text-gray-900">Privacy Policies</Link></li>
-                <li><Link to="/copyright-policy" className="hover:text-gray-900">Copyright Policies</Link></li>
-                <li><a href="#" className="hover:text-gray-900">Support</a></li>
+                <li><a href="#" className="hover:text-[#f37002]">About Us</a></li>
+                <li><Link to="/refund-policy" className="hover:text-[#f37002]">Refund Polocies</Link></li>
+                <li><Link to="/term-and-conditions" className="hover:text-[#f37002]">Terms & Conditions</Link></li>
+                <li><Link to="/privacy-policy" className="hover:text-[#f37002]">Privacy Policies</Link></li>
+                <li><Link to="/copyright-policy" className="hover:text-[#f37002]">Copyright Policies</Link></li>
+                <li><a href="#" className="hover:text-[#f37002]">Support</a></li>
                 <li className="text-red-600 font-bold flex items-center">
                   Beware of Frauds <span className="ml-2">⚠️</span>
                 </li>
@@ -86,7 +85,7 @@ const Footer = () => {
 
             {/* 🔹 For Suppliers & Brands */}
             <div className="border-r-2">
-            <h3 className=" mb-3 mt-3"
+            <h3 className=" mb-3"
                 style={{
                   fontSize: '12px',
                   fontWeight: '600',
@@ -102,7 +101,7 @@ const Footer = () => {
                   letterSpacing: '1.3px'
                 }}
               >
-                <li><a href="#" className="hover:text-gray-900">List Your Activities</a></li>
+                <li><a href="#" className="hover:text-[#f37002]">List Your Activities</a></li>
               </ul>
               <h3 className=" mb-3 mt-3"
                 style={{
@@ -120,14 +119,14 @@ const Footer = () => {
                   letterSpacing: '1.3px'
                 }}
               >
-                <li><a href="#" className="hover:text-gray-900">Partner With Us</a></li>
-                <li><a href="#" className="hover:text-gray-900">Destination Marketing</a></li>
+                <li><a href="#" className="hover:text-[#f37002]">Partner With Us</a></li>
+                <li><a href="#" className="hover:text-[#f37002]">Destination Marketing</a></li>
               </ul>
             </div>
 
             {/* 🔹 For Travellers */}
             <div className="border-r-2">
-            <h3 className=" mb-3 mt-3"
+            <h3 className=" mb-3"
                 style={{
                   fontSize: '12px',
                   fontWeight: '600',
@@ -143,13 +142,13 @@ const Footer = () => {
                   letterSpacing: '1.3px'
                 }}
               >
-                <li><a href="#" className="hover:text-gray-900">Gift an Experience</a></li>
+                <li><a href="#" className="hover:text-[#f37002]">Gift an Experience</a></li>
               </ul>
             </div>
 
             {/* 🔹 Travel Destinations */}
             <div>
-            <h3 className=" mb-3 mt-3"
+            <h3 className=" mb-3"
                 style={{
                   fontSize: '12px',
                   fontWeight: '600',

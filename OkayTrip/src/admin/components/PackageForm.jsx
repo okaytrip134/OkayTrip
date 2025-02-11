@@ -53,6 +53,7 @@ const PackageForm = ({ onClose, fetchPackages, selectedPackage }) => {
         startDate: selectedPackage.startDate,
         endDate: selectedPackage.endDate,
         totalSeats: selectedPackage.totalSeats,
+        availableSeats: selectedPackage.availableSeats, // ✅ Now tracking availableSeats 
         inclusions: selectedPackage.inclusions || [],
         exclusions: selectedPackage.exclusions || [],
         tripHighlights: selectedPackage.tripHighlights || [],
@@ -63,9 +64,16 @@ const PackageForm = ({ onClose, fetchPackages, selectedPackage }) => {
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-    setFormData({ ...formData, [name]: value });
+    if (name === "totalSeats") {
+      setFormData({
+        ...formData,
+        totalSeats: value,
+        availableSeats: value, // ✅ Reset availableSeats to totalSeats
+      });
+    } else {
+      setFormData({ ...formData, [name]: value });
+    }
   };
-
   const handleFileChange = (e) => {
     setFormData({ ...formData, images: Array.from(e.target.files) });
   };
@@ -228,14 +236,25 @@ const PackageForm = ({ onClose, fetchPackages, selectedPackage }) => {
                   className="border p-2 rounded"
                 />
               </div>
-              <input
-                type="number"
-                name="totalSeats"
-                value={formData.totalSeats}
-                onChange={handleInputChange}
-                placeholder="Total Seats"
-                className="border p-2 rounded"
-              />
+              {/* Total Seats (Fixed) & Available Seats */}
+              <div className="grid grid-cols-2 gap-4">
+                <input
+                  type="number"
+                  name="totalSeats"
+                  value={formData.totalSeats}
+                  onChange={handleInputChange}
+                  placeholder="Total Seats (Fixed)"
+                  className="border p-2 rounded"
+                />
+                <input
+                  type="number"
+                  name="availableSeats"
+                  value={formData.availableSeats}
+                  readOnly // ✅ Cannot be changed manually, only updated via bookings
+                  placeholder="Available Seats"
+                  className="border p-2 rounded bg-gray-100"
+                />
+              </div>
 
               {/* Dynamic Fields */}
               {[

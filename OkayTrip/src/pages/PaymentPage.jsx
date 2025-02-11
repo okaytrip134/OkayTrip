@@ -85,6 +85,7 @@ const PaymentPage = () => {
                 paymentId: response.razorpay_payment_id,
                 amount,
                 paymentType,
+                seatsToBook: 1,
               },
               {
                 headers: { Authorization: `Bearer ${userToken}` },

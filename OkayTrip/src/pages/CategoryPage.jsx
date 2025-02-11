@@ -157,7 +157,7 @@ const CategoryPage = () => {
 
                   <div className="flex items-center space-x-1 text-green-600 text-xs">
                     <span className="text-gray-400">Avialable Seats</span>
-                    <span>{pkg.totalSeats}</span>
+                    <span>{pkg.availableSeats}</span>
                   </div>
                 </div>
 
