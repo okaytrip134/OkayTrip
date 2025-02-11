@@ -15,7 +15,6 @@ import { FaAngleDown, FaAngleUp, FaChevronCircleLeft, FaChevronLeft, FaChevronRi
 
 
 const PackageDetailsPage = () => {
-  const API_URL = "http://localhost:8000";
   const { packageId } = useParams();
   const [packageData, setPackageData] = useState(null);
   const [loading, setLoading] = useState(true);

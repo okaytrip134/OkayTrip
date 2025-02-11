@@ -21,7 +21,6 @@ const PackageCardSkeleton = () => (
 );
 
 const ExplorePage = () => {
-  const API_URL = 'http://localhost:8000';
   const [categories, setCategories] = useState([]);
   const [packages, setPackages] = useState({});
   const [loadedCategories, setLoadedCategories] = useState({});

@@ -18,7 +18,7 @@ const PackageManager = () => {
   const fetchPackages = async (page = 1) => {
     setLoading(true); // Start loading
     try {
-      const { data } = await axios.get(`http://localhost:8000/api/admin/packages/`, {
+      const { data } = await axios.get(`${import.meta.env.VITE_APP_API_URL}/api/admin/packages/`, {
         headers: { Authorization: `Bearer ${adminToken}` },
         params: { page, limit },
       });
@@ -58,7 +58,7 @@ const PackageManager = () => {
   const handleToggleStatus = async (id, isActive) => {
     try {
       await axios.put(
-        `http://localhost:8000/api/admin/packages/${id}/status`,
+        `${import.meta.env.VITE_APP_API_URL}/api/admin/packages/${id}/status`,
         { isActive: !isActive },
         {
           headers: { Authorization: `Bearer ${adminToken}` },
