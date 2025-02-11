@@ -11,6 +11,8 @@ import mobiileEndImage from '../assets/end_of_trip_mobile.avif'
 import "react-responsive-carousel/lib/styles/carousel.min.css";
 import { Carousel } from "react-responsive-carousel";
 import UserAuth from "../components/UserAuth";
+import Skeleton from "react-loading-skeleton";
+import "react-loading-skeleton/dist/skeleton.css";
 import { FaAngleDown, FaAngleUp, FaChevronCircleLeft, FaChevronLeft, FaChevronRight } from "react-icons/fa";
 
 
@@ -72,26 +74,34 @@ const PackageDetailsPage = () => {
         {/* Images */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
           <div className="md:col-span-2">
-            <img
-              src={`${import.meta.env.VITE_APP_API_URL}${packageData.images[0]}`}
-              alt={packageData.title}
-              className="w-full h-[400px] object-cover"
-            />
+            {loading ? (
+              <Skeleton height={400} />
+            ) : (
+              <img
+                src={`${import.meta.env.VITE_APP_API_URL}${packageData.images[0]}`}
+                alt={packageData.title}
+                className="w-full h-[400px] object-cover"
+              />
+            )}
           </div>
           <div className="grid grid-cols-2 gap-2">
-            {packageData.images.slice(1, 5).map((image, index) => (
-              <div key={index} className="relative group">
-                <img
-                  src={`${import.meta.env.VITE_APP_API_URL}${image}`}
-                  alt={`Thumbnail ${index}`}
-                  className="w-full h-[10rem] object-cover cursor-pointer"
-                />
-                <div className="absolute inset-0 bg-black bg-opacity-30 flex items-center justify-center opacity-0 group-hover:opacity-100 transition">
-                  <span className="text-white text-sm font-medium">View</span>
+            {loading
+              ? Array(4)
+                .fill()
+                .map((_, index) => <Skeleton key={index} height={160} />)
+              : packageData.images.slice(1, 5).map((image, index) => (
+                <div key={index} className="relative group">
+                  <img
+                    src={`${import.meta.env.VITE_APP_API_URL}${image}`}
+                    alt={`Thumbnail ${index}`}
+                    className="w-full h-[10rem] object-cover cursor-pointer"
+                  />
+                  <div className="absolute inset-0 bg-black bg-opacity-30 flex items-center justify-center opacity-0 group-hover:opacity-100 transition">
+                    <span className="text-white text-sm font-medium">View</span>
+                  </div>
                 </div>
-              </div>
-            ))}
-            {packageData.images.length > 5 && (
+              ))}
+            {!loading && packageData.images.length > 5 && (
               <button
                 onClick={() => setShowImageGallery(true)}
                 className="col-span-2 bg-[#f37002] rounded-md font-mono font-semibold text-white hover:text-[#f37002] py-2 border border-[#f37002] text-center shadow hover:bg-transparent"
@@ -120,6 +130,95 @@ const PackageDetailsPage = () => {
                 transition: "all 0.3s ease-in-out",
               }}
             >
+                            <div className="pricing_card"
+                style={{
+                  padding: "15px",
+                  border: "1px solid #e0e0e0",
+                  borderRadius: "10px",
+                  minWidth: "360px",
+                }}
+              >
+                <div className="pricing_top"
+                  style={{
+                    display: "flex",
+                    justifyContent: "space-between",
+                    gap: "20px",
+                    marginBottom: "10px",
+                  }}
+                >
+                  <div className="pricing_left_section"
+                    style={{
+                    }}
+                  >
+                    <div className="undefined">
+                      <div className="productpricing_currentprice"
+                        style={{
+                          display: "flex",
+                          alignItems: "baseline",
+                          gap: "5px",
+                        }}
+                      >
+                        <div className="package_actual_price"
+                          style={{
+                            fontSize: '22px',
+                            fontWeight: 600,
+                            lineHeight: '38px',
+                            color: '#202020'
+                          }}
+                        >
+                          ₹ {packageData.discountedPrice}
+                        </div>
+                      </div>
+                      <div className="package_dicounted_price line-through"
+                        style={{
+                          fontSize: '18px',
+                          lineHeight: '27px',
+                          color: '#515151',
+                        }}
+                      >
+                        ₹ {packageData.realPrice}
+                      </div>
+                    </div>
+                  </div>
+                  <div className="package_pricing_rightsection relative">
+                    <div className="package_seat flex gap-[5px] items-center cursor-pointer font-semibold text-black">
+                      Avilable Seat :
+                      <span className="text-[#515151] font-bold">{packageData.availableSeats}</span>
+                    </div>
+                    <div className="packagepricing_dealwrapper"
+                      style={{
+                        minWidth: 'max-content',
+                        position: 'absolute',
+                        bottom: '0',
+                        right: '-15px',
+                        display: 'flex',
+                        justifyContent: 'flex-end',
+                        transform: 'scale(0.85)'
+                      }}
+                    >
+                    </div>
+                  </div>
+                </div>
+                <div className="pricing_bottom border-t border-[#e0e0e0] pt-4">
+                  <button className="Booking_button hover:bg-transparent hover:text-[#f37002] bg-[#f37002] text-white"
+                    style={{
+                      display: 'flex',
+                      justifyContent: 'center',
+                      alignItems: 'center',
+                      width: '100%',
+                      height: '51px',
+                      borderRadius: '7px',
+                      border: '1px solid #f37002',
+                      fontSize: '20px',
+                      fontWeight: '600',
+                      cursor: 'pointer'
+                    }}
+                    onClick={handleBooking}
+                  >
+                    <span>Book Now</span>
+                  </button>
+                </div>
+              </div>
               {/*Lead Form */}
               <div className="StickyForm_package shadow-sm"
                 style={{
@@ -132,7 +231,7 @@ const PackageDetailsPage = () => {
                   transition: "all 0.3s ease-in-out"
                 }}
               >
-                <div className="productEnquiryform_wrapper px-[5px] py-[15px] border border-[#b3afaf] rounded-lg mt-[10px] max-w-[325px] min-w-[270px]">
+                <div className="productEnquiryform_wrapper px-[5px] py-[15px] border border-[#b3afaf] rounded-lg mt-[10px] max-w-[360px] min-w-[270px]">
                   <div className="LeadForm_infoBOx px-3">
                     <div className="LeadFormProductName text-[#515151] text-[12px] font-bold truncate">
                       {packageData.title}
@@ -267,8 +366,8 @@ const PackageDetailsPage = () => {
                   lineHeight: "45px",
                   color: "#000",
                 }}
-              >{packageData.title}</h1>
-              <p className="text-gray-600 mt-2">{packageData.description}</p>
+                >{loading ? <Skeleton width={300} /> : packageData.title}</h1>
+              <p className="text-gray-600 mt-2">{loading ? <Skeleton count={3} /> : packageData.description}</p>
               <div className="package_duration"
                 style={{
                   display: "flex",
@@ -439,7 +538,7 @@ const PackageDetailsPage = () => {
                             className={`text-gray-500 transition-transform ${openIndex === index ? "rotate-180" : ""
                               }`}
                           >
-                            <FaAngleDown/>
+                            <FaAngleDown />
                           </span>
 
                         </div>
