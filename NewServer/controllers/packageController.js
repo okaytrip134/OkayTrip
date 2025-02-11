@@ -36,9 +36,9 @@ exports.createPackage = async (req, res) => {
     for (const file of req.files) {
       const optimizedPath = `uploads/packages/optimized-${file.filename}`;
       await sharp(file.path).resize(800).toFile(optimizedPath);
-      
+
       images.push(`/${optimizedPath}`);
-    
+
       fs.unlink(file.path, (err) => {
         if (err) console.error(`Error deleting file: ${file.path}`, err);
       });
@@ -59,7 +59,7 @@ exports.createPackage = async (req, res) => {
       inclusions: Array.isArray(inclusions) ? inclusions : JSON.parse(inclusions),
       exclusions: Array.isArray(exclusions) ? exclusions : JSON.parse(exclusions),
       tripHighlights: Array.isArray(tripHighlights) ? tripHighlights : JSON.parse(tripHighlights),
-      itinerary: formattedItinerary, 
+      itinerary: formattedItinerary,
     });
 
     await newPackage.save();
@@ -92,7 +92,8 @@ exports.getAllPackages = async (req, res) => {
 exports.getPackagesByCategory = async (req, res) => {
   const { categoryId } = req.params;
   try {
-    const packages = await Package.find({ categoryId, isActive: true });
+    const packages = await Package.find({ categoryId, isActive: true })
+      .populate("categoryId", "name");
     res.status(200).json(packages);
   } catch (error) {
     console.error("Error fetching packages by category:", error);

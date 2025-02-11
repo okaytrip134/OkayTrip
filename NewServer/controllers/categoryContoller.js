@@ -77,3 +77,36 @@ exports.toggleCategoryStatus = async (req, res) => {
       res.status(500).json({ message: "Internal server error" });
     }
   };
+  exports.deleteCategory = async (req, res) => {
+    const { id } = req.params;
+  
+    try {
+      const category = await Category.findById(id);
+      if (!category) {
+        return res.status(404).json({ message: "Category not found" });
+      }
+  
+      // Get the full path of the SVG file
+      const fullPath = path.join(__dirname, `../../${category.svgPath}`);
+  
+      // Check if the file exists and delete it
+      if (fs.existsSync(fullPath)) {
+        fs.unlink(fullPath, (err) => {
+          if (err) {
+            console.error(`Error deleting SVG file: ${fullPath}`, err);
+          } else {
+            console.log(`Deleted SVG file: ${fullPath}`);
+          }
+        });
+      }
+  
+      // Delete the category from the database
+      await Category.findByIdAndDelete(id);
+  
+      res.status(200).json({ message: "Category and associated SVG deleted successfully!" });
+    } catch (error) {
+      console.error("Error deleting category:", error);
+      res.status(500).json({ message: "Internal server error" });
+    }
+  };
+  

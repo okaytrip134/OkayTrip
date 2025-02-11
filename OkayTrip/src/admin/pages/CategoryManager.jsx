@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { FaToggleOn, FaToggleOff } from "react-icons/fa";
+import toast, { Toaster } from "react-hot-toast"; // Import react-hot-toast
 
 const CategoryManager = () => {
   const [categories, setCategories] = useState([]);
@@ -102,8 +103,29 @@ const CategoryManager = () => {
     fetchCategories();
   }, []);
 
+  const handleDeleteCategory = async (id) => {
+    if (!window.confirm("Are you sure you want to delete this category?")) return;
+    try {
+      const { data } = await axios.delete(
+        `${import.meta.env.VITE_APP_API_URL}/api/admin/categories/${id}`,
+        {
+          headers: { Authorization: `Bearer ${adminToken}` },
+        }
+      );
+      setMessage(data.message);
+      toast.success("Category Deleted.");
+
+      fetchCategories(); // Refresh the category list
+    } catch (error) {
+      console.error("Error deleting category:", error);
+      setMessage("Failed to delete category.");
+    }
+  };
+
+
   return (
     <div className="p-6 bg-gray-50 min-h-screen">
+      <Toaster position="top-right" /> {/* Toast Notification Container */}
       <h1 className="text-2xl font-bold mb-6 text-gray-800">Manage Categories</h1>
       <div className="bg-white p-6 rounded shadow-md mb-6">
         <h2 className="text-lg font-semibold mb-4">Create New Category</h2>
@@ -168,6 +190,12 @@ const CategoryManager = () => {
                   } hover:opacity-90`}
                 >
                   {category.isActive ? "Deactivate" : "Activate"}
+                </button>
+                <button
+                  onClick={() => handleDeleteCategory(category._id)}
+                  className="px-3 py-1 rounded text-sm font-medium bg-red-500 text-white hover:opacity-90"
+                >
+                  Delete
                 </button>
               </div>
             </li>

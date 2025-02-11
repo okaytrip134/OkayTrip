@@ -42,7 +42,6 @@ const BlurImage = ({ src, alt }) => {
 };
 
 const CategoryPage = () => {
-  const API_URL = "http://localhost:8000";
   const { categoryId } = useParams();
   const [category, setCategory] = useState(""); // Store Category Name
   const [packages, setPackages] = useState([]);
@@ -91,7 +90,7 @@ const CategoryPage = () => {
         setCategory("Unknown Category");
       }
     };
-  
+
     fetchCategoryName();
   }, [categoryId]);
 
@@ -131,7 +130,7 @@ const CategoryPage = () => {
 
   return (
     <div className="px-8 lg:px-32 py-8 min-h-screen max-w-[1440px] mx-auto">
-     <h1 className="text-2xl font-bold mb-6">Tours In {category}</h1>
+      <h1 className="text-2xl font-bold mb-6">Tours In {category}</h1>
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
         {packages.map((pkg, index) => {
           const packageProps =
@@ -169,6 +168,31 @@ const CategoryPage = () => {
                   {new Date(pkg.startDate).toLocaleDateString()} -{" "}
                   {new Date(pkg.endDate).toLocaleDateString()}
                 </p>
+
+                <div
+                  className="flex w-full relative rounded-md mb-[2px]"
+                  style={{
+                    background: 'linear-gradient(180deg, rgba(255, 186, 10, .1), rgba(255, 186, 10, 0));'
+                  }}
+                >
+                  <div className="productcard_destinationListBOx flex items-center overflow-hidden, gap-[5px] h-8 my-0 mr-32px ml-7px">
+                    <div className="flex w-max items-center gap-1">
+                      <span className="flex items-center text-xs font-semibold text-[#000]">
+                        {pkg.duration.split(" ")[0]}D
+                      </span>
+                      <span className="flex items-center text-[10px] font-normal text-[#515151] w-max uppercase"
+                        style={
+                          {
+                            fontFamily: 'Helvetica',
+                            letterSpacing: '1px'
+                          }
+                        }
+                      >
+                        {pkg.categoryId ? pkg.categoryId.name : "Category not available"}
+                      </span>
+                    </div>
+                  </div>
+                </div>
 
                 <div className="flex items-center justify-between mb-4">
                   <div className="flex items-center space-x-2">
@@ -221,12 +245,8 @@ const CategoryPage = () => {
                     style={{
                       width: 'calc(100% - 61px)'
                     }}
-                    onClick={(e) => {
-                      e.stopPropagation(); // Prevent navigation to package details
-                      handleBooking(pkg._id); // Handle booking logic
-                    }}
                   >
-                    <span className="  ">Book Now</span>
+                    <span className="  ">View Details</span>
                   </div>
                 </div>
               </div>
@@ -248,18 +268,18 @@ const CategoryPage = () => {
           No more packages to load
         </div>
       )}
-{/* Show Authentication Popup */}
-{showAuthPopup && (
-  <UserAuth
-    onClose={() => {
-      setShowAuthPopup(false);
-      const token = localStorage.getItem("userToken");
-      if (token && selectedPackageId) {
-        navigate(`/booking/${selectedPackageId}`); // Redirect to booking page
-      }
-    }}
-  />
-)}
+      {/* Show Authentication Popup */}
+      {showAuthPopup && (
+        <UserAuth
+          onClose={() => {
+            setShowAuthPopup(false);
+            const token = localStorage.getItem("userToken");
+            if (token && selectedPackageId) {
+              navigate(`/booking/${selectedPackageId}`); // Redirect to booking page
+            }
+          }}
+        />
+      )}
     </div>
   );
 };

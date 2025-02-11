@@ -1,11 +1,12 @@
-import { useState, useEffect } from "react";
+import React, { useState, useEffect, lazy, Suspense } from "react";
 import { FaUser, FaPhoneAlt, FaEnvelope, FaEllipsisV } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
 import AddressDetails from "./AddressDetails";
+import Skeleton from "react-loading-skeleton";
+import "react-loading-skeleton/dist/skeleton.css";
 
 // eslint-disable-next-line react/prop-types
 const UserProfileContent = ({ activeTab }) => {
-  const API_URL = "http://localhost:8000";
   const [user, setUser] = useState(null);
   const [dropdownVisible, setDropdownVisible] = useState(false);
   const [editMode, setEditMode] = useState(null); // 'profile', 'phone', 'password'
@@ -79,7 +80,27 @@ const UserProfileContent = ({ activeTab }) => {
   };
 
   if (!user) {
-    return <div>Loading...</div>;
+    return (
+      <div className="bg-white rounded-lg shadow-lg max-w-5xl mx-auto mt-8 p-6">
+        <h2 className="text-2xl font-semibold mb-4">
+          <Skeleton width={200} />
+        </h2>
+        <div className="grid grid-cols-2 gap-6 mt-6">
+          <div>
+            <Skeleton circle height={50} width={50} />
+            <Skeleton height={20} width="80%" className="mt-2" />
+          </div>
+          <div>
+            <Skeleton circle height={50} width={50} />
+            <Skeleton height={20} width="80%" className="mt-2" />
+          </div>
+        </div>
+        <div className="mt-6">
+          <Skeleton height={20} width="60%" />
+          <Skeleton height={20} width="90%" className="mt-2" />
+        </div>
+      </div>
+    );
   }
 
   return (
@@ -259,7 +280,9 @@ const UserProfileContent = ({ activeTab }) => {
                   Click to verify
                 </a>
               </div>
-              <AddressDetails />
+              <Suspense fallback={<Skeleton height={100} count={3} />}>
+                <AddressDetails />
+              </Suspense>
             </div>
           )}
         </div>
