@@ -8,8 +8,8 @@ const {
   updatePackage,
   togglePackageStatus,
   deletePackage
-} = require("../../controllers/packageController");
-const adminAuth = require("../../middlewares/adminAuth");
+} = require("../../controllers/packageController/");
+const adminAuth = require("../../middlewares/authMiddleware");
 const multer = require("multer");
 
 // Multer setup for package image uploads
