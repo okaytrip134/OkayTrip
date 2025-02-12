@@ -209,7 +209,7 @@ const ExplorePage = () => {
                       onClick={() => (window.location.href = `/package/${pkg._id}`)}
                     >
                       {/* Top Container for Image */}
-                      <div className="top-container overflow-hidden rounded-t relative w-[295px] md:w-[340px] h-[340px]">
+                      <div className="top-container overflow-hidden rounded-t relative w-[285px] md:w-[340px] h-[340px]">
                         <img
                           src={`${import.meta.env.VITE_APP_API_URL}${pkg.images[0]}`}
                           alt={pkg.title}

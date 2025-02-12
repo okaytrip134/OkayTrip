@@ -142,7 +142,7 @@ const CategoryPage = () => {
             <div
               key={pkg._id}
               {...packageProps}
-              className="rounded transition snap-center w-[340px] cursor-pointer"
+              className="rounded transition snap-center max-w-[340px] cursor-pointer"
               onClick={() => (window.location.href = `/package/${pkg._id}`)} // Redirect on click
             >
               <BlurImage
@@ -150,7 +150,7 @@ const CategoryPage = () => {
                 alt={pkg.title}
               />
 
-              <div className="bg-white rounded-b p-4 w-[340px]">
+              <div className="bg-white rounded-b pt-4 max-w-[340px]">
                 <div className="flex items-center justify-between mb-2">
                   <p className="text-sm text-gray-500">{pkg.duration}</p>
 
