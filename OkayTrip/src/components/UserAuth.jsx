@@ -4,7 +4,7 @@ import toast, { Toaster } from "react-hot-toast"; // Import react-hot-toast
 import { FaEye, FaEyeSlash } from "react-icons/fa";
 const UserAuth = ({ onClose }) => {
   // const API_URL = "http://localhost:8000";
-  const [isLogin, setIsLogin] = useState(true); 
+  const [isLogin, setIsLogin] = useState(true);
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -33,7 +33,7 @@ const UserAuth = ({ onClose }) => {
     };
     fetchBannerData();
   }, []);
-  
+
   const [showPassword, setShowPassword] = useState(false);
 
 
@@ -46,7 +46,7 @@ const UserAuth = ({ onClose }) => {
       setError(""); // Reset error
 
       const payload = isLogin
-        ? { email: formData.email, password: formData.password }
+        ? { emailOrPhone: formData.emailOrPhone, password: formData.password }
         : {
           name: formData.name,
           email: formData.email,
@@ -77,7 +77,7 @@ const UserAuth = ({ onClose }) => {
 
         console.log("Token Expiry Set:", expiryTime); // Debugging
       } else {
-        toast.success("Signup successful!!");
+        toast.success("Signup successful!");
       }
 
       onClose(); // Close the modal on success
@@ -131,8 +131,8 @@ const UserAuth = ({ onClose }) => {
           <div className="flex justify-center mb-6">
             <button
               className={`text-lg font-bold px-4 py-2 ${isLogin
-                  ? "text-orange-500 border-b-2 border-orange-500"
-                  : "text-gray-500"
+                ? "text-orange-500 border-b-2 border-orange-500"
+                : "text-gray-500"
                 }`}
               onClick={() => setIsLogin(true)}
             >
@@ -140,8 +140,8 @@ const UserAuth = ({ onClose }) => {
             </button>
             <button
               className={`text-lg font-bold px-4 py-2 ${!isLogin
-                  ? "text-orange-500 border-b-2 border-orange-500"
-                  : "text-gray-500"
+                ? "text-orange-500 border-b-2 border-orange-500"
+                : "text-gray-500"
                 }`}
               onClick={() => setIsLogin(false)}
             >
@@ -169,16 +169,28 @@ const UserAuth = ({ onClose }) => {
                   onChange={handleInputChange}
                   className="w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
                 />
+                <input
+                  type="email"
+                  name="email"
+                  placeholder="Email"
+                  value={formData.email}
+                  onChange={handleInputChange}
+                  className="w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
+                />
               </>
             )}
-            <input
-              type="email"
-              name="email"
-              placeholder="Email"
-              value={formData.email}
-              onChange={handleInputChange}
-              className="w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
-            />
+            {isLogin && (
+              <div className="relative">
+                <input
+                  type="text"
+                  name="emailOrPhone"
+                  placeholder="Email or Phone Number"
+                  value={formData.emailOrPhone}
+                  onChange={handleInputChange}
+                  className="w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
+                />
+              </div>
+            )}
             <div className="relative">
               <input
                 type={showPassword ? "text" : "password"}
@@ -197,21 +209,21 @@ const UserAuth = ({ onClose }) => {
             </div>
             {!isLogin && (
               <div className="relative">
-              <input
-                type={showPassword ? "text" : "password"}
-                name="confirmPassword"
-                placeholder="Confirm Password"
-                value={formData.confirmPassword}
-                onChange={handleInputChange}
-                className="w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
-              />
-              <span
-                className="absolute right-3 top-3 text-gray-500 cursor-pointer"
-                onClick={() => setShowPassword((prev) => !prev)}
-              >
-                {showPassword ? <FaEyeSlash size={20} /> : <FaEye size={20} />}
-              </span>
-            </div>
+                <input
+                  type={showPassword ? "text" : "password"}
+                  name="confirmPassword"
+                  placeholder="Confirm Password"
+                  value={formData.confirmPassword}
+                  onChange={handleInputChange}
+                  className="w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
+                />
+                <span
+                  className="absolute right-3 top-3 text-gray-500 cursor-pointer"
+                  onClick={() => setShowPassword((prev) => !prev)}
+                >
+                  {showPassword ? <FaEyeSlash size={20} /> : <FaEye size={20} />}
+                </span>
+              </div>
             )}
           </div>
 

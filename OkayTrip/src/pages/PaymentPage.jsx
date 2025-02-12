@@ -7,7 +7,6 @@ import { FaCreditCard, FaCheckCircle, FaTimesCircle, FaLock } from "react-icons/
 import logo from "../assets/Logo/Trip ok new 2 black-01.png"; // ✅ Import company logo
 
 const PaymentPage = () => {
-  const API_URL = "http://localhost:8000";
   const location = useLocation();
   const navigate = useNavigate();
   const { packageId, packageTitle, amount, paymentType } = location.state || {};
