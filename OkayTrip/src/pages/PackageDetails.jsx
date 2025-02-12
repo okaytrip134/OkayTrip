@@ -130,12 +130,12 @@ const PackageDetailsPage = () => {
                 transition: "all 0.3s ease-in-out",
               }}
             >
-                            <div className="pricing_card"
+              <div className="pricing_card"
                 style={{
                   padding: "15px",
                   border: "1px solid #e0e0e0",
                   borderRadius: "10px",
-                  minWidth: "360px",
+                  minWidth: "290px",
                 }}
               >
                 <div className="pricing_top"
@@ -366,7 +366,7 @@ const PackageDetailsPage = () => {
                   lineHeight: "45px",
                   color: "#000",
                 }}
-                >{loading ? <Skeleton width={300} /> : packageData.title}</h1>
+              >{loading ? <Skeleton width={300} /> : packageData.title}</h1>
               <p className="text-gray-600 mt-2">{loading ? <Skeleton count={3} /> : packageData.description}</p>
               <div className="package_duration"
                 style={{

@@ -162,7 +162,7 @@ const ExplorePage = () => {
     });
   };
   return (
-    <div className="px-8 lg:px-32 py-8 min-h-screen max-w-[1440px] mx-auto">
+    <div className="px-4 md:px-8 lg:px-32 py-8 min-h-screen max-w-[1440px] mx-auto">
       {categories.length === 0 ? (
         <div></div>
       ) : (
@@ -187,7 +187,7 @@ const ExplorePage = () => {
             <div className="relative">
               {visibleLeftButtons[category._id] && (
                 <button
-                  className="absolute left-[-32px] top-[30%] border-[1px] border-solid border-gray-500 transform -translate-y-1/2 z-[4] bg-[hsla(0,0%,100%,.7)] p-5 rounded-full shadow hover:bg-gray-100"
+                  className="absolute left-[-32px] top-[30%] border-[1px] border-solid border-gray-500 transform -translate-y-1/2 z-[4] bg-[hsla(0,0%,100%,.7)] p-5 rounded-full shadow hover:bg-gray-100 hidden md:block"
                   onClick={() => scrollCarousel(category._id, 'left')}
                 >
                   <FaChevronLeft size={16} />
@@ -352,7 +352,7 @@ const ExplorePage = () => {
                 />
               )}
               <button
-                className=" absolute right-[-32px] top-[30%] border-[1px] border-solid border-gray-500 transform -translate-y-1/2 z-0 bg-[hsla(0,0%,100%,.7)] p-5 rounded-full shadow hover:bg-gray-100"
+                className=" absolute right-[-32px] top-[30%] border-[1px] border-solid border-gray-500 transform -translate-y-1/2 z-0 bg-[hsla(0,0%,100%,.7)] p-5 rounded-full shadow hover:bg-gray-100 hidden md:block"
                 onClick={() => scrollCarousel(category._id, 'right')}
               >
                 <FaChevronRight size={16} />

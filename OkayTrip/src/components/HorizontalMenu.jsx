@@ -75,7 +75,7 @@ const HorizontalMenu = () => {
       {scrollPosition > 0 && (
         <button
           onClick={scrollLeft}
-          className="w-10 h-10 border rounded-full shadow hover:text-orange-500 transition-all"
+          className="w-10 h-10 border rounded-full shadow hover:text-orange-500 transition-all hidden md:block"
         >
           &#8592;
         </button>
@@ -133,7 +133,7 @@ const HorizontalMenu = () => {
       {canScrollRight && (
         <button
           onClick={scrollRight}
-          className="w-10 h-10 border rounded-full shadow hover:text-orange-500 transition-all"
+          className="w-10 h-10 border rounded-full shadow hover:text-orange-500 transition-all hidden md:block"
         >
           &#8594;
         </button>
