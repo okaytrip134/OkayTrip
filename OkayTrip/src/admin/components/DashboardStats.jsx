@@ -1,27 +1,65 @@
-import React from "react";
+'use client';
 
-const DashboardStats = () => {
-  const stats = [
-    { label: "Total Bookings", value: 1000, color: "bg-green-100", icon: "🛒" },
-    { label: "Total Users", value: 500, color: "bg-blue-100", icon: "👤" },
-    { label: "Total Tours", value: 200, color: "bg-yellow-100", icon: "✈️" },
-    { label: "Total Categories", value: 70, color: "bg-pink-100", icon: "📦" },
-  ];
-
+import { Col, Row, Typography } from "antd";
+import glass_bag from "../../assets/glass/ic_glass_bag.png";
+import glass_buy from "../../assets/glass/ic_glass_buy.png";
+import glass_message from "../../assets/glass/ic_glass_message.png";
+import glass_users from "../../assets/glass/ic_glass_users.png";
+import AnalysisCard from "../components/AnalysisCard";
+function Datacard() {
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-      {stats.map((stat, index) => (
-        <div
-          key={index}
-          className={`p-4 rounded-lg shadow-md ${stat.color}`}
-        >
-          <div className="text-3xl">{stat.icon}</div>
-          <div className="text-xl font-semibold">{stat.value}</div>
-          <div className="text-sm text-gray-500">{stat.label}</div>
-        </div>
-      ))}
+    <div className="p-4">
+      {" "}
+      {/* Increased padding around the whole dashboard */}
+      <Typography.Title level={2}>Hi, Welcome back Admin 👋</Typography.Title>
+      <Row gutter={[16, 16]} justify="center">
+        <Col lg={6} md={12} span={24}>
+          <AnalysisCard
+            cover={glass_bag}
+            title="1000"
+            subtitle="Total Booking"
+            style={{
+              color: "#008059", // Dark green for text
+              background: `linear-gradient(135deg, rgba(204, 234, 225, 0.8), rgba(204, 234, 225, 0.8))`, // #CCEAE1 in gradient
+            }}
+          />
+        </Col>
+        <Col lg={6} md={12} span={24}>
+          <AnalysisCard
+            cover={glass_users}
+            title="500"
+            subtitle="Total users"
+            style={{
+              color: "#0092B3", // Dark blue for text
+              background: `linear-gradient(135deg, rgba(204, 237, 244, 0.8), rgba(204, 237, 244, 0.8))`, // #CCEDF4 in gradient
+            }}
+          />
+        </Col>
+        <Col lg={6} md={12} span={24}>
+          <AnalysisCard
+            cover={glass_buy}
+            title="200"
+            subtitle="Total Tours"
+            style={{
+              color: "#D95834", // Orange for text
+              background: `linear-gradient(135deg, rgba(252, 226, 217, 0.8), rgba(252, 226, 217, 0.8))`, // #FCE2D9 in gradient
+            }}
+          />
+        </Col>
+        <Col lg={6} md={12} span={24}>
+          <AnalysisCard
+            cover={glass_message}
+            title="70"
+            subtitle="Total categories"
+            style={{
+              color: "#DB4026", // Red for text
+              background: `linear-gradient(135deg, rgba(249, 217, 211, 0.8), rgba(249, 217, 211, 0.8))`, // #F9D9D3 in gradient
+            }}
+          />
+        </Col>
+      </Row>
     </div>
   );
-};
+}
 
-export default DashboardStats;
+export default Datacard;
