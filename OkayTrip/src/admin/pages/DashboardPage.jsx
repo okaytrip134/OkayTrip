@@ -31,7 +31,7 @@ const DashboardPage = () => {
     { name: "Categories", icon: <AppstoreOutlined />, path: "/admin/dashboard/Categories" },
     { name: "Packages", icon: <FolderOpenOutlined />, path: "/admin/dashboard/Packages" },
     { name: "Booking Report", icon: <FileTextOutlined />, path: "/admin/dashboard/booking-report" },
-    { name: "Banners", icon: <PictureOutlined />, path: "/admin/dashboard/banner" },
+    { name: "Banners", icon: <PictureOutlined />, path: "/admin/dashboard/banner-manager" },
   ];
 
   const profileMenu = (
