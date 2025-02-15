@@ -1,72 +1,94 @@
 import React, { useEffect, useState } from "react";
+import { Table, Button, Typography, Card, Popconfirm, message } from "antd";
 import { fetchAllUsers, deleteUser } from "../../api/admin";
+
+const { Title } = Typography;
 
 const AdminUserList = () => {
   const [users, setUsers] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
-  // Fetch users on component mount
   useEffect(() => {
     const fetchUsers = async () => {
       try {
-        const data = await fetchAllUsers(); // Call API from admin.js
+        const data = await fetchAllUsers();
         setUsers(data);
       } catch (err) {
         setError(err.message || "Failed to load users");
+      } finally {
+        setLoading(false);
       }
     };
 
     fetchUsers();
   }, []);
 
-  // Handle user deletion
   const handleDeleteUser = async (userId) => {
     try {
-      const confirmDelete = window.confirm("Are you sure you want to delete this user?");
-      if (!confirmDelete) return;
-
-      await deleteUser(userId); // Call delete API from admin.js
-      setUsers(users.filter((user) => user._id !== userId)); // Update state to remove deleted user
-      alert("User deleted successfully");
+      await deleteUser(userId);
+      setUsers(users.filter((user) => user._id !== userId));
+      message.success("User deleted successfully");
     } catch (err) {
       console.error("Error deleting user:", err.message || err);
-      alert(err.message || "Failed to delete user");
+      message.error(err.message || "Failed to delete user");
     }
   };
 
+  const columns = [
+    {
+      title: "Name",
+      dataIndex: "name",
+      key: "name",
+    },
+    {
+      title: "Email",
+      dataIndex: "email",
+      key: "email",
+    },
+    {
+      title: "Phone",
+      dataIndex: "phone",
+      key: "phone",
+      render: (phone) => phone || "N/A",
+    },
+    {
+      title: "Role",
+      dataIndex: "role",
+      key: "role",
+    },
+    {
+      title: "Actions",
+      key: "actions",
+      render: (_, record) => (
+        <Popconfirm
+          title="Are you sure you want to delete this user?"
+          onConfirm={() => handleDeleteUser(record._id)}
+          okText="Yes"
+          cancelText="No"
+        >
+          <Button danger>Delete</Button>
+        </Popconfirm>
+      ),
+    },
+  ];
+
   return (
-    <div className="p-6">
-      <h2 className="text-xl font-bold mb-4">All Users</h2>
-      {error && <p className="text-red-500">{error}</p>}
-      <table className="w-full border border-gray-300">
-        <thead className="bg-gray-100">
-          <tr>
-            <th className="border px-4 py-2">Name</th>
-            <th className="border px-4 py-2">Email</th>
-            <th className="border px-4 py-2">Phone</th>
-            <th className="border px-4 py-2">Role</th>
-            <th className="border px-4 py-2">Actions</th>
-          </tr>
-        </thead>
-        <tbody>
-          {users.map((user) => (
-            <tr key={user._id}>
-              <td className="border px-4 py-2">{user.name}</td>
-              <td className="border px-4 py-2">{user.email}</td>
-              <td className="border px-4 py-2">{user.phone || "N/A"}</td>
-              <td className="border px-4 py-2">{user.role}</td>
-              <td className="border px-4 py-2">
-                <button
-                  className="bg-red-500 text-white px-2 py-1 rounded hover:bg-red-600"
-                  onClick={() => handleDeleteUser(user._id)}
-                >
-                  Delete
-                </button>
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
+    <div className="p-6 bg-gray-100 min-h-screen">
+      <Card>
+        <Title level={3} className="mb-4">
+          Manage Users
+        </Title>
+        {error && <Typography.Text type="danger">{error}</Typography.Text>}
+        <Table
+          columns={columns}
+          dataSource={users}
+          loading={loading}
+          rowKey={(record) => record._id}
+          bordered
+          pagination={{ pageSize: 10 }}
+        />
+      </Card>
     </div>
   );
 };
