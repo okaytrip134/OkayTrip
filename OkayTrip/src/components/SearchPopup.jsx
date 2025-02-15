@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Calendar, Search, X, Plane, PlaneTakeoff } from "lucide-react";
+import { Calendar, Search, X, PlaneTakeoff } from "lucide-react";
 
 const SearchPopup = ({ onClose }) => {
   const [searchTerm, setSearchTerm] = useState("");
