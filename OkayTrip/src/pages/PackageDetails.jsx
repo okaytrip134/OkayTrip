@@ -135,7 +135,7 @@ const PackageDetailsPage = () => {
                   padding: "15px",
                   border: "1px solid #e0e0e0",
                   borderRadius: "10px",
-                  minWidth: "290px",
+                  minWidth: "270px",
                 }}
               >
                 <div className="pricing_top"
@@ -231,7 +231,7 @@ const PackageDetailsPage = () => {
                   transition: "all 0.3s ease-in-out"
                 }}
               >
-                <div className="productEnquiryform_wrapper px-[5px] py-[15px] border border-[#b3afaf] rounded-lg mt-[10px] max-w-[360px] min-w-[270px]">
+                <div className="productEnquiryform_wrapper px-[5px] py-[15px] border border-[#b3afaf] rounded-lg mt-[10px] max-w-[360px] min-w-[240px]">
                   <div className="LeadForm_infoBOx px-3">
                     <div className="LeadFormProductName text-[#515151] text-[12px] font-bold truncate">
                       {packageData.title}

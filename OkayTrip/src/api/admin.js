@@ -24,7 +24,7 @@ export const deleteUser = async (userId) => {
     if (!token) throw new Error("No admin token found!");
 
     const response = await axios.delete(
-      `http://localhost:8000/api/admin/users/${userId}`,
+      `${import.meta.env.VITE_APP_API_URL}/api/admin/users/${userId}`,
       {
         headers: {
           Authorization: `Bearer ${token}`,
