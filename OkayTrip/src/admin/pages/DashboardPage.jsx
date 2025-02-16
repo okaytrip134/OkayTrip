@@ -49,7 +49,7 @@ const DashboardPage = () => {
       icon: <SvgIcon src={setting} alt="Management" />,
       isDropdown: true,
       items: [
-        { name: "Banners", icon: <SvgIcon src={packages} alt="Management" />, path: "/admin/dashboard/banner" },
+        { name: "Banners", icon: <SvgIcon src={packages} alt="Management" />, path: "/admin/dashboard/banner-manager" },
       ]
     },
     { name: "Top Sale Bar", icon: <BarChartOutlined />, path: "/admin/dashboard/top-sale-bar" },
