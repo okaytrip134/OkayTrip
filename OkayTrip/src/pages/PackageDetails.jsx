@@ -483,7 +483,7 @@ const PackageDetailsPage = () => {
                       onChange={(index) => setCurrentSlide(index)}
                     >
                       {packageData.images.map((image, index) => (
-                        <div key={index} className="relative">
+                        <div key={index} className="relative  mb-4">
                           <img
                             src={`${import.meta.env.VITE_APP_API_URL}${image}`}
                             alt={`Package Image ${index}`}
