@@ -1,136 +1,155 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
-import toast, { Toaster } from "react-hot-toast";
+import { Form, Input, Upload, Button, Card, Typography, message, Spin, Image } from "antd";
+import { UploadOutlined } from "@ant-design/icons";
+
+const { Title } = Typography;
 
 const AdminBannerManager = () => {
-    const [bannerData, setBannerData] = useState({
-        title: "",
-        subtitle: "",
-        imageUrl: "",
-    });
-    const [imageFile, setImageFile] = useState(null);
-    const [loading, setLoading] = useState(false);
+  const [form] = Form.useForm();
+  const [bannerData, setBannerData] = useState({
+    title: "",
+    subtitle: "",
+    imageUrl: "",
+  });
+  const [loading, setLoading] = useState(false);
+  const [imageFile, setImageFile] = useState(null);
 
-    // Fetch current banner data
-    const fetchBanner = async () => {
-        try {
-            const { data } = await axios.get(`${import.meta.env.VITE_APP_API_URL}/api/admin/banner`);
-            if (data.banner) {
-                setBannerData(data.banner);
-            }
-        } catch (error) {
-            console.error("Error fetching banner:", error);
-            toast.error("Failed to fetch banner data.");
+  // Fetch current banner data
+  const fetchBanner = async () => {
+    try {
+      const { data } = await axios.get(
+        `${import.meta.env.VITE_APP_API_URL}/api/admin/banner`
+      );
+      if (data.banner) {
+        setBannerData(data.banner);
+        form.setFieldsValue(data.banner);
+      }
+    } catch (error) {
+      console.error("Error fetching banner:", error);
+      message.error("Failed to fetch banner data");
+    }
+  };
+
+  useEffect(() => {
+    fetchBanner();
+  }, []);
+
+  // Handle form submission
+  const handleUpdateBanner = async (values) => {
+    if (!values.title || !values.subtitle) {
+      message.error("Title and Subtitle are required");
+      return;
+    }
+
+    const formData = new FormData();
+    formData.append("title", values.title);
+    formData.append("subtitle", values.subtitle);
+    if (imageFile) {
+      formData.append("image", imageFile);
+    }
+
+    setLoading(true);
+    try {
+      const { data } = await axios.put(
+        `${import.meta.env.VITE_APP_API_URL}/api/admin/banner`,
+        formData,
+        {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
         }
-    };
+      );
 
-    useEffect(() => {
-        fetchBanner();
-    }, []);
+      message.success("Banner updated successfully!");
+      setBannerData(data.banner);
+      setImageFile(null);
+    } catch (error) {
+      console.error("Error updating banner:", error);
+      message.error("Failed to update banner");
+    } finally {
+      setLoading(false);
+    }
+  };
 
-    // Handle form submission (update banner)
-    const handleUpdateBanner = async (e) => {
-        e.preventDefault();
+  const uploadProps = {
+    beforeUpload: (file) => {
+      const isImage = file.type.startsWith('image/');
+      if (!isImage) {
+        message.error('You can only upload image files!');
+        return false;
+      }
+      setImageFile(file);
+      return false;
+    },
+    maxCount: 1,
+  };
 
-        if (!bannerData.title || !bannerData.subtitle) {
-            toast.error("Title and Subtitle are required.");
-            return;
-        }
+  return (
+    <div className="p-6 bg-gray-50 min-h-screen">
+      <Card className="max-w-3xl mx-auto shadow-md">
+        <Title level={2} className="text-center mb-6">
+          Banner Management
+        </Title>
 
-        const formData = new FormData();
-        formData.append("title", bannerData.title);
-        formData.append("subtitle", bannerData.subtitle);
-        if (imageFile) {
-            formData.append("image", imageFile);
-        }
+        <Form
+          form={form}
+          layout="vertical"
+          onFinish={handleUpdateBanner}
+          initialValues={bannerData}
+        >
+          <Form.Item
+            label="Title"
+            name="title"
+            rules={[{ required: true, message: "Please input the banner title!" }]}
+          >
+            <Input placeholder="Enter banner title" size="large" />
+          </Form.Item>
 
-        setLoading(true);
-        try {
-            const { data } = await axios.put(`${import.meta.env.VITE_APP_API_URL}/api/admin/banner`, formData, {
-                headers: {
-                    "Content-Type": "multipart/form-data",
-                },
-            });
+          <Form.Item
+            label="Subtitle"
+            name="subtitle"
+            rules={[{ required: true, message: "Please input the banner subtitle!" }]}
+          >
+            <Input.TextArea
+              placeholder="Enter banner subtitle"
+              size="large"
+              rows={3}
+            />
+          </Form.Item>
 
-            toast.success("Banner updated successfully!");
-            setBannerData(data.banner);
-            setImageFile(null); // Reset file input
-        } catch (error) {
-            console.error("Error updating banner:", error);
-            toast.error("Failed to update banner.");
-        } finally {
-            setLoading(false);
-        }
-    };
+          <Form.Item label="Banner Image">
+            <Upload {...uploadProps} listType="picture">
+              <Button icon={<UploadOutlined />}>Select Image</Button>
+            </Upload>
+            {bannerData.imageUrl && (
+              <div className="mt-4">
+                <p className="text-sm text-gray-600 mb-2">Current Banner:</p>
+                <Image
+                  src={`${import.meta.env.VITE_APP_API_URL}${bannerData.imageUrl}`}
+                  alt="Current Banner"
+                  className="rounded-lg"
+                  height={200}
+                />
+              </div>
+            )}
+          </Form.Item>
 
-    // Handle input changes for title and subtitle
-    const handleInputChange = (e) => {
-        const { name, value } = e.target;
-        setBannerData({ ...bannerData, [name]: value });
-    };
-
-    return (
-        <div className="max-w-4xl mx-auto p-8 bg-white shadow-lg rounded-lg">
-            <Toaster position="top-right" />
-            <h1 className="text-3xl font-bold text-gray-800 mb-6">Admin Banner Manager</h1>
-            <form onSubmit={handleUpdateBanner} className="space-y-6">        {/* Title */}
-                <div>
-                    <label className="block text-gray-700 font-medium mb-2">Title</label>
-                    <input
-                        type="text"
-                        name="title"
-                        value={bannerData.title}
-                        onChange={handleInputChange}
-                        className="w-full p-3 border rounded-md focus:ring focus:ring-orange-300"
-                        required
-                    />
-                </div>
-
-                {/* Subtitle */}
-                <div>
-                    <label className="block text-gray-700 font-medium mb-2">Subtitle</label>
-                    <input
-                        type="text"
-                        name="subtitle"
-                        value={bannerData.subtitle}
-                        onChange={handleInputChange}
-                        className="w-full p-3 border rounded-md focus:ring focus:ring-orange-300"
-                        required
-                    />
-                </div>
-
-                {/* Banner Image */}
-                <div>
-                    <label className="block text-gray-700 font-medium mb-2">Banner Image</label>
-                    <input
-                        type="file"
-                        onChange={(e) => setImageFile(e.target.files[0])}
-                        className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-orange-100 file:text-orange-700 hover:file:bg-orange-200"
-                    />
-                    {bannerData.imageUrl && (
-                        <div className="mt-4">
-                            <p className="text-sm text-gray-600">Current Banner Preview:</p>
-                            <img
-                                src={`${import.meta.env.VITE_APP_API_URL}${bannerData.imageUrl}`}
-                                alt="Current Banner"
-                                className="mt-2 w-full h-40 object-cover rounded-lg shadow"
-                            />
-                        </div>
-                    )}
-                </div>
-
-                {/* Submit Button */}
-                <button
-                    type="submit"
-                    className={`w-full py-3 rounded-md font-bold transition ${loading ? "bg-gray-400" : "bg-orange-500 hover:bg-orange-600 text-white"
-                        }`}
-                    disabled={loading}
-                >
-                    {loading ? "Updating..." : "Update Banner"}
-                </button>
-            </form>
-        </div>
-    );
+          <Form.Item>
+            <Button
+              type="primary"
+              htmlType="submit"
+              loading={loading}
+              className="w-full bg-orange-500 hover:bg-orange-600 border-orange-500 hover:border-orange-600"
+              size="large"
+            >
+              Update Banner
+            </Button>
+          </Form.Item>
+        </Form>
+      </Card>
+    </div>
+  );
 };
 
 export default AdminBannerManager;

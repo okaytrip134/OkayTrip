@@ -1,91 +1,119 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
+import {
+    Table,
+    Button,
+    Space,
+    Select,
+    Card,
+    Typography,
+    Tag,
+    message,
+    Tooltip
+} from "antd";
+import {
+    DownloadOutlined,
+    ReloadOutlined,
+    ExclamationCircleOutlined
+} from "@ant-design/icons";
+import { Modal } from 'antd';
+
+const { Title } = Typography;
+const { confirm } = Modal;
 
 const AdminBookings = () => {
     const [bookings, setBookings] = useState([]);
     const [loading, setLoading] = useState(true);
-    const [currentPage, setCurrentPage] = useState(1);
-    const [totalPages, setTotalPages] = useState(1);
-    const bookingsPerPage = 7; // ✅ Limit to 7 bookings per page
+    const [pagination, setPagination] = useState({
+        current: 1,
+        pageSize: 7,
+        total: 0,
+    });
+
+    const fetchBookings = async (page = 1, pageSize = 7) => {
+        try {
+            setLoading(true);
+            const { data } = await axios.get(
+                `http://localhost:8000/api/admin/bookings`,
+                {
+                    params: {
+                        page,
+                        limit: pageSize,
+                    },
+                    headers: { Authorization: `Bearer ${localStorage.getItem("adminToken")}` },
+                }
+            );
+
+            setBookings(data.bookings);
+            setPagination({
+                ...pagination,
+                total: data.totalPages * pageSize,
+                current: page,
+            });
+        } catch (error) {
+            message.error("Failed to fetch bookings");
+        } finally {
+            setLoading(false);
+        }
+    };
 
     useEffect(() => {
-        const fetchBookings = async () => {
-            try {
-                const { data } = await axios.get(
-                    `${import.meta.env.VITE_APP_API_URL}/api/admin/bookings?page=${currentPage}&limit=${bookingsPerPage}`,
-                    {
-                        headers: { Authorization: `Bearer ${localStorage.getItem("adminToken")}` },
-                    }
-                );
-                setBookings(data.bookings);
-                setTotalPages(data.totalPages);
-            } catch (error) {
-                console.error("Error fetching bookings:", error);
-            } finally {
-                setLoading(false);
-            }
-        };
-
         fetchBookings();
-    }, [currentPage]);
+    }, []);
 
-    // ✅ Handle Pagination
-    const goToNextPage = () => {
-        if (currentPage < totalPages) setCurrentPage(currentPage + 1);
-    };
-
-    const goToPreviousPage = () => {
-        if (currentPage > 1) setCurrentPage(currentPage - 1);
-    };
-    // ✅ Handle Status Update
     const handleStatusChange = async (bookingId, newStatus) => {
         try {
             await axios.put(
-                `${import.meta.env.VITE_APP_API_URL}/api/admin/bookings/${bookingId}/status`, // Fixed route
+                `http://localhost:8000/api/admin/bookings/${bookingId}/status`,
                 { status: newStatus },
                 {
                     headers: { Authorization: `Bearer ${localStorage.getItem("adminToken")}` },
                 }
             );
 
-            setBookings((prevBookings) =>
-                prevBookings.map((booking) =>
-                    booking.bookingId === bookingId ? { ...booking, status: newStatus } : booking
-                )
-            );
+            message.success(`Booking status updated to ${newStatus}`);
+            fetchBookings(pagination.current);
         } catch (error) {
-            console.error("Error updating booking status:", error);
+            message.error("Failed to update booking status");
         }
     };
 
-    // ✅ Handle Booking Cancellation
-    const handleCancelBooking = async (bookingId) => {
-        try {
-            await axios.put(
-                `${import.meta.env.VITE_APP_API_URL}/api/admin/bookings/${bookingId}/cancel`, // Fixed cancellation route
-                {},
-                {
-                    headers: { Authorization: `Bearer ${localStorage.getItem("adminToken")}` },
+    const handleCancelBooking = (bookingId) => {
+        confirm({
+            title: 'Are you sure you want to cancel this booking?',
+            icon: <ExclamationCircleOutlined />,
+            content: 'This action cannot be undone.',
+            okText: 'Yes',
+            okType: 'danger',
+            cancelText: 'No',
+            async onOk() {
+                try {
+                    await axios.put(
+                        `http://localhost:8000/api/admin/bookings/${bookingId}/cancel`,
+                        {},
+                        {
+                            headers: { Authorization: `Bearer ${localStorage.getItem("adminToken")}` },
+                        }
+                    );
+
+                    message.success("Booking cancelled successfully");
+                    fetchBookings(pagination.current);
+                } catch (error) {
+                    message.error("Failed to cancel booking");
                 }
-            );
-
-            setBookings((prevBookings) =>
-                prevBookings.map((booking) =>
-                    booking.bookingId === bookingId ? { ...booking, status: "Canceled" } : booking
-                )
-            );
-        } catch (error) {
-            console.error("Error canceling booking:", error);
-        }
+            },
+        });
     };
 
-    // ✅ Handle CSV Download
     const handleDownloadCSV = async () => {
         try {
-            const response = await axios.get(`${import.meta.env.VITE_APP_API_URL}/api/admin/bookings/download`, {
-                headers: { Authorization: `Bearer ${localStorage.getItem("adminToken")}` },
-                responseType: "blob",
-            });
+            const response = await axios.get(
+                "http://localhost:8000/api/admin/bookings/download",
+                {
+                    headers: { Authorization: `Bearer ${localStorage.getItem("adminToken")}` },
+                    responseType: "blob",
+                }
+            );
 
             const url = window.URL.createObjectURL(new Blob([response.data]));
             const link = document.createElement("a");
@@ -94,90 +122,160 @@ const AdminBookings = () => {
             document.body.appendChild(link);
             link.click();
             link.remove();
+            message.success("Report downloaded successfully");
         } catch (error) {
-            console.error("Error downloading CSV:", error);
+            message.error("Failed to download report");
         }
     };
+    // Delete Booking Function
+    const handleDelete = async (bookingId) => {
+        try {
+            await axios.delete(`http://localhost:8000/api/admin/bookings/${bookingId}/delete`);
+            message.success("Booking deleted successfully!");
+            setBookings(bookings.filter((booking) => booking.bookingId !== bookingId));
+        } catch (error) {
+            console.error("Error deleting booking:", error);
+            message.error("Failed to delete booking.");
+        }
+    };
+    const columns = [
+        {
+            title: "Booking ID",
+            dataIndex: "bookingId",
+            key: "bookingId",
+        },
+        {
+            title: "User",
+            dataIndex: ["userId", "name"],
+            key: "userName",
+            render: (name) => name || "N/A",
+        },
+        {
+            title: "Package",
+            dataIndex: ["packageId", "title"],
+            key: "package",
+            render: (title) => title || "N/A",
+        },
+        {
+            title: "Booking Date",
+            dataIndex: "createdAt",
+            key: "createdAt",
+            render: (date) => date ? new Date(date).toLocaleDateString('en-IN', {
+                day: 'numeric',
+                month: 'short',
+                year: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit'
+            }) : "N/A",
+        },
+        {
+            title: "Amount",
+            dataIndex: "amount",
+            key: "amount",
+            render: (amount) => `₹${amount}`,
+        },
+        {
+            title: "Payment Type",
+            dataIndex: "paymentType",
+            key: "paymentType",
+            render: (type) => <Tag color="blue">{type}</Tag>,
+        },
+        {
+            title: "Status",
+            dataIndex: "status",
+            key: "status",
+            render: (status, record) => (
+                <Select
+                    value={status}
+                    onChange={(value) => handleStatusChange(record.bookingId, value)}
+                    style={{ width: 120 }}
+                >
+                    <Select.Option value="Pending">
+                        <Tag color="gold">Pending</Tag>
+                    </Select.Option>
+                    <Select.Option value="Confirmed">
+                        <Tag color="green">Confirmed</Tag>
+                    </Select.Option>
+                    <Select.Option value="Canceled">
+                        <Tag color="red">Canceled</Tag>
+                    </Select.Option>
+                    <Select.Option value="Completed">
+                        <Tag color="blue">Completed</Tag>
+                    </Select.Option>
+                </Select>
+            ),
+            filters: [
+                { text: "Pending", value: "Pending" },
+                { text: "Confirmed", value: "Confirmed" },
+                { text: "Canceled", value: "Canceled" },
+                { text: "Completed", value: "Completed" },
+            ],
+            onFilter: (value, record) => record.status === value,
+        },
+        {
+            title: "Actions",
+            key: "actions",
+            render: (_, record) => (
+                <Space>
+                    <Button
+                        danger
+                        type="primary"
+                        onClick={() => handleCancelBooking(record.bookingId)}
+                        disabled={record.status === "Canceled"}
+                    >
+                        Cancel
+                    </Button>
+                    <Button
+                        danger
+                        type="primary"
+                        onClick={() => handleDelete(record.bookingId)}
+                        disabled={record.status === "Canceled"}
+                    >
+                        Delete
+                    </Button>
+                </Space>
+            ),
+        },
+    ];
 
     return (
-        <div className="p-8">
-            <h1 className="text-2xl font-bold mb-4">Admin Booking Reports</h1>
-
-            {/* ✅ CSV Download Button */}
-            <button
-                className="bg-blue-500 text-white px-4 py-2 rounded mb-4 hover:bg-blue-600"
-                onClick={handleDownloadCSV}
-            >
-                Download CSV
-            </button>
-
-            {loading ? (
-                <p>Loading bookings...</p>
-            ) : (
-                <>
-                    <table className="w-full border-collapse border border-gray-300">
-                        <thead>
-                            <tr className="bg-gray-100">
-                                <th className="border p-2">Booking ID</th>
-                                <th className="border p-2">User</th>
-                                <th className="border p-2">Package</th>
-                                <th className="border p-2">Amount</th>
-                                <th className="border p-2">Payment Type</th>
-                                <th className="border p-2">Status</th>
-                                <th className="border p-2">Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {bookings.map((booking) => (
-                                <tr key={booking._id} className="text-center">
-                                    <td className="border p-2">{booking.bookingId}</td>
-                                    <td className="border p-2">{booking.userId?.name || "N/A"}</td>
-                                    <td className="border p-2">{booking.packageId?.title || "N/A"}</td>
-                                    <td className="border p-2">₹{booking.amount}</td>
-                                    <td className="border p-2">{booking.paymentType}</td>
-                                    <td className="border p-2">
-                                        <select
-                                            className="p-2 border rounded"
-                                            value={booking.status}
-                                            onChange={(e) => handleStatusChange(booking.bookingId, e.target.value)}
-                                        >
-                                            <option value="Pending">Pending</option>
-                                            <option value="Confirmed">Confirmed</option>
-                                            <option value="Canceled">Canceled</option>
-                                            <option value="Completed">Completed</option>
-                                        </select>
-                                    </td>
-                                    <td className="border p-2">
-                                        <button
-                                            className="bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600"
-                                            onClick={() => handleCancelBooking(booking.bookingId)}
-                                        >
-                                            Cancel Booking
-                                        </button>
-                                    </td>
-                                </tr>
-                            ))}
-                        </tbody>
-                    </table>
-                    <div className="mt-4 flex justify-center">
-                        <button
-                            onClick={goToPreviousPage}
-                            disabled={currentPage === 1}
-                            className="bg-gray-500 text-white px-4 py-2 mx-2 rounded disabled:opacity-50"
+        <div className="p-6">
+            <Card>
+                <div className="flex justify-between items-center mb-6">
+                    <Title level={3}>Admin Booking Reports</Title>
+                    <Space>
+                        <Button
+                            type="primary"
+                            icon={<DownloadOutlined />}
+                            onClick={handleDownloadCSV}
                         >
-                            Previous
-                        </button>
-                        <span className="mx-4">Page {currentPage} of {totalPages}</span>
-                        <button
-                            onClick={goToNextPage}
-                            disabled={currentPage === totalPages}
-                            className="bg-gray-500 text-white px-4 py-2 mx-2 rounded disabled:opacity-50"
-                        >
-                            Next
-                        </button>
-                    </div>
-                </>
-            )}
+                            Download Report
+                        </Button>
+                        <Tooltip title="Refresh Data">
+                            <Button
+                                icon={<ReloadOutlined />}
+                                onClick={() => fetchBookings(pagination.current)}
+                            />
+                        </Tooltip>
+                    </Space>
+                </div>
+
+                <Table
+                    columns={columns}
+                    dataSource={bookings}
+                    rowKey="bookingId"
+                    loading={loading}
+                    pagination={{
+                        ...pagination,
+                        onChange: (page, pageSize) => {
+                            fetchBookings(page, pageSize);
+                        },
+                        showSizeChanger: true,
+                        showTotal: (total) => `Total ${total} bookings`,
+                    }}
+                    scroll={{ x: true }}
+                />
+            </Card>
         </div>
     );
 };

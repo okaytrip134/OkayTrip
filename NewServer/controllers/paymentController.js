@@ -10,19 +10,22 @@ const razorpay = new Razorpay({
 });
 
 // **Initiate Payment**
+
+// **Initiate Payment**
+let bookingCounter = 1; // Resets if server restarts
+
 exports.initiatePayment = async (req, res) => {
   try {
-    const { packageId, packageTitle, amount, paymentType } = req.body;
-    const userId = req.user.id;
-    const bookingId = `SB${Date.now()}`;
-
+    const { amount } = req.body;
     if (!amount) {
       return res.status(400).json({ success: false, message: "Amount is required" });
     }
 
-    // ✅ Create Razorpay Order
+    const bookingId = `OKB${String(bookingCounter++).padStart(6, "0")}`;
+    console.log("Generated Booking ID:", bookingId);
+
     const order = await razorpay.orders.create({
-      amount: amount * 100, // Razorpay uses paise
+      amount: amount * 100,
       currency: "INR",
       receipt: bookingId,
       payment_capture: 1,

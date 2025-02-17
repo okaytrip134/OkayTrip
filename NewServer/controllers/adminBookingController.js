@@ -2,44 +2,39 @@ const json2csv = require("json2csv").parse;
 const Booking = require("../models/booking"); // ✅ Import Booking Model
 
 exports.getAllBookings = async (req, res) => {
-    try {
-        const page = parseInt(req.query.page) || 1;
-        const limit = parseInt(req.query.limit) || 7;
-        const search = req.query.search || "";
-        const sort = req.query.sort || "";
-        const skip = (page - 1) * limit;
+  try {
+      const page = parseInt(req.query.page) || 1;
+      const limit = parseInt(req.query.limit) || 7;
+      const search = req.query.search || "";
+      const skip = (page - 1) * limit;
 
-        let query = {};
+      let query = {};
 
-        // ✅ Search by Booking ID, User Name, Package Title
-        if (search) {
-            query = {
-                $or: [
-                    { bookingId: { $regex: search, $options: "i" } },
-                    { "userId.name": { $regex: search, $options: "i" } },
-                    { "packageId.title": { $regex: search, $options: "i" } }
-                ],
-            };
-        }
+      if (search) {
+          query = {
+              $or: [
+                  { bookingId: { $regex: search, $options: "i" } },
+                  { "userId.name": { $regex: search, $options: "i" } },
+                  { "packageId.title": { $regex: search, $options: "i" } }
+              ],
+          };
+      }
 
-        // ✅ Sorting Logic
-        let sortQuery = {};
-        if (sort === "date") sortQuery = { createdAt: -1 };
-        if (sort === "amount") sortQuery = { amount: -1 };
-        if (sort === "user") sortQuery = { "userId.name": 1 };
+      // Always sort by createdAt in descending order first
+      let sortQuery = { createdAt: -1 };
 
-        const totalBookings = await Booking.countDocuments(query);
-        const bookings = await Booking.find(query)
-            .populate("packageId userId")
-            .sort(sortQuery)
-            .skip(skip)
-            .limit(limit);
+      const totalBookings = await Booking.countDocuments(query);
+      const bookings = await Booking.find(query)
+          .populate("packageId userId")
+          .sort(sortQuery)  // This ensures newest bookings come first
+          .skip(skip)
+          .limit(limit);
 
-        res.json({ success: true, bookings, totalPages: Math.ceil(totalBookings / limit) });
-    } catch (error) {
-        console.error("Error fetching bookings:", error);
-        res.status(500).json({ success: false, message: "Failed to fetch bookings" });
-    }
+      res.json({ success: true, bookings, totalPages: Math.ceil(totalBookings / limit) });
+  } catch (error) {
+      console.error("Error fetching bookings:", error);
+      res.status(500).json({ success: false, message: "Failed to fetch bookings" });
+  }
 };
 
 exports.downloadBookingsCSV = async (req, res) => {
@@ -128,3 +123,23 @@ exports.updateBookingStatus = async (req, res) => {
       res.status(500).json({ success: false, message: "Failed to cancel booking" });
     }
   };
+  exports.deleteBooking = async (req, res) => {
+    try {
+      const { bookingId } = req.params;
+  
+      // Check if booking exists
+      const booking = await Booking.findOne({ bookingId });
+      if (!booking) {
+        return res.status(404).json({ success: false, message: "Booking not found" });
+      }
+  
+      // Delete the booking
+      await Booking.deleteOne({ bookingId });
+  
+      res.json({ success: true, message: "Booking deleted successfully" });
+    } catch (error) {
+      console.error("Error deleting booking:", error);
+      res.status(500).json({ success: false, message: "Failed to delete booking" });
+    }
+  };
+  
