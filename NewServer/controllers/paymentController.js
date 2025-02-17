@@ -5,11 +5,9 @@ require("dotenv").config(); // Load environment variables
 
 // ✅ Initialize Razorpay with Correct API Keys
 const razorpay = new Razorpay({
-  key_id: process.env.RAZORPAY_KEY_ID, 
+  key_id: process.env.RAZORPAY_KEY_ID,
   key_secret: process.env.RAZORPAY_KEY_SECRET,
 });
-
-// **Initiate Payment**
 
 // **Initiate Payment**
 let bookingCounter = 1; // Resets if server restarts
