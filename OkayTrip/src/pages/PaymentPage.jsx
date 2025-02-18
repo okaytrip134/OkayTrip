@@ -3,7 +3,6 @@ import { useLocation, useNavigate } from "react-router-dom";
 import axios from "axios";
 import { toast } from "react-toastify"; // ✅ Import Toastify
 import "react-toastify/dist/ReactToastify.css"; // ✅ Import Toastify Styles
-import { FaCreditCard, FaCheckCircle, FaTimesCircle, FaLock } from "react-icons/fa";
 import logo from "../assets/Logo/Trip ok new 2 black-01.png"; // ✅ Import company logo
 
 const PaymentPage = () => {
@@ -84,7 +83,7 @@ const PaymentPage = () => {
                 paymentId: response.razorpay_payment_id,
                 amount,
                 paymentType,
-                seatsToBook: 1,
+                seatsToBook: 1,  // Ensure seatsToBook is included
               },
               {
                 headers: { Authorization: `Bearer ${userToken}` },
