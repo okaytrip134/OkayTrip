@@ -3,7 +3,8 @@ const {
   getAllBookings, 
   updateBookingStatus, 
   cancelBooking, 
-  downloadBookingsCSV 
+  downloadBookingsCSV,
+  deleteBooking
 } = require("../../controllers/adminBookingController");
 const authMiddleware = require("../../middlewares/authMiddleware");
 
@@ -20,5 +21,6 @@ router.put("/:bookingId/status", authMiddleware, updateBookingStatus);
 
 // ✅ Cancel a booking
 router.put("/:bookingId/cancel", authMiddleware, cancelBooking);
+router.delete("/:bookingId/delete", deleteBooking); // DELETE request
 
 module.exports = router;
