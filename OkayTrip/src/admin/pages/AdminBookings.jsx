@@ -34,7 +34,7 @@ const AdminBookings = () => {
         try {
             setLoading(true);
             const { data } = await axios.get(
-                `http://localhost:8000/api/admin/bookings`,
+                `${import.meta.env.VITE_APP_API_URL}/api/admin/bookings`,
                 {
                     params: {
                         page,
@@ -64,7 +64,7 @@ const AdminBookings = () => {
     const handleStatusChange = async (bookingId, newStatus) => {
         try {
             await axios.put(
-                `http://localhost:8000/api/admin/bookings/${bookingId}/status`,
+                `${import.meta.env.VITE_APP_API_URL}/api/admin/bookings/${bookingId}/status`,
                 { status: newStatus },
                 {
                     headers: { Authorization: `Bearer ${localStorage.getItem("adminToken")}` },
@@ -89,7 +89,7 @@ const AdminBookings = () => {
             async onOk() {
                 try {
                     await axios.put(
-                        `http://localhost:8000/api/admin/bookings/${bookingId}/cancel`,
+                        `${import.meta.env.VITE_APP_API_URL}/api/admin/bookings/${bookingId}/cancel`,
                         {},
                         {
                             headers: { Authorization: `Bearer ${localStorage.getItem("adminToken")}` },
@@ -108,7 +108,7 @@ const AdminBookings = () => {
     const handleDownloadCSV = async () => {
         try {
             const response = await axios.get(
-                "http://localhost:8000/api/admin/bookings/download",
+                `${import.meta.env.VITE_APP_API_URL}/api/admin/bookings/download`,
                 {
                     headers: { Authorization: `Bearer ${localStorage.getItem("adminToken")}` },
                     responseType: "blob",
@@ -130,7 +130,7 @@ const AdminBookings = () => {
     // Delete Booking Function
     const handleDelete = async (bookingId) => {
         try {
-            await axios.delete(`http://localhost:8000/api/admin/bookings/${bookingId}/delete`);
+            await axios.delete(`${import.meta.env.VITE_APP_API_URL}/api/admin/bookings/${bookingId}/delete`);
             message.success("Booking deleted successfully!");
             setBookings(bookings.filter((booking) => booking.bookingId !== bookingId));
         } catch (error) {
