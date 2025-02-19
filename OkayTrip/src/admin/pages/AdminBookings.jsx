@@ -140,6 +140,18 @@ const AdminBookings = () => {
     };
     const columns = [
         {
+            title: "Booking Date",
+            dataIndex: "createdAt",
+            key: "createdAt",
+            render: (date) => date ? new Date(date).toLocaleDateString('en-IN', {
+                day: 'numeric',
+                month: 'short',
+                year: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit'
+            }) : "N/A",
+        },
+        {
             title: "Booking ID",
             dataIndex: "bookingId",
             key: "bookingId",
@@ -155,18 +167,6 @@ const AdminBookings = () => {
             dataIndex: ["packageId", "title"],
             key: "package",
             render: (title) => title || "N/A",
-        },
-        {
-            title: "Booking Date",
-            dataIndex: "createdAt",
-            key: "createdAt",
-            render: (date) => date ? new Date(date).toLocaleDateString('en-IN', {
-                day: 'numeric',
-                month: 'short',
-                year: 'numeric',
-                hour: '2-digit',
-                minute: '2-digit'
-            }) : "N/A",
         },
         {
             title: "Amount",
