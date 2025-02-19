@@ -527,10 +527,10 @@ const PackageDetailsPage = () => {
                         >
                           {/* Left Section: Day Label & Title */}
                           <div className="flex items-center gap-4">
-                            <span className="bg-[#BF500E] w-[60px] text-white text-sm font-semibold px-3 py-1 rounded-full mr-3">
+                            <span className="bg-[#BF500E] w-[70px] text-white text-sm font-semibold px-3 py-1 rounded-full mr-3">
                               DAY {index + 1}
                             </span>
-                            <h4 className="text-lg font-semibold whitespace-nowrap text-gray-800">{day.title}</h4>
+                            <h4 className="text-lg font-semibold text-gray-800">{day.title}</h4>
                           </div>
 
                           {/* Right Section: Dropdown Icon */}
