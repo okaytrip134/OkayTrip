@@ -1,8 +1,24 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
+import { 
+  Form, Input, Select, Button, Upload, InputNumber, 
+  DatePicker, Card, message, Modal, List, Divider
+} from "antd";
+import { 
+  UploadOutlined, DeleteOutlined, PlusOutlined
+} from "@ant-design/icons";
+import moment from "moment";
+
+const { TextArea } = Input;
+const { RangePicker } = DatePicker;
 
 const PackageForm = ({ onClose, fetchPackages, selectedPackage }) => {
+  const [form] = Form.useForm();
   const [categories, setCategories] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [fileList, setFileList] = useState([]);
+  
+  // Form values
   const [formData, setFormData] = useState({
     title: "",
     categoryId: "",
@@ -19,6 +35,8 @@ const PackageForm = ({ onClose, fetchPackages, selectedPackage }) => {
     tripHighlights: [],
     itinerary: [],
   });
+  
+  // Dynamic inputs
   const [newInclusion, setNewInclusion] = useState("");
   const [newExclusion, setNewExclusion] = useState("");
   const [newTripHighlight, setNewTripHighlight] = useState("");
@@ -41,6 +59,7 @@ const PackageForm = ({ onClose, fetchPackages, selectedPackage }) => {
 
     fetchCategories();
 
+    // Initialize form data if editing
     if (selectedPackage) {
       setFormData({
         title: selectedPackage.title,
@@ -53,7 +72,7 @@ const PackageForm = ({ onClose, fetchPackages, selectedPackage }) => {
         startDate: selectedPackage.startDate,
         endDate: selectedPackage.endDate,
         totalSeats: selectedPackage.totalSeats,
-        availableSeats: selectedPackage.availableSeats, // ✅ Now tracking availableSeats 
+        availableSeats: selectedPackage.availableSeats,
         inclusions: selectedPackage.inclusions || [],
         exclusions: selectedPackage.exclusions || [],
         tripHighlights: selectedPackage.tripHighlights || [],
@@ -62,22 +81,29 @@ const PackageForm = ({ onClose, fetchPackages, selectedPackage }) => {
     }
   }, [selectedPackage]);
 
+  // Handle regular input changes
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     if (name === "totalSeats") {
       setFormData({
         ...formData,
         totalSeats: value,
-        availableSeats: value, // ✅ Reset availableSeats to totalSeats
+        availableSeats: value,
       });
     } else {
       setFormData({ ...formData, [name]: value });
     }
   };
-  const handleFileChange = (e) => {
-    setFormData({ ...formData, images: Array.from(e.target.files) });
+
+  // Handle image upload
+  const handleFileChange = ({ fileList }) => {
+    // Store the file objects in formData
+    const files = fileList.map(file => file.originFileObj || file);
+    setFormData({ ...formData, images: files });
+    setFileList(fileList);
   };
 
+  // Handle dynamic list items
   const handleAddToList = (field, value, clearFn) => {
     if (value) {
       setFormData({ ...formData, [field]: [...formData[field], value] });
@@ -90,6 +116,7 @@ const PackageForm = ({ onClose, fetchPackages, selectedPackage }) => {
     setFormData({ ...formData, [field]: updatedList });
   };
 
+  // Handle itinerary items
   const handleAddItinerary = () => {
     if (newItineraryEntry.title && newItineraryEntry.description) {
       setFormData({
@@ -97,7 +124,7 @@ const PackageForm = ({ onClose, fetchPackages, selectedPackage }) => {
         itinerary: [
           ...formData.itinerary,
           {
-            day: `Day ${formData.itinerary.length + 1}`, // Auto-assign day number
+            day: `Day ${formData.itinerary.length + 1}`,
             title: newItineraryEntry.title,
             description: newItineraryEntry.description,
           },
@@ -107,16 +134,36 @@ const PackageForm = ({ onClose, fetchPackages, selectedPackage }) => {
     }
   };
 
-  const [loading, setLoading] = useState(false);
+  // Handle date range
+  const handleDateRangeChange = (dates) => {
+    if (dates) {
+      setFormData({
+        ...formData,
+        startDate: dates[0].format('YYYY-MM-DD'),
+        endDate: dates[1].format('YYYY-MM-DD'),
+      });
+    } else {
+      setFormData({
+        ...formData,
+        startDate: null,
+        endDate: null,
+      });
+    }
+  };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
+  // Form submission
+  const handleSubmit = async () => {
     setLoading(true);
     const packageData = new FormData();
 
+    // Append all form data
     for (let key in formData) {
       if (key === "images") {
-        formData[key].forEach((file) => packageData.append("images", file));
+        formData[key].forEach((file) => {
+          if (file instanceof File) {
+            packageData.append("images", file);
+          }
+        });
       } else if (["inclusions", "exclusions", "tripHighlights", "itinerary"].includes(key)) {
         packageData.append(key, JSON.stringify(formData[key]));
       } else {
@@ -131,243 +178,349 @@ const PackageForm = ({ onClose, fetchPackages, selectedPackage }) => {
           packageData,
           { headers: { Authorization: `Bearer ${adminToken}` } }
         );
+        message.success("Package updated successfully");
       } else {
         await axios.post(
           `${import.meta.env.VITE_APP_API_URL}/api/admin/packages/create`,
           packageData,
           { headers: { Authorization: `Bearer ${adminToken}` } }
         );
+        message.success("Package created successfully");
       }
 
       fetchPackages(); // Refresh the package list
       onClose(); // Close the form modal
-      setFormData({}); // Reset the form
     } catch (error) {
+      message.error("Error saving package");
       console.error("Error saving package:", error);
     } finally {
-      setLoading(false); // Ensure loading is reset
+      setLoading(false);
     }
   };
+
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
       <div className="bg-white rounded-lg shadow-lg w-full max-w-3xl max-h-[90vh] overflow-auto">
-        <div className="p-6">
-          <h2 className="text-2xl font-bold mb-4">{selectedPackage ? "Edit Package" : "Add Package"}</h2>
-          <form onSubmit={handleSubmit}>
+        <Card 
+          title={selectedPackage ? "Edit Package" : "Add Package"}
+          extra={
+            <Button type="text" onClick={onClose} danger>
+              Close
+            </Button>
+          }
+        >
+          <Form layout="vertical" initialValues={formData}>
+            {/* Basic Information */}
+            <Divider orientation="left">Basic Information</Divider>
             <div className="grid grid-cols-1 gap-4">
-              <input
-                type="text"
-                name="title"
-                value={formData.title}
-                onChange={handleInputChange}
-                placeholder="Title"
-                className="border p-2 rounded"
-              />
-              <select
-                name="categoryId"
-                value={formData.categoryId}
-                onChange={handleInputChange}
-                className="border p-2 rounded"
-              >
-                <option value="">Select Category</option>
-                {categories.map((category) => (
-                  <option key={category._id} value={category._id}>
-                    {category.name}
-                  </option>
-                ))}
-              </select>
-              <textarea
-                name="description"
-                value={formData.description}
-                onChange={handleInputChange}
-                placeholder="Description"
-                className="border p-2 rounded"
-              />
-              <input
-                type="file"
-                multiple
-                onChange={handleFileChange}
-                className="border p-2 rounded"
-              />
+              <Form.Item label="Title" required>
+                <Input
+                  name="title"
+                  value={formData.title}
+                  onChange={handleInputChange}
+                  placeholder="Package Title"
+                />
+              </Form.Item>
+              
+              <Form.Item label="Category" required>
+                <Select
+                  name="categoryId"
+                  value={formData.categoryId}
+                  onChange={(value) => setFormData({...formData, categoryId: value})}
+                  placeholder="Select Category"
+                >
+                  {categories.map((category) => (
+                    <Select.Option key={category._id} value={category._id}>
+                      {category.name}
+                    </Select.Option>
+                  ))}
+                </Select>
+              </Form.Item>
+              
+              <Form.Item label="Description" required>
+                <TextArea
+                  name="description"
+                  value={formData.description}
+                  onChange={handleInputChange}
+                  placeholder="Detailed package description"
+                  rows={4}
+                />
+              </Form.Item>
+              
+              <Form.Item label="Images">
+                <Upload
+                  listType="picture-card"
+                  fileList={fileList}
+                  onChange={handleFileChange}
+                  beforeUpload={() => false}
+                  multiple
+                >
+                  <div>
+                    <UploadOutlined />
+                    <div style={{ marginTop: 8 }}>Upload</div>
+                  </div>
+                </Upload>
+              </Form.Item>
+            </div>
 
-              {/* Price & Duration */}
-              <div className="grid grid-cols-2 gap-4">
-                <input
-                  type="number"
+            {/* Pricing & Duration */}
+            <Divider orientation="left">Pricing & Duration</Divider>
+            <div className="grid grid-cols-2 gap-4">
+              <Form.Item label="Regular Price" required>
+                <InputNumber
                   name="realPrice"
                   value={formData.realPrice}
-                  onChange={handleInputChange}
-                  placeholder="Real Price"
-                  className="border p-2 rounded"
+                  onChange={(value) => setFormData({...formData, realPrice: value})}
+                  placeholder="Regular Price"
+                  formatter={value => `$ ${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')}
+                  parser={value => value.replace(/\$\s?|(,*)/g, '')}
+                  style={{ width: '100%' }}
                 />
-                <input
-                  type="number"
+              </Form.Item>
+              
+              <Form.Item label="Discounted Price">
+                <InputNumber
                   name="discountedPrice"
                   value={formData.discountedPrice}
-                  onChange={handleInputChange}
+                  onChange={(value) => setFormData({...formData, discountedPrice: value})}
                   placeholder="Discounted Price"
-                  className="border p-2 rounded"
+                  formatter={value => `$ ${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')}
+                  parser={value => value.replace(/\$\s?|(,*)/g, '')}
+                  style={{ width: '100%' }}
                 />
-              </div>
+              </Form.Item>
+            </div>
 
-              <input
-                type="text"
+            <Form.Item label="Duration" required>
+              <Input
                 name="duration"
                 value={formData.duration}
                 onChange={handleInputChange}
                 placeholder="E.g., 5 days & 4 nights"
-                className="border p-2 rounded"
               />
+            </Form.Item>
 
-              {/* Dates & Seats */}
-              <div className="grid grid-cols-2 gap-4">
-                <input
-                  type="date"
-                  name="startDate"
-                  value={formData.startDate}
-                  onChange={handleInputChange}
-                  className="border p-2 rounded"
-                />
-                <input
-                  type="date"
-                  name="endDate"
-                  value={formData.endDate}
-                  onChange={handleInputChange}
-                  className="border p-2 rounded"
-                />
-              </div>
-              {/* Total Seats (Fixed) & Available Seats */}
-              <div className="grid grid-cols-2 gap-4">
-                <input
-                  type="number"
+            <Form.Item label="Trip Dates" required>
+              <RangePicker
+                style={{ width: '100%' }}
+                value={formData.startDate && formData.endDate ? [
+                  moment(formData.startDate), 
+                  moment(formData.endDate)
+                ] : null}
+                onChange={handleDateRangeChange}
+              />
+            </Form.Item>
+
+            <div className="grid grid-cols-2 gap-4">
+              <Form.Item label="Total Seats" required>
+                <InputNumber
                   name="totalSeats"
                   value={formData.totalSeats}
-                  onChange={handleInputChange}
+                  onChange={(value) => setFormData({
+                    ...formData, 
+                    totalSeats: value,
+                    availableSeats: value
+                  })}
                   placeholder="Total Seats (Fixed)"
-                  className="border p-2 rounded"
+                  style={{ width: '100%' }}
                 />
-                <input
-                  type="number"
-                  name="availableSeats"
+              </Form.Item>
+              
+              <Form.Item label="Available Seats">
+                <InputNumber
                   value={formData.availableSeats}
-                  readOnly // ✅ Cannot be changed manually, only updated via bookings
+                  disabled
                   placeholder="Available Seats"
-                  className="border p-2 rounded bg-gray-100"
+                  style={{ width: '100%', backgroundColor: '#f5f5f5' }}
                 />
+              </Form.Item>
+            </div>
+
+            {/* Dynamic Fields */}
+            <Divider orientation="left">Package Details</Divider>
+            
+            {/* Inclusions */}
+            <Form.Item label="Inclusions">
+              <div className="mb-2 flex gap-2">
+                <Input
+                  value={newInclusion}
+                  onChange={(e) => setNewInclusion(e.target.value)}
+                  placeholder="Add an inclusion"
+                  style={{ flex: 1 }}
+                />
+                <Button 
+                  type="primary"
+                  onClick={() => handleAddToList("inclusions", newInclusion, setNewInclusion)}
+                  icon={<PlusOutlined />}
+                >
+                  Add
+                </Button>
               </div>
+              <List
+                size="small"
+                bordered
+                dataSource={formData.inclusions}
+                renderItem={(item, index) => (
+                  <List.Item
+                    actions={[
+                      <Button 
+                        type="text" 
+                        danger
+                        icon={<DeleteOutlined />} 
+                        onClick={() => handleRemoveFromList("inclusions", index)}
+                      />
+                    ]}
+                  >
+                    {item}
+                  </List.Item>
+                )}
+              />
+            </Form.Item>
+            
+            {/* Exclusions */}
+            <Form.Item label="Exclusions">
+              <div className="mb-2 flex gap-2">
+                <Input
+                  value={newExclusion}
+                  onChange={(e) => setNewExclusion(e.target.value)}
+                  placeholder="Add an exclusion"
+                  style={{ flex: 1 }}
+                />
+                <Button 
+                  type="primary"
+                  onClick={() => handleAddToList("exclusions", newExclusion, setNewExclusion)}
+                  icon={<PlusOutlined />}
+                >
+                  Add
+                </Button>
+              </div>
+              <List
+                size="small"
+                bordered
+                dataSource={formData.exclusions}
+                renderItem={(item, index) => (
+                  <List.Item
+                    actions={[
+                      <Button 
+                        type="text" 
+                        danger
+                        icon={<DeleteOutlined />} 
+                        onClick={() => handleRemoveFromList("exclusions", index)}
+                      />
+                    ]}
+                  >
+                    {item}
+                  </List.Item>
+                )}
+              />
+            </Form.Item>
+            
+            {/* Trip Highlights */}
+            <Form.Item label="Trip Highlights">
+              <div className="mb-2 flex gap-2">
+                <Input
+                  value={newTripHighlight}
+                  onChange={(e) => setNewTripHighlight(e.target.value)}
+                  placeholder="Add a trip highlight"
+                  style={{ flex: 1 }}
+                />
+                <Button 
+                  type="primary"
+                  onClick={() => handleAddToList("tripHighlights", newTripHighlight, setNewTripHighlight)}
+                  icon={<PlusOutlined />}
+                >
+                  Add
+                </Button>
+              </div>
+              <List
+                size="small"
+                bordered
+                dataSource={formData.tripHighlights}
+                renderItem={(item, index) => (
+                  <List.Item
+                    actions={[
+                      <Button 
+                        type="text" 
+                        danger
+                        icon={<DeleteOutlined />} 
+                        onClick={() => handleRemoveFromList("tripHighlights", index)}
+                      />
+                    ]}
+                  >
+                    {item}
+                  </List.Item>
+                )}
+              />
+            </Form.Item>
 
-              {/* Dynamic Fields */}
-              {[
-                { name: "inclusions", placeholder: "Add an inclusion", value: newInclusion, setValue: setNewInclusion },
-                { name: "exclusions", placeholder: "Add an exclusion", value: newExclusion, setValue: setNewExclusion },
-                {
-                  name: "tripHighlights",
-                  placeholder: "Add a trip highlight",
-                  value: newTripHighlight,
-                  setValue: setNewTripHighlight,
-                },
-              ].map((field) => (
-                <div key={field.name}>
-                  <div className="flex space-x-2">
-                    <input
-                      type="text"
-                      value={field.value}
-                      onChange={(e) => field.setValue(e.target.value)}
-                      placeholder={field.placeholder}
-                      className="border p-2 rounded flex-grow"
-                    />
-                    <button
-                      type="button"
-                      onClick={() => handleAddToList(field.name, field.value, field.setValue)}
-                      className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
-                    >
-                      Add
-                    </button>
-                  </div>
-                  <ul className="list-disc pl-5">
-                    {formData[field.name].map((item, index) => (
-                      <li key={index} className="flex justify-between items-center">
-                        {item}
-                        <button
-                          type="button"
-                          onClick={() => handleRemoveFromList(field.name, index)}
-                          className="text-red-500 hover:underline"
-                        >
-                          Remove
-                        </button>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              ))}
-
-              {/* Itinerary */}
-              <div>
-                <h3 className="text-lg font-bold">Itinerary</h3>
-                <div className="flex space-x-2 mb-2">
-                  <input
-                    type="text"
+            {/* Itinerary */}
+            <Form.Item label="Itinerary">
+              <div className="mb-2">
+                <div className="mb-2">
+                  <Input
                     placeholder="Title (e.g., Visit Burj Khalifa)"
                     value={newItineraryEntry.title}
                     onChange={(e) =>
                       setNewItineraryEntry({ ...newItineraryEntry, title: e.target.value })
                     }
-                    className="border p-2 rounded flex-grow"
+                    className="mb-2"
                   />
-                  <input
-                    type="text"
+                  <Input
                     placeholder="Description"
                     value={newItineraryEntry.description}
                     onChange={(e) =>
                       setNewItineraryEntry({ ...newItineraryEntry, description: e.target.value })
                     }
-                    className="border p-2 rounded flex-grow"
+                    className="mb-2"
                   />
-                  <button
-                    type="button"
+                  <Button
+                    type="primary"
                     onClick={handleAddItinerary}
-                    className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
+                    icon={<PlusOutlined />}
                   >
-                    Add
-                  </button>
+                    Add to Itinerary
+                  </Button>
                 </div>
-                <ul className="list-disc pl-5">
-                  {formData.itinerary.map((item, index) => (
-                    <li key={index} className="flex justify-between items-center">
-                      <span>
+                <List
+                  size="small"
+                  bordered
+                  dataSource={formData.itinerary}
+                  renderItem={(item, index) => (
+                    <List.Item
+                      actions={[
+                        <Button 
+                          type="text" 
+                          danger
+                          icon={<DeleteOutlined />} 
+                          onClick={() => handleRemoveFromList("itinerary", index)}
+                        />
+                      ]}
+                    >
+                      <div>
                         <strong>{item.day}:</strong> {item.title} - {item.description}
-                      </span>
-                      <button
-                        type="button"
-                        onClick={() => handleRemoveFromList("itinerary", index)}
-                        className="text-red-500 hover:underline"
-                      >
-                        Remove
-                      </button>
-                    </li>
-                  ))}
-                </ul>
+                      </div>
+                    </List.Item>
+                  )}
+                />
               </div>
-            </div>
-
+            </Form.Item>
+            
+            {/* Form Actions */}
             <div className="mt-4 flex justify-end space-x-4">
-              <button
-                type="button"
-                onClick={onClose}
-                className="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600"
-              >
+              <Button onClick={onClose}>
                 Cancel
-              </button>
-              <button
-                type="submit"
-                className={`bg-orange-500 text-white px-4 py-2 rounded ${loading ? "opacity-50" : "hover:bg-orange-600"}`}
-                disabled={loading}
+              </Button>
+              <Button
+                type="primary"
+                onClick={handleSubmit}
+                loading={loading}
+                style={{ backgroundColor: '#f59e0b' }}
               >
                 {loading ? "Saving..." : "Save"}
-              </button>
+              </Button>
             </div>
-          </form>
-        </div>
+          </Form>
+        </Card>
       </div>
     </div>
   );
