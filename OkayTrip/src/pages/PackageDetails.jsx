@@ -491,7 +491,7 @@ const PackageDetailsPage = () => {
                           />
 
                           {/* ✅ Slide Number */}
-                          <div className="absolute bottom-3 right-3 bg-black bg-opacity-50 text-white px-3 py-1 rounded-full text-sm">
+                          <div className="absolute bottom-3 right-3  bg-black bg-opacity-50 text-white px-3 py-1 rounded-full text-sm">
                             {index + 1}/{packageData.images.length}
                           </div>
                         </div>
@@ -526,11 +526,11 @@ const PackageDetailsPage = () => {
                           onClick={() => toggleDropdown(index)}
                         >
                           {/* Left Section: Day Label & Title */}
-                          <div className="flex items-center">
-                            <span className="bg-[#BF500E] text-white text-sm font-semibold px-3 py-1 rounded-full mr-3">
+                          <div className="flex items-center gap-4">
+                            <span className="bg-[#BF500E] w-[60px] text-white text-sm font-semibold px-3 py-1 rounded-full mr-3">
                               DAY {index + 1}
                             </span>
-                            <h4 className="text-lg font-semibold text-gray-800">{day.title}</h4>
+                            <h4 className="text-lg font-semibold whitespace-nowrap text-gray-800">{day.title}</h4>
                           </div>
 
                           {/* Right Section: Dropdown Icon */}
