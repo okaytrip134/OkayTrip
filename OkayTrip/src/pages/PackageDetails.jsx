@@ -231,7 +231,7 @@ const PackageDetailsPage = () => {
                   transition: "all 0.3s ease-in-out"
                 }}
               >
-                <div className="productEnquiryform_wrapper px-[5px] py-[15px] border border-[#b3afaf] rounded-lg mt-[10px] max-w-[360px] min-w-[240px]">
+                <div className="productEnquiryform_wrapper px-[5px] py-[15px] border border-[#b3afaf] rounded-lg mt-[10px] max-w-[290px] md:max-w-[360px] min-w-[240px]">
                   <div className="LeadForm_infoBOx px-3">
                     <div className="LeadFormProductName text-[#515151] text-[12px] font-bold truncate">
                       {packageData.title}
@@ -672,7 +672,7 @@ const PackageDetailsPage = () => {
                   transition: "all 0.3s ease-in-out"
                 }}
               >
-                <div className="productEnquiryform_wrapper px-[5px] py-[15px] border border-[#e0e0e0] rounded-lg mt-[10px] max-w-[368px] min-w-[340px] min-h-[500px]">
+                <div className="productEnquiryform_wrapper px-[5px] py-[15px] border border-[#e0e0e0] rounded-lg mt-[10px] max-w-[390px] min-w-[340px] min-h-[500px]">
                   <div className="LeadForm_infoBOx"
                     style={{
                       display: 'flex',
