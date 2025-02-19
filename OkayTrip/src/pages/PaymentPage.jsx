@@ -4,6 +4,7 @@ import axios from "axios";
 import { toast } from "react-toastify"; // ✅ Import Toastify
 import "react-toastify/dist/ReactToastify.css"; // ✅ Import Toastify Styles
 import logo from "../assets/Logo/Trip ok new 2 black-01.png"; // ✅ Import company logo
+import { FaLock } from "react-icons/fa";
 
 const PaymentPage = () => {
   const location = useLocation();
