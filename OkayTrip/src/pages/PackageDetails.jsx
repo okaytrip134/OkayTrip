@@ -68,7 +68,7 @@ const PackageDetailsPage = () => {
   }
 
   return (
-    <div className=" lg:px-32 py-8 min-h-screen max-w-[1400px] mx-auto">
+    <div className=" lg:px-16 py-8 min-h-screen max-w-[1400px] mx-auto">
       {/* Main Content */}
       <div className="bg-white rounded p-6 mb-8">
         {/* Images */}
