@@ -12,7 +12,8 @@ import moment from "moment";
 const { TextArea } = Input;
 const { RangePicker } = DatePicker;
 
-const PackageForm = ({ onClose, fetchPackages, selectedPackage }) => {
+// Updated props to match new PackageManager implementation
+const PackageForm = ({ visible, onClose, onSuccess, selectedPackage }) => {
   const [form] = Form.useForm();
   const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -63,7 +64,7 @@ const PackageForm = ({ onClose, fetchPackages, selectedPackage }) => {
     if (selectedPackage) {
       setFormData({
         title: selectedPackage.title,
-        categoryId: selectedPackage.categoryId,
+        categoryId: selectedPackage.categoryId?._id || selectedPackage.categoryId,
         description: selectedPackage.description,
         images: selectedPackage.images || [],
         realPrice: selectedPackage.realPrice,
@@ -78,6 +79,17 @@ const PackageForm = ({ onClose, fetchPackages, selectedPackage }) => {
         tripHighlights: selectedPackage.tripHighlights || [],
         itinerary: selectedPackage.itinerary || [],
       });
+      
+      // Handle image list display for existing packages
+      if (selectedPackage.images && selectedPackage.images.length > 0) {
+        const initialFileList = selectedPackage.images.map((url, index) => ({
+          uid: `-${index}`,
+          name: `image-${index}.jpg`,
+          status: 'done',
+          url: url,
+        }));
+        setFileList(initialFileList);
+      }
     }
   }, [selectedPackage]);
 
@@ -188,8 +200,10 @@ const PackageForm = ({ onClose, fetchPackages, selectedPackage }) => {
         message.success("Package created successfully");
       }
 
-      fetchPackages(); // Refresh the package list
-      onClose(); // Close the form modal
+      // Call onSuccess instead of fetchPackages
+      if (onSuccess) {
+        onSuccess();
+      }
     } catch (error) {
       message.error("Error saving package");
       console.error("Error saving package:", error);
@@ -197,6 +211,9 @@ const PackageForm = ({ onClose, fetchPackages, selectedPackage }) => {
       setLoading(false);
     }
   };
+
+  // If not visible, don't render
+  if (!visible) return null;
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
@@ -272,8 +289,8 @@ const PackageForm = ({ onClose, fetchPackages, selectedPackage }) => {
                   value={formData.realPrice}
                   onChange={(value) => setFormData({...formData, realPrice: value})}
                   placeholder="Regular Price"
-                  formatter={value => `$ ${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')}
-                  parser={value => value.replace(/\$\s?|(,*)/g, '')}
+                  formatter={value => `₹ ${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')}
+                  parser={value => value.replace(/₹\s?|(,*)/g, '')}
                   style={{ width: '100%' }}
                 />
               </Form.Item>
@@ -284,8 +301,8 @@ const PackageForm = ({ onClose, fetchPackages, selectedPackage }) => {
                   value={formData.discountedPrice}
                   onChange={(value) => setFormData({...formData, discountedPrice: value})}
                   placeholder="Discounted Price"
-                  formatter={value => `$ ${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')}
-                  parser={value => value.replace(/\$\s?|(,*)/g, '')}
+                  formatter={value => `₹ ${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')}
+                  parser={value => value.replace(/₹\s?|(,*)/g, '')}
                   style={{ width: '100%' }}
                 />
               </Form.Item>
@@ -514,7 +531,6 @@ const PackageForm = ({ onClose, fetchPackages, selectedPackage }) => {
                 type="primary"
                 onClick={handleSubmit}
                 loading={loading}
-                style={{ backgroundColor: '#f59e0b' }}
               >
                 {loading ? "Saving..." : "Save"}
               </Button>
