@@ -50,9 +50,11 @@ const DashboardPage = () => {
       isDropdown: true,
       items: [
         { name: "Banners", icon: <SvgIcon src={packages} alt="Management" />, path: "/admin/dashboard/banner-manager" },
+        { name: "Reviews", icon: <SvgIcon src={packages} alt="Management" />, path: "/admin/dashboard/Reviews-Manager" },
+        { name: "Coupon-Report", icon: <SvgIcon src={packages} alt="Management" />, path: "/admin/dashboard/Coupon-Report" },
+        { name: "Top Sale Bar", icon: <BarChartOutlined />, path: "/admin/dashboard/top-sale-bar" },
       ]
     },
-    { name: "Top Sale Bar", icon: <BarChartOutlined />, path: "/admin/dashboard/top-sale-bar" },
     { name: "Categories", icon: <SvgIcon src={categories} alt="Management" />, path: "/admin/dashboard/Categories" },
     { name: "Packages", icon: <SvgIcon src={management} alt="Management" />, path: "/admin/dashboard/Packages" },
     { name: "Booking Report", icon: <SvgIcon src={report} alt="Management" />, path: "/admin/dashboard/booking-report" },

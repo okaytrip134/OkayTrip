@@ -1,56 +1,104 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
+import {
+  Table,
+  Button,
+  Space,
+  Tag,
+  Card,
+  Typography,
+  Row,
+  Col,
+  Dropdown,
+  Radio,
+  Spin,
+  message,
+  Popconfirm,
+  Menu,
+  Badge
+} from "antd";
+import {
+  PlusOutlined,
+  EditOutlined,
+  DeleteOutlined,
+  MoreOutlined,
+  EyeOutlined,
+  CheckCircleOutlined,
+  StopOutlined
+} from "@ant-design/icons";
 import PackageForm from "../components/PackageForm";
+import { useMediaQuery } from "react-responsive";
+
+const { Title } = Typography;
 
 const PackageManager = () => {
   const [packages, setPackages] = useState([]);
-  const [filteredPackages, setFilteredPackages] = useState([]); // Safeguard: always initialized as an array
   const [filter, setFilter] = useState("all"); // all | active | inactive
   const [showForm, setShowForm] = useState(false);
   const [selectedPackage, setSelectedPackage] = useState(null);
-  const [currentPage, setCurrentPage] = useState(1);
-  const [totalPackages, setTotalPackages] = useState(0);
-  const [limit] = useState(6); // Packages per page
-  const [loading, setLoading] = useState(true); // Add loading state
+  const [loading, setLoading] = useState(true);
+  const [pagination, setPagination] = useState({
+    current: 1,
+    pageSize: 6,
+    total: 0,
+  });
   const adminToken = localStorage.getItem("adminToken");
+  const isMobile = useMediaQuery({ maxWidth: 768 });
 
   // Fetch packages
-  const fetchPackages = async (page = 1) => {
-    setLoading(true); // Start loading
+  const fetchPackages = async (params = {}) => {
+    setLoading(true);
     try {
+      const { page = pagination.current, pageSize = pagination.pageSize } = params;
+      
       const { data } = await axios.get(`${import.meta.env.VITE_APP_API_URL}/api/admin/packages/`, {
         headers: { Authorization: `Bearer ${adminToken}` },
-        params: { page, limit },
+        params: { page, limit: pageSize },
       });
-      setPackages(data.packages || []); // Always ensure data is an array
-      setFilteredPackages(data.packages || []); // Initially show all packages
-      setTotalPackages(data.totalPackages || 0);
-      setLoading(false); // End loading
+      
+      setPackages(data.packages || []);
+      setPagination({
+        ...pagination,
+        current: page,
+        total: data.totalPackages || 0,
+      });
+      setLoading(false);
     } catch (error) {
       console.error("Error fetching packages:", error);
-      setLoading(false); // End loading on error
+      message.error("Failed to load packages");
+      setLoading(false);
     }
+  };
+
+  useEffect(() => {
+    fetchPackages();
+  }, []);
+
+  // Handle table change (pagination, filters, sorting)
+  const handleTableChange = (paginationData) => {
+    fetchPackages({
+      page: paginationData.current,
+      pageSize: paginationData.pageSize,
+    });
   };
 
   // Filter packages by status
-  const filterPackages = (status) => {
-    setFilter(status);
-    if (status === "all") {
-      setFilteredPackages(packages);
-    } else {
-      const isActive = status === "active";
-      setFilteredPackages(packages.filter((pkg) => pkg.isActive === isActive));
-    }
+  const handleFilterChange = (e) => {
+    const value = e.target.value;
+    setFilter(value);
   };
 
+  // Delete package
   const handleDelete = async (id) => {
     try {
       await axios.delete(`${import.meta.env.VITE_APP_API_URL}/api/admin/packages/${id}`, {
         headers: { Authorization: `Bearer ${adminToken}` },
       });
-      fetchPackages(currentPage); // Refresh the package list
+      message.success("Package deleted successfully");
+      fetchPackages({ page: pagination.current });
     } catch (error) {
       console.error("Error deleting package:", error);
+      message.error("Failed to delete package");
     }
   };
 
@@ -64,162 +112,319 @@ const PackageManager = () => {
           headers: { Authorization: `Bearer ${adminToken}` },
         }
       );
-      fetchPackages(currentPage); // Refresh the package list
+      message.success(`Package ${isActive ? "deactivated" : "activated"} successfully`);
+      fetchPackages({ page: pagination.current });
     } catch (error) {
       console.error("Error toggling package status:", error);
+      message.error("Failed to update package status");
     }
   };
 
-  useEffect(() => {
-    fetchPackages(currentPage);
-  }, [currentPage]);
+  // Filter data based on selected filter
+  const getFilteredData = () => {
+    if (filter === "all") return packages;
+    const isActive = filter === "active";
+    return packages.filter((pkg) => pkg.isActive === isActive);
+  };
 
-  const totalPages = Math.ceil(totalPackages / limit);
+  const columns = [
+    {
+      title: "Package",
+      dataIndex: "title",
+      key: "title",
+      render: (text, record) => (
+        <Space direction="vertical" size={0}>
+          <Typography.Text strong>{text}</Typography.Text>
+          <Typography.Text type="secondary" style={{ fontSize: '12px' }}>
+            {record.categoryId?.name || "Uncategorized"}
+          </Typography.Text>
+        </Space>
+      ),
+      fixed: isMobile ? 'left' : false,
+    },
+    {
+      title: "Price",
+      dataIndex: "discountedPrice",
+      key: "price",
+      render: (price) => `₹${price}`,
+      responsive: ['md'],
+    },
+    {
+      title: "Seats",
+      dataIndex: "totalSeats",
+      key: "seats",
+      render: (totalSeats, record) => (
+        <Space>
+          <Badge status={record.availableSeats > 0 ? "success" : "error"} />
+          {record.availableSeats}/{totalSeats}
+        </Space>
+      ),
+      responsive: ['md'],
+    },
+    {
+      title: "Duration",
+      dataIndex: "duration",
+      key: "duration",
+      responsive: ['lg'],
+    },
+    {
+      title: "Dates",
+      key: "dates",
+      render: (_, record) => (
+        <Space direction="vertical" size={0}>
+          <Typography.Text style={{ fontSize: '12px' }}>
+            Start: {new Date(record.startDate).toLocaleDateString()}
+          </Typography.Text>
+          <Typography.Text style={{ fontSize: '12px' }}>
+            End: {new Date(record.endDate).toLocaleDateString()}
+          </Typography.Text>
+        </Space>
+      ),
+      responsive: ['lg'],
+    },
+    {
+      title: "Status",
+      key: "status",
+      dataIndex: "isActive",
+      render: (isActive) => (
+        <Tag color={isActive ? "success" : "error"}>
+          {isActive ? "Active" : "Inactive"}
+        </Tag>
+      ),
+    },
+    {
+      title: "Actions",
+      key: "actions",
+      fixed: isMobile ? 'right' : false,
+      render: (_, record) => {
+        const menu = (
+          <Menu>
+            <Menu.Item 
+              key="edit" 
+              icon={<EditOutlined />}
+              onClick={() => {
+                setSelectedPackage(record);
+                setShowForm(true);
+              }}
+            >
+              Edit
+            </Menu.Item>
+            <Menu.Item 
+              key="status" 
+              icon={record.isActive ? <StopOutlined /> : <CheckCircleOutlined />}
+              onClick={() => handleToggleStatus(record._id, record.isActive)}
+            >
+              {record.isActive ? "Deactivate" : "Activate"}
+            </Menu.Item>
+            <Menu.Divider />
+            <Menu.Item 
+              key="delete" 
+              danger 
+              icon={<DeleteOutlined />}
+            >
+              <Popconfirm
+                title="Are you sure you want to delete this package?"
+                onConfirm={() => handleDelete(record._id)}
+                okText="Yes"
+                cancelText="No"
+              >
+                Delete
+              </Popconfirm>
+            </Menu.Item>
+          </Menu>
+        );
 
-  return (
-    <div className="p-6 bg-gray-50 min-h-screen">
-      <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold">Manage Packages</h1>
-        <button
-          onClick={() => {
-            setShowForm(true);
-            setSelectedPackage(null);
-          }}
-          className="bg-orange-500 text-white px-4 py-2 rounded hover:bg-orange-600"
-        >
-          Add Package
-        </button>
-      </div>
+        return isMobile ? (
+          <Dropdown overlay={menu} trigger={["click"]}>
+            <Button type="text" icon={<MoreOutlined />} />
+          </Dropdown>
+        ) : (
+          <Space>
+            <Button 
+              type="primary" 
+              ghost
+              icon={<EditOutlined />} 
+              size="small"
+              onClick={() => {
+                setSelectedPackage(record);
+                setShowForm(true);
+              }}
+            >
+              Edit
+            </Button>
+            <Button
+              type={record.isActive ? "danger" : "success"}
+              ghost
+              size="small"
+              icon={record.isActive ? <StopOutlined /> : <CheckCircleOutlined />}
+              onClick={() => handleToggleStatus(record._id, record.isActive)}
+            >
+              {record.isActive ? "Deactivate" : "Activate"}
+            </Button>
+            <Popconfirm
+              title="Are you sure you want to delete this package?"
+              onConfirm={() => handleDelete(record._id)}
+              okText="Yes"
+              cancelText="No"
+            >
+              <Button danger size="small" icon={<DeleteOutlined />}>
+                Delete
+              </Button>
+            </Popconfirm>
+          </Space>
+        );
+      },
+    },
+  ];
 
-      {/* Filter Buttons */}
-      <div className="mb-6 flex space-x-4">
-        <button
-          onClick={() => filterPackages("all")}
-          className={`px-4 py-2 rounded ${filter === "all" ? "bg-blue-500 text-white" : "bg-gray-200 text-gray-800"
-            }`}
-        >
-          All
-        </button>
-        <button
-          onClick={() => filterPackages("active")}
-          className={`px-4 py-2 rounded ${filter === "active" ? "bg-blue-500 text-white" : "bg-gray-200 text-gray-800"
-            }`}
-        >
-          Active
-        </button>
-        <button
-          onClick={() => filterPackages("inactive")}
-          className={`px-4 py-2 rounded ${filter === "inactive" ? "bg-blue-500 text-white" : "bg-gray-200 text-gray-800"
-            }`}
-        >
-          Inactive
-        </button>
-      </div>
-
-      {loading ? (
-        <p>Loading packages...</p>
-      ) : (
-        <div className="bg-white rounded shadow-md p-4">
-          <table className="w-full table-auto border-collapse">
-            <thead>
-              <tr className="bg-gray-100">
-                <th className="border p-2">Title</th>
-                <th className="border p-2">Category</th>
-                <th className="border p-2">Price</th>
-                <th className="border p-2">Total Seats</th>
-                <th className="border p-2">Available Seats</th>
-                <th className="border p-2">Duration</th>
-                <th className="border p-2">Start Date</th>
-                <th className="border p-2">End Date</th>
-                <th className="border p-2">Status</th>
-                <th className="border p-2">Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {filteredPackages?.map((pkg) => (
-              <tr key={pkg._id}>
-              <td className="border p-2">{pkg.title}</td>
-              <td className="border p-2">{pkg.categoryId?.name || "Unknown Category"}</td>
-              <td className="border p-2">₹{pkg.discountedPrice}</td>
-              <td className="border p-2">{pkg.totalSeats}</td>
-              <td className="border p-2">
-                <input
-                  type="number"
-                  min="0"
-                  value={pkg.availableSeats}
-                  readOnly
-                  className="w-16 border p-1 rounded text-center"
-                />
-              </td>
-              <td className="border p-2">{pkg.duration}</td>
-              <td className="border p-2">{new Date(pkg.startDate).toLocaleDateString()}</td>
-              <td className="border p-2">{new Date(pkg.endDate).toLocaleDateString()}</td>
-              <td className="border p-2">
-                {pkg.isActive ? (
-                  <span className="text-green-600 font-semibold">Active</span>
-                ) : (
-                  <span className="text-red-600 font-semibold">Inactive</span>
-                )}
-              </td>
-              <td className="border p-2 space-x-2">
-                <button
-                  onClick={() => handleToggleStatus(pkg._id, pkg.isActive)}
-                  className={`px-2 py-1 text-sm font-medium rounded ${
-                    pkg.isActive ? "bg-red-500 text-white" : "bg-green-500 text-white"
-                  }`}
-                >
-                  {pkg.isActive ? "Deactivate" : "Activate"}
-                </button>
-                <button
+  // Mobile card view component
+  const MobileCardView = ({ data }) => (
+    <div className="space-y-4">
+      {data.map((pkg) => (
+        <Card 
+          key={pkg._id} 
+          size="small"
+          className="shadow-sm"
+          extra={
+            <Dropdown overlay={
+              <Menu>
+                <Menu.Item 
+                  key="edit" 
+                  icon={<EditOutlined />}
                   onClick={() => {
                     setSelectedPackage(pkg);
                     setShowForm(true);
                   }}
-                  className="text-blue-500 hover:underline"
                 >
                   Edit
-                </button>
-                <button
-                  onClick={() => handleDelete(pkg._id)}
-                  className="text-red-500 hover:underline"
+                </Menu.Item>
+                <Menu.Item 
+                  key="status" 
+                  icon={pkg.isActive ? <StopOutlined /> : <CheckCircleOutlined />}
+                  onClick={() => handleToggleStatus(pkg._id, pkg.isActive)}
                 >
-                  Delete
-                </button>
-              </td>
-            </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      )}
+                  {pkg.isActive ? "Deactivate" : "Activate"}
+                </Menu.Item>
+                <Menu.Item 
+                  key="delete" 
+                  danger 
+                  icon={<DeleteOutlined />}
+                >
+                  <Popconfirm
+                    title="Are you sure you want to delete this package?"
+                    onConfirm={() => handleDelete(pkg._id)}
+                    okText="Yes"
+                    cancelText="No"
+                  >
+                    Delete
+                  </Popconfirm>
+                </Menu.Item>
+              </Menu>
+            } trigger={["click"]}>
+              <Button type="text" icon={<MoreOutlined />} />
+            </Dropdown>
+          }
+          title={
+            <Space align="center">
+              <Typography.Text strong>{pkg.title}</Typography.Text>
+              <Tag color={pkg.isActive ? "success" : "error"}>
+                {pkg.isActive ? "Active" : "Inactive"}
+              </Tag>
+            </Space>
+          }
+        >
+          <Row gutter={[8, 8]}>
+            <Col span={12}>
+              <Typography.Text type="secondary">Category:</Typography.Text>
+              <div>{pkg.categoryId?.name || "Uncategorized"}</div>
+            </Col>
+            <Col span={12}>
+              <Typography.Text type="secondary">Price:</Typography.Text>
+              <div>₹{pkg.discountedPrice}</div>
+            </Col>
+            <Col span={12}>
+              <Typography.Text type="secondary">Seats:</Typography.Text>
+              <div>{pkg.availableSeats}/{pkg.totalSeats}</div>
+            </Col>
+            <Col span={12}>
+              <Typography.Text type="secondary">Duration:</Typography.Text>
+              <div>{pkg.duration}</div>
+            </Col>
+            <Col span={24}>
+              <Typography.Text type="secondary">Dates:</Typography.Text>
+              <div>
+                {new Date(pkg.startDate).toLocaleDateString()} - {new Date(pkg.endDate).toLocaleDateString()}
+              </div>
+            </Col>
+          </Row>
+        </Card>
+      ))}
+    </div>
+  );
 
-      {/* Pagination */}
-      {!loading && (
-        <div className="flex justify-between items-center mt-4">
-          <button
-            disabled={currentPage === 1}
-            onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
-            className="bg-gray-200 text-gray-800 px-4 py-2 rounded hover:bg-gray-300 disabled:opacity-50"
-          >
-            Previous
-          </button>
-          <p className="text-sm text-gray-600">
-            Page {currentPage} of {Math.ceil(totalPackages / limit)}
-          </p>
-          <button
-            disabled={currentPage === Math.ceil(totalPackages / limit)}
-            onClick={() => setCurrentPage((prev) => prev + 1)}
-            className="bg-gray-200 text-gray-800 px-4 py-2 rounded hover:bg-gray-300 disabled:opacity-50"
-          >
-            Next
-          </button>
-        </div>
-      )}
+  return (
+    <div className="site-card-wrapper">
+      <Card className="shadow-md">
+        <Row gutter={[16, 16]} align="middle" justify="space-between" style={{ marginBottom: 16 }}>
+          <Col xs={24} sm={12}>
+            <Title level={4} style={{ margin: 0 }}>Manage Packages</Title>
+          </Col>
+          <Col xs={24} sm={12} style={{ textAlign: 'right' }}>
+            <Button
+              type="primary"
+              icon={<PlusOutlined />}
+              onClick={() => {
+                setShowForm(true);
+                setSelectedPackage(null);
+              }}
+            >
+              Add Package
+            </Button>
+          </Col>
+          <Col xs={24}>
+            <Radio.Group 
+              value={filter} 
+              onChange={handleFilterChange}
+              optionType="button" 
+              buttonStyle="solid"
+            >
+              <Radio.Button value="all">All Packages</Radio.Button>
+              <Radio.Button value="active">Active</Radio.Button>
+              <Radio.Button value="inactive">Inactive</Radio.Button>
+            </Radio.Group>
+          </Col>
+        </Row>
+
+        <Spin spinning={loading}>
+          {isMobile ? (
+            <MobileCardView data={getFilteredData()} />
+          ) : (
+            <Table
+              columns={columns}
+              dataSource={getFilteredData()}
+              rowKey="_id"
+              pagination={{
+                ...pagination,
+                showSizeChanger: true,
+                pageSizeOptions: ['6', '10', '20'],
+                showTotal: (total) => `Total ${total} packages`,
+              }}
+              onChange={handleTableChange}
+              scroll={{ x: 'max-content' }}
+              size="middle"
+            />
+          )}
+        </Spin>
+      </Card>
 
       {showForm && (
         <PackageForm
+          visible={showForm}
           onClose={() => setShowForm(false)}
-          fetchPackages={() => fetchPackages(currentPage)}
+          onSuccess={() => {
+            fetchPackages({ page: pagination.current });
+            setShowForm(false);
+          }}
           selectedPackage={selectedPackage}
         />
       )}
