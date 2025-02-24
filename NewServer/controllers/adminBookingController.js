@@ -1,72 +1,141 @@
 const json2csv = require("json2csv").parse;
-const Booking = require("../models/booking"); // ✅ Import Booking Model
+const Booking = require("../models/booking");
 
 exports.getAllBookings = async (req, res) => {
   try {
-      const page = parseInt(req.query.page) || 1;
-      const limit = parseInt(req.query.limit) || 7;
-      const search = req.query.search || "";
-      const skip = (page - 1) * limit;
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 7;
+    const skip = (page - 1) * limit;
 
-      let query = {};
+    // Build query based on filters
+    let query = {};
 
-      if (search) {
-          query = {
-              $or: [
-                  { bookingId: { $regex: search, $options: "i" } },
-                  { "userId.name": { $regex: search, $options: "i" } },
-                  { "packageId.title": { $regex: search, $options: "i" } }
-              ],
-          };
-      }
+    // Search filter
+    if (req.query.search) {
+      query.$or = [
+        { bookingId: { $regex: req.query.search, $options: "i" } },
+        { "userId.name": { $regex: req.query.search, $options: "i" } },
+        { "packageId.title": { $regex: req.query.search, $options: "i" } }
+      ];
+    }
 
-      // Always sort by createdAt in descending order first
-      let sortQuery = { createdAt: -1 };
+    // Date range filter
+    if (req.query.startDate && req.query.endDate) {
+      query.createdAt = {
+        $gte: new Date(req.query.startDate),
+        $lte: new Date(req.query.endDate)
+      };
+    }
 
-      const totalBookings = await Booking.countDocuments(query);
-      const bookings = await Booking.find(query)
-          .populate("packageId userId")
-          .sort(sortQuery)  // This ensures newest bookings come first
-          .skip(skip)
-          .limit(limit);
+    // Status filter
+    if (req.query.status) {
+      query.status = req.query.status;
+    }
 
-      res.json({ success: true, bookings, totalPages: Math.ceil(totalBookings / limit) });
+    // Payment type filter
+    if (req.query.paymentType) {
+      query.paymentType = req.query.paymentType;
+    }
+
+    // Price range filter
+    if (req.query.minPrice || req.query.maxPrice) {
+      query.amount = {};
+      if (req.query.minPrice) query.amount.$gte = parseFloat(req.query.minPrice);
+      if (req.query.maxPrice) query.amount.$lte = parseFloat(req.query.maxPrice);
+    }
+
+    // Always sort by createdAt in descending order
+    const sortQuery = { createdAt: -1 };
+
+    const totalBookings = await Booking.countDocuments(query);
+    const bookings = await Booking.find(query)
+      .populate("packageId userId")
+      .sort(sortQuery)
+      .skip(skip)
+      .limit(limit);
+
+    res.json({ 
+      success: true, 
+      bookings, 
+      totalPages: Math.ceil(totalBookings / limit) 
+    });
   } catch (error) {
-      console.error("Error fetching bookings:", error);
-      res.status(500).json({ success: false, message: "Failed to fetch bookings" });
+    console.error("Error fetching bookings:", error);
+    res.status(500).json({ success: false, message: "Failed to fetch bookings" });
   }
 };
 
 exports.downloadBookingsCSV = async (req, res) => {
   try {
-    // Fetch bookings with related user and package details
-    const bookings = await Booking.find()
-      .populate("userId", "name email phone") // Only include necessary fields
-      .populate("packageId", "title duration realPrice discountedPrice startDate endDate");
+    // Build query based on filters (same as getAllBookings)
+    let query = {};
 
-    // Convert data to CSV format
-    const formattedBookings = bookings.map((booking) => ({
-      Booking_ID: booking.bookingId,
-      Payment_ID: booking.paymentId,
-      User_Name: booking.userId?.name || "N/A",
-      User_Email: booking.userId?.email || "N/A",
-      User_Phone: booking.userId?.phone || "N/A",
-      Package_Title: booking.packageId?.title || "N/A",
-      Package_Duration: booking.packageId?.duration || "N/A",
-      Start_Date: booking.packageId?.startDate ? new Date(booking.packageId.startDate).toLocaleDateString() : "N/A",
-      End_Date: booking.packageId?.endDate ? new Date(booking.packageId.endDate).toLocaleDateString() : "N/A",
-      Amount_Paid: booking.amount,
-      Real_Price: booking.packageId?.realPrice || "N/A",
-      Discounted_Price: booking.packageId?.discountedPrice || "N/A",
-      Payment_Type: booking.paymentType,
-      Status: booking.status,
-      Booking_Date: booking.createdAt ? new Date(booking.createdAt).toLocaleString() : "N/A",
-    }));
+    if (req.query.search) {
+      query.$or = [
+        { bookingId: { $regex: req.query.search, $options: "i" } },
+        { "userId.name": { $regex: req.query.search, $options: "i" } },
+        { "packageId.title": { $regex: req.query.search, $options: "i" } }
+      ];
+    }
+
+    if (req.query.startDate && req.query.endDate) {
+      query.createdAt = {
+        $gte: new Date(req.query.startDate),
+        $lte: new Date(req.query.endDate)
+      };
+    }
+
+    if (req.query.status) {
+      query.status = req.query.status;
+    }
+
+    if (req.query.paymentType) {
+      query.paymentType = req.query.paymentType;
+    }
+
+    if (req.query.minPrice || req.query.maxPrice) {
+      query.amount = {};
+      if (req.query.minPrice) query.amount.$gte = parseFloat(req.query.minPrice);
+      if (req.query.maxPrice) query.amount.$lte = parseFloat(req.query.maxPrice);
+    }
+
+    const bookings = await Booking.find(query)
+      .populate("userId", "name email phone")
+      .populate("packageId", "title duration realPrice discountedPrice startDate endDate")
+      .lean();
+
+    const formattedBookings = bookings.map((booking) => {
+      const travelerDetails = booking.travelers && booking.travelers.length > 0
+        ? booking.travelers.map(traveler => 
+          `${traveler.name} (Age: ${traveler.age}, Gender: ${traveler.gender}, Aadhar: ${traveler.aadhar})`
+        ).join(" | ")
+        : "N/A";
+
+      return {
+        Booking_ID: booking.bookingId,
+        Payment_ID: booking.paymentId,
+        User_Name: booking.userId?.name || "N/A",
+        User_Email: booking.userId?.email || "N/A",
+        User_Phone: booking.userId?.phone || "N/A",
+        Package_Title: booking.packageId?.title || "N/A",
+        Package_Duration: booking.packageId?.duration || "N/A",
+        Start_Date: booking.packageId?.startDate ? new Date(booking.packageId.startDate).toLocaleDateString() : "N/A",
+        End_Date: booking.packageId?.endDate ? new Date(booking.packageId.endDate).toLocaleDateString() : "N/A",
+        Seats_Booked: booking.seatsBooked || 1,
+        Travelers: travelerDetails,
+        Amount_Paid: booking.amount,
+        Real_Price: booking.packageId?.realPrice || "N/A",
+        Discounted_Price: booking.packageId?.discountedPrice || "N/A",
+        Payment_Type: booking.paymentType,
+        Status: booking.status,
+        Booking_Date: booking.createdAt ? new Date(booking.createdAt).toLocaleString() : "N/A",
+      };
+    });
 
     const csv = json2csv(formattedBookings);
 
     res.header("Content-Type", "text/csv");
-    res.attachment("bookings_report.csv");
+    res.attachment("filtered_bookings_report.csv");
     res.send(csv);
   } catch (error) {
     console.error("Error generating CSV:", error);

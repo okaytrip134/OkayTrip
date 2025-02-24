@@ -16,13 +16,12 @@ exports.getBanner = async (req, res) => {
 // Update Banner
 exports.updateBanner = async (req, res) => {
   try {
-    const { title, subtitle } = req.body;
     const imageUrl = req.file ? `/uploads/banners/${req.file.filename}` : undefined;
 
     let banner = await Banner.findOne();
 
     if (!banner) {
-      banner = new Banner({ title, subtitle, imageUrl });
+      banner = new Banner({ imageUrl });
     } else {
       // Delete old image if a new one is uploaded
       if (imageUrl && banner.imageUrl) {
@@ -31,8 +30,6 @@ exports.updateBanner = async (req, res) => {
           fs.unlinkSync(oldImagePath);
         }
       }
-      banner.title = title;
-      banner.subtitle = subtitle;
       if (imageUrl) banner.imageUrl = imageUrl;
     }
 

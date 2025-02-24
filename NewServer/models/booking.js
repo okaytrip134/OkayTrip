@@ -7,6 +7,15 @@ const bookingSchema = new mongoose.Schema({
   paymentId: { type: String, required: true },
   amount: { type: Number, required: true },
   paymentType: { type: String, enum: ["full", "partial", "advance"], required: true },
+  seatsBooked: { type: Number, required: true }, // ✅ Store number of seats booked
+  travelers: [
+    {
+      name: { type: String, required: true },
+      age: { type: Number, required: true },
+      gender: { type: String, required: true },
+      aadhar: { type: String, required: true }
+    }
+  ], // ✅ Store traveler details
   status: { type: String, default: "Confirmed" },
 }, { timestamps: true });
 

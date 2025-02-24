@@ -9,12 +9,25 @@ import { FaLock } from "react-icons/fa";
 const PaymentPage = () => {
   const location = useLocation();
   const navigate = useNavigate();
-  const { packageId, packageTitle, amount, paymentType } = location.state || {};
+
+  // ✅ Destructure state safely and provide fallback values
+  const {
+    packageId = null,
+    packageTitle = "Unknown Package",
+    amount = 0,
+    paymentType = "online",
+  } = location.state || {};
+
+  const safeAmount = parseFloat(amount) || 0; // ✅ Ensure amount is a valid number
+
   const [isScriptLoaded, setIsScriptLoaded] = useState(false);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (!packageId || !amount) {
+    console.log("PaymentPage state:", location.state); // ✅ Debugging log
+
+    if (!packageId || safeAmount <= 0) {
+      toast.error("Invalid payment details. Redirecting...");
       navigate("/"); // Redirect if data is missing
       return;
     }
@@ -45,34 +58,32 @@ const PaymentPage = () => {
       setIsScriptLoaded(true);
       setLoading(false);
     }
-  }, [packageId, amount, navigate]);
+  }, [packageId, safeAmount, navigate]);
 
   const handlePayment = async () => {
     const userToken = localStorage.getItem("userToken");
-
+  
     if (!userToken) {
-      toast.error("Please log in to proceed with payment."); // ✅ Show Toast Notification
+      toast.error("Please log in to proceed with payment.");
       return;
     }
-
-    toast.info("Processing Payment..."); // ✅ Show Toast Notification
-
+  
+    toast.info("Processing Payment...");
+  
     try {
       const { data } = await axios.post(
         `${import.meta.env.VITE_APP_API_URL}/api/payment/payment`,
-        { packageId, packageTitle, amount, paymentType },
-        {
-          headers: { Authorization: `Bearer ${userToken}` },
-        }
+        { packageId, packageTitle, amount: safeAmount, paymentType },
+        { headers: { Authorization: `Bearer ${userToken}` } }
       );
-
+  
       const options = {
         key: import.meta.env.VITE_RAZORPAY_KEY_ID,
         amount: data.amount,
         currency: "INR",
         name: "OkayTrip",
         description: `Booking for ${packageTitle}`,
-        image: logo, // ✅ Use company logo for branding
+        image: logo,
         order_id: data.orderId,
         handler: async function (response) {
           try {
@@ -82,23 +93,23 @@ const PaymentPage = () => {
                 packageId,
                 bookingId: data.bookingId,
                 paymentId: response.razorpay_payment_id,
-                amount,
+                amount: safeAmount,
                 paymentType,
-                seatsToBook: 1,  // Ensure seatsToBook is included
+                seatsToBook: location.state.numSeats, // ✅ Save number of seats
+                travelers: location.state.travelers, // ✅ Save traveler details
               },
               {
                 headers: { Authorization: `Bearer ${userToken}` },
               }
             );
-
-            toast.success("Payment Successful! Redirecting..."); // ✅ Success Toast
-
+  
+            toast.success("Payment Successful! Redirecting...");
             setTimeout(() => {
-              navigate(`/package/${packageId}`); // ✅ Redirect back to package details page
+              navigate(`/package/${packageId}`);
             }, 3000);
           } catch (error) {
             console.error("Error confirming booking:", error);
-            toast.error("Error confirming booking. Please contact support."); // ✅ Error Toast
+            toast.error("Error confirming booking. Please contact support.");
           }
         },
         prefill: {
@@ -110,21 +121,19 @@ const PaymentPage = () => {
           color: "#F37002",
         },
       };
-
+  
       const razorpay = new window.Razorpay(options);
       razorpay.open();
     } catch (error) {
       console.error("Error initiating payment:", error);
-      toast.error("Payment failed. Please try again."); // ✅ Failure Toast
+      toast.error("Payment failed. Please try again.");
     }
   };
-
+  
   return (
     <div className="max-w-3xl mx-auto p-8 min-h-screen flex flex-col justify-center items-center bg-gray-50">
-      {/* ✅ Include Toastify container for notifications */}
       <div className="bg-white shadow-lg rounded-lg p-6 w-full max-w-lg text-center border border-gray-200">
-        
-        {/* ✅ Company Logo */}
+
         <div className="flex justify-center mb-4">
           <img src={logo} alt="Company Logo" className="h-12" />
         </div>
@@ -139,25 +148,22 @@ const PaymentPage = () => {
             <span className="font-semibold text-gray-900">Package:</span> {packageTitle}
           </p>
           <p className="text-gray-700 text-lg mb-1">
-            <span className="font-semibold text-gray-900">Amount:</span> ₹{amount.toFixed(2)}
+            <span className="font-semibold text-gray-900">Amount:</span> ₹{safeAmount.toFixed(2)}
           </p>
           <p className="text-gray-700 text-lg">
             <span className="font-semibold text-gray-900">Payment Type:</span> {paymentType.charAt(0).toUpperCase() + paymentType.slice(1)}
           </p>
         </div>
 
-        {/* ✅ Payment Button */}
         <button
-          className={`mt-6 w-full py-3 rounded-lg text-white font-semibold text-lg transition-all ${
-            isScriptLoaded ? "bg-orange-500 hover:bg-orange-600" : "bg-gray-400"
-          }`}
+          className={`mt-6 w-full py-3 rounded-lg text-white font-semibold text-lg transition-all ${isScriptLoaded ? "bg-orange-500 hover:bg-orange-600" : "bg-gray-400"
+            }`}
           onClick={handlePayment}
           disabled={!isScriptLoaded}
         >
           {isScriptLoaded ? "Proceed to Pay" : "Loading Payment Gateway..."}
         </button>
 
-        {/* ✅ Trust & Security */}
         <p className="text-gray-400 text-sm mt-4">
           <FaLock className="inline-block mr-1" /> Transactions are encrypted and secure.
         </p>

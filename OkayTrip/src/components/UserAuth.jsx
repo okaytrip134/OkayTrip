@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import toast, { Toaster } from "react-hot-toast"; // Import react-hot-toast
+
 import { FaEye, FaEyeSlash } from "react-icons/fa";
+
 const UserAuth = ({ onClose }) => {
-  // const API_URL = "http://localhost:8000";
-  const [isLogin, setIsLogin] = useState(true);
+  const [isLogin, setIsLogin] = useState(true); // Toggle between Login and Signup
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -34,8 +35,8 @@ const UserAuth = ({ onClose }) => {
     fetchBannerData();
   }, []);
 
-  const [showPassword, setShowPassword] = useState(false);
 
+  const [showPassword, setShowPassword] = useState(false);
 
   const handleInputChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -95,7 +96,6 @@ const UserAuth = ({ onClose }) => {
 
   return (
     <div className="fixed h-full md:h-auto inset-0 bg-black bg-opacity-20 z-50 flex justify-center items-center">
-      <Toaster position="top-right" /> {/* Toast Notification Container */}
       <div className="bg-white rounded-lg shadow-lg w-11/12 max-w-4xl flex overflow-hidden relative">
         {/* Close Button */}
         <button
@@ -106,18 +106,14 @@ const UserAuth = ({ onClose }) => {
         </button>
 
         {/* Left Section: Image */}
-        {/* Left Section: Image */}
         <div className="hidden md:block w-1/2 relative">
           <img
             src={`${import.meta.env.VITE_APP_API_URL}${bannerData.imageUrl}`}
             alt="Login Illustration"
             className="w-full h-full object-cover"
           />
-          <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-t from-black/50 via-black/ to-transparent"></div>
-          <div className="absolute top-0 left-0 w-full h-full bg-black bg-opacity-30 flex flex-col justify-end items-start text-left text-white px-4">
-            <h2 className="text-3xl font-bold mb-2">{bannerData.title}</h2>
-            <p className="text-lg">{bannerData.subtitle}</p>
-          </div>
+          {/* <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-t from-black/50 via-black/ to-transparent"></div> */}
+
         </div>
 
         {/* Right Section: Form */}

@@ -1,17 +1,12 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
-import { Form, Input, Upload, Button, Card, Typography, message, Spin, Image } from "antd";
+import { Form, Upload, Button, Card, Typography, message, Spin, Image } from "antd";
 import { UploadOutlined } from "@ant-design/icons";
 
 const { Title } = Typography;
 
 const AdminBannerManager = () => {
-  const [form] = Form.useForm();
-  const [bannerData, setBannerData] = useState({
-    title: "",
-    subtitle: "",
-    imageUrl: "",
-  });
+  const [bannerData, setBannerData] = useState({ imageUrl: "" });
   const [loading, setLoading] = useState(false);
   const [imageFile, setImageFile] = useState(null);
 
@@ -23,7 +18,6 @@ const AdminBannerManager = () => {
       );
       if (data.banner) {
         setBannerData(data.banner);
-        form.setFieldsValue(data.banner);
       }
     } catch (error) {
       console.error("Error fetching banner:", error);
@@ -36,18 +30,14 @@ const AdminBannerManager = () => {
   }, []);
 
   // Handle form submission
-  const handleUpdateBanner = async (values) => {
-    if (!values.title || !values.subtitle) {
-      message.error("Title and Subtitle are required");
+  const handleUpdateBanner = async () => {
+    if (!imageFile) {
+      message.error("Please select an image to update");
       return;
     }
 
     const formData = new FormData();
-    formData.append("title", values.title);
-    formData.append("subtitle", values.subtitle);
-    if (imageFile) {
-      formData.append("image", imageFile);
-    }
+    formData.append("image", imageFile);
 
     setLoading(true);
     try {
@@ -92,32 +82,7 @@ const AdminBannerManager = () => {
           Banner Management
         </Title>
 
-        <Form
-          form={form}
-          layout="vertical"
-          onFinish={handleUpdateBanner}
-          initialValues={bannerData}
-        >
-          <Form.Item
-            label="Title"
-            name="title"
-            rules={[{ required: true, message: "Please input the banner title!" }]}
-          >
-            <Input placeholder="Enter banner title" size="large" />
-          </Form.Item>
-
-          <Form.Item
-            label="Subtitle"
-            name="subtitle"
-            rules={[{ required: true, message: "Please input the banner subtitle!" }]}
-          >
-            <Input.TextArea
-              placeholder="Enter banner subtitle"
-              size="large"
-              rows={3}
-            />
-          </Form.Item>
-
+        <Form layout="vertical" onFinish={handleUpdateBanner}>
           <Form.Item label="Banner Image">
             <Upload {...uploadProps} listType="picture">
               <Button icon={<UploadOutlined />}>Select Image</Button>

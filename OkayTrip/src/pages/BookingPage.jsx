@@ -10,6 +10,9 @@ const BookingPage = () => {
   const [selectedPayment, setSelectedPayment] = useState("full");
   const [showRefundPolicy, setShowRefundPolicy] = useState(false);
   const [agreedToPolicy, setAgreedToPolicy] = useState(false);
+  const [numSeats, setNumSeats] = useState(1); // ✅ Number of seats (default: 1)
+  const [travelers, setTravelers] = useState([]); // ✅ Traveler details
+
   const navigate = useNavigate();
   const userToken = localStorage.getItem("userToken");
 
@@ -35,23 +38,57 @@ const BookingPage = () => {
     fetchPackage();
   }, [packageId, userToken, navigate]);
 
+  // ✅ Update traveler details when number of seats changes
+  useEffect(() => {
+    setTravelers(
+      Array.from({ length: numSeats }, () => ({
+        name: "",
+        age: "",
+        gender: "",
+        aadhar: "",
+      }))
+    );
+  }, [numSeats]);
+
   const calculatePaymentAmount = () => {
-    if (selectedPayment === "partial") return packageData.discountedPrice * 0.5;
-    if (selectedPayment === "advance") return packageData.discountedPrice * 0.2;
-    return packageData.discountedPrice;
+    let baseAmount = packageData?.discountedPrice || 0;
+    if (selectedPayment === "partial") baseAmount *= 0.5;
+    if (selectedPayment === "advance") baseAmount *= 0.2;
+    return baseAmount * numSeats; // ✅ Multiply by number of seats
+  };
+
+  const handleInputChange = (index, field, value) => {
+    const updatedTravelers = [...travelers];
+    updatedTravelers[index][field] = value;
+    setTravelers(updatedTravelers);
   };
 
   const handleProceedToPayment = () => {
     if (!agreedToPolicy) {
+      alert("Please agree to the refund policy before proceeding.");
       return;
     }
-
+  
+    // ✅ Ensure all traveler details are filled if more than 1 seat
+    if (numSeats > 1) {
+      if (travelers.some((t) => !t.name || !t.age || !t.gender || !t.aadhar)) {
+        alert("Please fill all traveler details.");
+        return;
+      }
+    }
+  
+    // ✅ Save traveler details & seat count in localStorage
+    localStorage.setItem("travelers", JSON.stringify(travelers));
+    localStorage.setItem("numSeats", numSeats);
+  
     navigate("/payment", {
       state: {
         packageId: packageData._id,
         packageTitle: packageData.title,
         amount: calculatePaymentAmount(),
         paymentType: selectedPayment,
+        travelers, // ✅ Pass traveler details to the payment page
+        numSeats,
       },
     });
   };
@@ -79,6 +116,59 @@ const BookingPage = () => {
         </div>
       </div>
 
+      {/* ✅ Select Number of Seats */}
+      <div className="mt-6 bg-white shadow-lg rounded-lg p-6">
+        <h3 className="text-lg font-semibold text-gray-800">Select Number of Seats</h3>
+        <input
+          type="number"
+          min="1"
+          max="10"
+          value={numSeats}
+          onChange={(e) => setNumSeats(parseInt(e.target.value) || 1)}
+          className="w-full mt-2 p-2 border rounded-md"
+        />
+      </div>
+
+      {/* ✅ Show Traveler Details Form if More than 1 Seat */}
+      {numSeats > 1 && (
+        <div className="mt-6 bg-white shadow-lg rounded-lg p-6">
+          <h3 className="text-lg font-semibold text-gray-800">Traveler Details</h3>
+          {travelers.map((traveler, index) => (
+            <div key={index} className="mb-4 p-4 border rounded-md">
+              <h4 className="font-semibold text-gray-700">Traveler {index + 1}</h4>
+              <input
+                placeholder="Full Name"
+                className="w-full my-2 p-2 border rounded-md"
+                value={traveler.name}
+                onChange={(e) => handleInputChange(index, "name", e.target.value)}
+              />
+              <input
+                type="number"
+                placeholder="Age"
+                className="w-full my-2 p-2 border rounded-md"
+                value={traveler.age}
+                onChange={(e) => handleInputChange(index, "age", e.target.value)}
+              />
+              <select
+                className="w-full my-2 p-2 border rounded-md"
+                value={traveler.gender}
+                onChange={(e) => handleInputChange(index, "gender", e.target.value)}
+              >
+                <option value="">Select Gender</option>
+                <option value="male">Male</option>
+                <option value="female">Female</option>
+                <option value="other">Other</option>
+              </select>
+              <input
+                placeholder="Aadhar Number"
+                className="w-full my-2 p-2 border rounded-md"
+                value={traveler.aadhar}
+                onChange={(e) => handleInputChange(index, "aadhar", e.target.value)}
+              />
+            </div>
+          ))}
+        </div>
+      )}
       {/* Payment Options */}
       <div className="mt-6 bg-white shadow-lg rounded-lg p-6">
         <h3 className="text-lg font-semibold mb-4 text-gray-800">Choose Payment Method</h3>
@@ -103,8 +193,7 @@ const BookingPage = () => {
           ))}
         </div>
       </div>
-
-      {/* Refund Policy Section */}
+      {/* ✅ Refund Policy (Kept Same) */}
       <div className="mt-6 bg-white shadow-lg rounded-lg p-6">
         <div
           className="flex justify-between items-center cursor-pointer"
@@ -169,15 +258,15 @@ const BookingPage = () => {
                 </ul>
               </li>
               <li>
-              3.   <strong>Review & Approval: </strong>Once your refund request and documentation are received, our team will review your case and determine the eligibility for a refund. We will notify you of our decision within 5 business days.
+                3.   <strong>Review & Approval: </strong>Once your refund request and documentation are received, our team will review your case and determine the eligibility for a refund. We will notify you of our decision within 5 business days.
               </li>
               <li>
-              4.	<strong>Refund Issuance:</strong> If approved, your refund will be processed within 10-15 business days. Refunds will be issued to the original method of payment unless otherwise specified. Please note that additional processing times may apply, depending on your payment provider.
+                4.	<strong>Refund Issuance:</strong> If approved, your refund will be processed within 10-15 business days. Refunds will be issued to the original method of payment unless otherwise specified. Please note that additional processing times may apply, depending on your payment provider.
               </li>
 
             </ul>
             <p className="mt-4 text-gray-600 text-xs">
-            If you have any questions or concerns regarding your refund request, feel free to contact us at <a href="mailto:support@okaytrip.in">support@okaytrip.in</a>
+              If you have any questions or concerns regarding your refund request, feel free to contact us at <a href="mailto:support@okaytrip.in">support@okaytrip.in</a>
             </p>
           </div>
         )}
@@ -197,7 +286,7 @@ const BookingPage = () => {
         </div>
       </div>
 
-      {/* Proceed to Payment Button */}
+      {/* Proceed to Payment */}
       <div className="mt-6 bg-white shadow-lg rounded-lg p-6 flex flex-col md:flex-row items-center justify-between">
         <div>
           <h3 className="text-lg font-semibold text-gray-800">Total Payable:</h3>
