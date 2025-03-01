@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import axios from "axios";
 import Lightbox from "yet-another-react-lightbox";
@@ -14,6 +14,7 @@ import UserAuth from "../components/UserAuth";
 import Skeleton from "react-loading-skeleton";
 import "react-loading-skeleton/dist/skeleton.css";
 import { FaAngleDown, FaAngleUp, FaChevronCircleLeft, FaChevronLeft, FaChevronRight } from "react-icons/fa";
+import RelatedPackages from "../components/RelatedPackages";
 
 
 const PackageDetailsPage = () => {
@@ -872,33 +873,7 @@ const PackageDetailsPage = () => {
             </div>
           </div>
         </div>
-
-
-        {/* Inclusions and Exclusions */}
-        {/* <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 mb-6">
-          <div>
-            <h3 className="text-xl font-bold mb-4">Inclusions</h3>
-            <ul className="list-disc pl-6 space-y-2">
-              {packageData.inclusions.map((inclusion, index) => (
-                <li key={index} className="text-gray-600">
-                  {inclusion}
-                </li>
-              ))}
-            </ul>
-          </div>
-          {packageData.exclusions && (
-            <div>
-              <h3 className="text-xl font-bold mb-4">Exclusions</h3>
-              <ul className="list-disc pl-6 space-y-2">
-                {packageData.exclusions.map((exclusion, index) => (
-                  <li key={index} className="text-gray-600">
-                    {exclusion}
-                  </li>
-                ))}
-              </ul>
-            </div>
-          )}
-        </div> */}
+        <RelatedPackages categoryId={packageData.categoryId?._id} currentPackageId={packageData._id} />
 
       </div>
 
