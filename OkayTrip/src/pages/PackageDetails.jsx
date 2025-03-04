@@ -873,7 +873,10 @@ const PackageDetailsPage = () => {
             </div>
           </div>
         </div>
+        <div className="LineDivider_tourPackageDivider my-8 mx-0 w-[95%] h-[1px] border-t-[1px] border-t-[#e0e0e0]"></div>
         <RelatedPackages categoryId={packageData.categoryId?._id} currentPackageId={packageData._id} />
+        <div className="LineDivider_tourPackageDivider my-8 mx-0 w-[95%] h-[1px] border-t-[1px] border-t-[#e0e0e0]"></div>
+        <ReviewsSection packageId={packageData._id} />
 
       </div>
 

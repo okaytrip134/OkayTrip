@@ -53,7 +53,7 @@ const RelatedPackages = ({ categoryId, currentPackageId }) => {
         <div className="max-w-[1440px] mx-auto p-6">
             <div className="rounded-xl p-6 relative">
                 {/* Section Header */}
-                <h2 className="text-xl sm:text-2xl font-bold text-gray-800 mb-6 pb-2 border-b">
+                <h2 className="text-xl sm:text-2xl font-bold text-gray-800 mb-6 pb-2">
                     Related Packages
                 </h2>
 
