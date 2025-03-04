@@ -9,6 +9,7 @@ import PackageManager from "./pages/PackageManager";
 import BookingReport from "./pages/BookingReport";
 import AdminBookings from "./pages/AdminBookings";
 import AdminBannerManager from "./pages/AdminBannerManager";
+import AdminReviews from "./pages/AdminReview";
 
 const AppAdmin = () => {
   return (
@@ -23,6 +24,7 @@ const AppAdmin = () => {
           <Route path="Packages" element={<PackageManager/>} />
           <Route path="booking-report" element= {<AdminBookings/>}/>
           <Route path="banner-manager" element= {<AdminBannerManager/>}/>
+          <Route path="Admin-reviews" element= {<AdminReviews/>}/>
 
         </Route>
         <Route path="*" element={<div>404 Not Found</div>} />

@@ -21,6 +21,7 @@ import user from '../../assets/icons/ic-user.svg'
 import report from '../../assets/icons/ic-workbench.svg'
 import packages from '../../assets/icons/ic-files.svg'
 import categories from '../../assets/icons/ic-category.svg'
+import { FaComment } from "react-icons/fa";
 
 const DashboardPage = () => {
   const navigate = useNavigate();
@@ -50,7 +51,7 @@ const DashboardPage = () => {
       isDropdown: true,
       items: [
         { name: "Banners", icon: <SvgIcon src={packages} alt="Management" />, path: "/admin/dashboard/banner-manager" },
-        { name: "Reviews", icon: <SvgIcon src={packages} alt="Management" />, path: "/admin/dashboard/Reviews-Manager" },
+        {name: "Reviews", icon:<FaComment/>, path: "/admin/dashboard/Admin-reviews"},
         { name: "Coupon-Report", icon: <SvgIcon src={packages} alt="Management" />, path: "/admin/dashboard/Coupon-Report" },
         { name: "Top Sale Bar", icon: <BarChartOutlined />, path: "/admin/dashboard/top-sale-bar" },
       ]

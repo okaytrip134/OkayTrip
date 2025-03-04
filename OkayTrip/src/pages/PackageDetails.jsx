@@ -15,6 +15,7 @@ import Skeleton from "react-loading-skeleton";
 import "react-loading-skeleton/dist/skeleton.css";
 import { FaAngleDown, FaAngleUp, FaChevronCircleLeft, FaChevronLeft, FaChevronRight } from "react-icons/fa";
 import RelatedPackages from "../components/RelatedPackages";
+import ReviewsSection from "../components/ReviewsSections";
 
 
 const PackageDetailsPage = () => {
