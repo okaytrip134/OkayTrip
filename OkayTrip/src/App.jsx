@@ -17,6 +17,7 @@ import RefundPolicy from "./pages/RefundPolicy";
 import PrivacyPolicy from "./pages/PrivacyPolicy";
 import TermsConditions from "./pages/Term&conditions";
 import CopyrightPolicy from "./pages/CopyRightPolicy";
+import BookingSuccess from "./pages/BookingSuccess";
 
 function App() {
   return (
@@ -49,6 +50,7 @@ const AppContent = () => {
           <Route path="/privacy-policy" element={<PrivacyPolicy/>}/>
           <Route path="/term-and-conditions" element={<TermsConditions/>}/>
           <Route path="/copyright-policy" element= {<CopyrightPolicy/>}/>
+          <Route path="/booking-success" element={<BookingSuccess/>}/>
         </Routes>
       </div>
       {/* Conditionally render Footer */}

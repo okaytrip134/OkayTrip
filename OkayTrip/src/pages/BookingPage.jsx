@@ -10,8 +10,9 @@ const BookingPage = () => {
   const [selectedPayment, setSelectedPayment] = useState("full");
   const [showRefundPolicy, setShowRefundPolicy] = useState(false);
   const [agreedToPolicy, setAgreedToPolicy] = useState(false);
-  const [numSeats, setNumSeats] = useState(1); // ✅ Number of seats (default: 1)
+  const [numSeats, setNumSeats] = useState(1); // ✅ Default 1 seat
   const [travelers, setTravelers] = useState([]); // ✅ Traveler details
+
 
   const navigate = useNavigate();
   const userToken = localStorage.getItem("userToken");
@@ -38,60 +39,90 @@ const BookingPage = () => {
     fetchPackage();
   }, [packageId, userToken, navigate]);
 
-  // ✅ Update traveler details when number of seats changes
+  // ✅ Initialize traveler details with at least 1 traveler (Logged-in user info if available)
   useEffect(() => {
-    setTravelers(
-      Array.from({ length: numSeats }, () => ({
-        name: "",
-        age: "",
-        gender: "",
-        aadhar: "",
-      }))
-    );
+    const user = JSON.parse(localStorage.getItem("userData")); // Fetch user data from storage
+
+    setTravelers((prev) => {
+      const updatedTravelers = [...prev];
+
+      // ✅ Ensure traveler form always matches the number of seats
+      while (updatedTravelers.length < numSeats) {
+        updatedTravelers.push({ name: "", age: "", gender: "", aadhar: "" });
+      }
+      while (updatedTravelers.length > numSeats) {
+        updatedTravelers.pop();
+      }
+
+      // ✅ If first traveler & user exists, pre-fill user details
+      if (numSeats === 1 && user) {
+        updatedTravelers[0] = {
+          name: user.name || "",
+          age: user.age || "",
+          gender: user.gender || "",
+          aadhar: user.aadhar || "",
+        };
+      }
+
+      return updatedTravelers;
+    });
   }, [numSeats]);
 
   const calculatePaymentAmount = () => {
     let baseAmount = packageData?.discountedPrice || 0;
-    if (selectedPayment === "partial") baseAmount *= 0.5;
-    if (selectedPayment === "advance") baseAmount *= 0.2;
-    return baseAmount * numSeats; // ✅ Multiply by number of seats
-  };
+    let tax = 0;
 
+    if (selectedPayment === "partial") {
+      baseAmount *= 0.5;
+    } else if (selectedPayment === "advance") {
+      baseAmount *= 0.2;
+    } else if (selectedPayment === "full") {
+      tax = baseAmount * 0.18; // ✅ Apply 18% GST for full payment
+    }
+
+    return {
+      baseAmount: baseAmount * numSeats,
+      taxAmount: tax * numSeats,
+      totalAmount: (baseAmount + tax) * numSeats, // ✅ Total including tax
+    };
+  };
+  const { baseAmount, taxAmount, totalAmount } = calculatePaymentAmount();
   const handleInputChange = (index, field, value) => {
     const updatedTravelers = [...travelers];
     updatedTravelers[index][field] = value;
     setTravelers(updatedTravelers);
   };
-
   const handleProceedToPayment = () => {
     if (!agreedToPolicy) {
       alert("Please agree to the refund policy before proceeding.");
       return;
     }
-  
-    // ✅ Ensure all traveler details are filled if more than 1 seat
-    if (numSeats > 1) {
-      if (travelers.some((t) => !t.name || !t.age || !t.gender || !t.aadhar)) {
-        alert("Please fill all traveler details.");
-        return;
-      }
+
+    // ✅ Ensure all traveler details are filled
+    if (travelers.some((t) => !t.name || !t.age || !t.gender || !t.aadhar)) {
+      alert("Please fill all traveler details.");
+      return;
     }
-  
+
     // ✅ Save traveler details & seat count in localStorage
     localStorage.setItem("travelers", JSON.stringify(travelers));
     localStorage.setItem("numSeats", numSeats);
-  
+
+
+    const { totalAmount } = calculatePaymentAmount();
+    // ✅ Pass only totalAmount to Payment Page
     navigate("/payment", {
       state: {
         packageId: packageData._id,
         packageTitle: packageData.title,
-        amount: calculatePaymentAmount(),
+        amount: totalAmount, // ✅ Fixed: Passing only total amount
         paymentType: selectedPayment,
-        travelers, // ✅ Pass traveler details to the payment page
+        travelers,
         numSeats,
       },
     });
   };
+
 
   if (loading) {
     return <div className="text-center py-10 text-lg font-semibold">Loading package details...</div>;
@@ -129,54 +160,52 @@ const BookingPage = () => {
         />
       </div>
 
-      {/* ✅ Show Traveler Details Form if More than 1 Seat */}
-      {numSeats > 1 && (
-        <div className="mt-6 bg-white shadow-lg rounded-lg p-6">
-          <h3 className="text-lg font-semibold text-gray-800">Traveler Details</h3>
-          {travelers.map((traveler, index) => (
-            <div key={index} className="mb-4 p-4 border rounded-md">
-              <h4 className="font-semibold text-gray-700">Traveler {index + 1}</h4>
-              <input
-                placeholder="Full Name"
-                className="w-full my-2 p-2 border rounded-md"
-                value={traveler.name}
-                onChange={(e) => handleInputChange(index, "name", e.target.value)}
-              />
-              <input
-                type="number"
-                placeholder="Age"
-                className="w-full my-2 p-2 border rounded-md"
-                value={traveler.age}
-                onChange={(e) => handleInputChange(index, "age", e.target.value)}
-              />
-              <select
-                className="w-full my-2 p-2 border rounded-md"
-                value={traveler.gender}
-                onChange={(e) => handleInputChange(index, "gender", e.target.value)}
-              >
-                <option value="">Select Gender</option>
-                <option value="male">Male</option>
-                <option value="female">Female</option>
-                <option value="other">Other</option>
-              </select>
-              <input
-                placeholder="Aadhar Number"
-                className="w-full my-2 p-2 border rounded-md"
-                value={traveler.aadhar}
-                onChange={(e) => handleInputChange(index, "aadhar", e.target.value)}
-              />
-            </div>
-          ))}
-        </div>
-      )}
+      {/* ✅ Traveler Details (Always Show at Least One) */}
+      <div className="mt-6 bg-white shadow-lg rounded-lg p-6">
+        <h3 className="text-lg font-semibold text-gray-800">Traveler Details</h3>
+        {travelers.map((traveler, index) => (
+          <div key={index} className="mb-4 p-4 border rounded-md">
+            <h4 className="font-semibold text-gray-700">Traveler {index + 1}</h4>
+            <input
+              placeholder="Full Name"
+              className="w-full my-2 p-2 border rounded-md"
+              value={traveler.name}
+              onChange={(e) => handleInputChange(index, "name", e.target.value)}
+            />
+            <input
+              type="number"
+              placeholder="Age"
+              className="w-full my-2 p-2 border rounded-md"
+              value={traveler.age}
+              onChange={(e) => handleInputChange(index, "age", e.target.value)}
+            />
+            <select
+              className="w-full my-2 p-2 border rounded-md"
+              value={traveler.gender}
+              onChange={(e) => handleInputChange(index, "gender", e.target.value)}
+            >
+              <option value="">Select Gender</option>
+              <option value="male">Male</option>
+              <option value="female">Female</option>
+              <option value="other">Other</option>
+            </select>
+            <input
+              placeholder="Aadhar Number"
+              className="w-full my-2 p-2 border rounded-md"
+              value={traveler.aadhar}
+              onChange={(e) => handleInputChange(index, "aadhar", e.target.value)}
+            />
+          </div>
+        ))}
+      </div>
       {/* Payment Options */}
       <div className="mt-6 bg-white shadow-lg rounded-lg p-6">
         <h3 className="text-lg font-semibold mb-4 text-gray-800">Choose Payment Method</h3>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           {[
-            { value: "partial", label: "Partial Payment (50%)", amount: packageData.discountedPrice * 0.5, icon: <FaRegCreditCard /> },
-            { value: "advance", label: "Advance Payment (20%)", amount: packageData.discountedPrice * 0.2, icon: <FaWallet /> },
-            { value: "full", label: "Full Payment", amount: packageData.discountedPrice, icon: <FaCheckCircle /> },
+            { value: "partial", label: "Partial Payment (50%)", icon: <FaRegCreditCard /> },
+            { value: "advance", label: "Advance Payment (20%)", icon: <FaWallet /> },
+            { value: "full", label: "Full Payment (100%) + 18% GST", icon: <FaCheckCircle /> },
           ].map((option) => (
             <div
               key={option.value}
@@ -188,11 +217,32 @@ const BookingPage = () => {
                 <span className="text-2xl text-orange-500">{option.icon}</span>
                 <span className="text-gray-800 font-semibold">{option.label}</span>
               </div>
-              <span className="text-gray-700 font-bold text-lg">₹{option.amount.toFixed(2)}</span>
             </div>
           ))}
         </div>
       </div>
+
+      <div className="mt-6 bg-white shadow-lg rounded-lg p-6">
+        <h3 className="text-lg font-semibold text-gray-800">Total Payment</h3>
+        <div className="bg-gray-100 p-4 rounded-lg">
+          <p className="text-gray-700 text-lg mb-1">
+            <span className="font-semibold text-gray-900">Base Amount:</span> ₹{baseAmount.toFixed(2)}
+          </p>
+          {/* ✅ Show this message only if payment type is NOT "full" */}
+          {selectedPayment !== "full" && (
+            <p className="text-red-600 text-sm font-medium">Tax will be included after full payment.</p>
+          )}
+          {selectedPayment === "full" && (
+            <p className="text-gray-700 text-lg mb-1">
+              <span className="font-semibold text-gray-900">GST (18%):</span> ₹{taxAmount.toFixed(2)}
+            </p>
+          )}
+          <p className="text-xl font-bold text-orange-500 mt-1">
+            <span className="font-semibold">Total Payable:</span> ₹{totalAmount.toFixed(2)}
+          </p>
+        </div>
+      </div>
+
       {/* ✅ Refund Policy (Kept Same) */}
       <div className="mt-6 bg-white shadow-lg rounded-lg p-6">
         <div
@@ -285,12 +335,11 @@ const BookingPage = () => {
           </label>
         </div>
       </div>
-
       {/* Proceed to Payment */}
       <div className="mt-6 bg-white shadow-lg rounded-lg p-6 flex flex-col md:flex-row items-center justify-between">
         <div>
           <h3 className="text-lg font-semibold text-gray-800">Total Payable:</h3>
-          <p className="text-2xl font-bold text-orange-500 mt-1">₹{calculatePaymentAmount().toFixed(2)}</p>
+          <p className="text-2xl font-bold text-orange-500 mt-1">      ₹{calculatePaymentAmount().totalAmount.toFixed(2)} {/* ✅ FIXED */} </p>
         </div>
         <button
           className={`mt-4 md:mt-0 px-6 py-3 rounded-lg text-white font-semibold text-lg ${agreedToPolicy ? "bg-orange-500 hover:bg-orange-600" : "bg-gray-400 cursor-not-allowed"
