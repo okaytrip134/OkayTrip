@@ -468,10 +468,11 @@ const PackageDetailsPage = () => {
               <div className="LineDivider_tourPackageDivider my-8 mx-0 w-[95%] h-[1px] border-t-[1px] border-t-[#e0e0e0]"></div>
 
               {/* Itinerary */}
+              {/* Itinerary */}
               {packageData.itinerary && packageData.itinerary.length > 0 && (
                 <div className="mb-6">
                   <h3 className="text-2xl font-bold mb-4">Itinerary</h3>
-                  {/* ✅ Image Slider (Before Itinerary) */}
+                  {/* Image Slider (Before Itinerary) */}
                   <div className="relative">
                     <Carousel
                       showArrows={true}
@@ -485,21 +486,21 @@ const PackageDetailsPage = () => {
                       onChange={(index) => setCurrentSlide(index)}
                     >
                       {packageData.images.map((image, index) => (
-                        <div key={index} className="relative  mb-4">
+                        <div key={index} className="relative">
                           <img
                             src={`${import.meta.env.VITE_APP_API_URL}${image}`}
                             alt={`Package Image ${index}`}
                             className="w-full h-[400px] object-cover rounded-lg"
                           />
 
-                          {/* ✅ Slide Number */}
-                          <div className="absolute bottom-3 right-3  bg-black bg-opacity-50 text-white px-3 py-1 rounded-full text-sm">
+                          {/* Slide Number */}
+                          <div className="absolute bottom-3 right-3 bg-black bg-opacity-50 text-white px-3 py-1 rounded-full text-sm">
                             {index + 1}/{packageData.images.length}
                           </div>
                         </div>
                       ))}
                     </Carousel>
-                    {/* ✅ Small Thumbnail View */}
+                    {/* Small Thumbnail View */}
                     <div className="absolute bottom-3 left-3 flex space-x-2">
                       {packageData.images.slice(0, 4).map((image, index) => (
                         <img
@@ -524,25 +525,26 @@ const PackageDetailsPage = () => {
                     {packageData.itinerary.map((day, index) => (
                       <div key={index} className="bg-white border border-gray-200 rounded-lg shadow-sm">
                         <div
-                          className="flex items-center justify-between p-4  cursor-pointer"
+                          className="p-4 cursor-pointer"
                           onClick={() => toggleDropdown(index)}
                         >
-                          {/* Left Section: Day Label & Title */}
-                          <div className="flex items-center gap-4">
-                            <span className="bg-[#BF500E] w-[70px] text-white text-sm font-semibold px-3 py-1 rounded-full mr-3">
+                          {/* Updated Layout */}
+                          <div className="flex  items-center gap-3">
+                            {/* Day Label - Now as a flex-shrink-0 to prevent wrapping */}
+                            <span className="flex-shrink-0 bg-[#BF500E] text-white text-sm font-semibold px-3 py-1 rounded-full">
                               DAY {index + 1}
                             </span>
-                            <h4 className="text-lg font-semibold text-gray-800">{day.title}</h4>
+
+                            {/* Title - Now with flex-grow and proper truncation on mobile */}
+                            <div className="flex-grow flex justify-between items-center">
+                              <h4 className="text-lg font-semibold text-gray-800 pr-2">{day.title}</h4>
+
+                              {/* Dropdown Icon - Moved to ensure it stays at the end */}
+                              <span className={`flex-shrink-0 text-gray-500 transition-transform ${openIndex === index ? "rotate-180" : ""}`}>
+                                <FaAngleDown />
+                              </span>
+                            </div>
                           </div>
-
-                          {/* Right Section: Dropdown Icon */}
-                          <span
-                            className={`text-gray-500 transition-transform ${openIndex === index ? "rotate-180" : ""
-                              }`}
-                          >
-                            <FaAngleDown />
-                          </span>
-
                         </div>
 
                         {/* Conditional Description Rendering */}
