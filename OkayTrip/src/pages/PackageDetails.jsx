@@ -466,16 +466,16 @@ const PackageDetailsPage = () => {
               )}
 
               <div className="LineDivider_tourPackageDivider my-8 mx-0 w-[95%] h-[1px] border-t-[1px] border-t-[#e0e0e0]"></div>
-
-              {/* Itinerary */}
               {/* Itinerary */}
               {packageData.itinerary && packageData.itinerary.length > 0 && (
                 <div className="mb-6">
                   <h3 className="text-2xl font-bold mb-4">Itinerary</h3>
-                  {/* Image Slider (Before Itinerary) */}
-                  <div className="relative">
+
+                  {/* Image Slider with Fixed Overlay Elements */}
+                  <div className="relative mb-6 rounded-lg overflow-hidden">
+                    {/* Carousel Component */}
                     <Carousel
-                      showArrows={true}
+                      showArrows={false} // We'll create custom arrows outside the carousel
                       showThumbs={false}
                       showStatus={false}
                       infiniteLoop
@@ -484,43 +484,138 @@ const PackageDetailsPage = () => {
                       interval={5000}
                       selectedItem={currentSlide}
                       onChange={(index) => setCurrentSlide(index)}
+                      renderIndicator={(onClickHandler, isSelected, index) => {
+                        return (
+                          <button
+                            type="button"
+                            onClick={onClickHandler}
+                            key={index}
+                            tabIndex={0}
+                            className={`inline-block h-2 w-2 mx-1 rounded-full ${isSelected ? 'bg-white' : 'bg-white bg-opacity-50'
+                              }`}
+                            style={{ margin: '0 4px' }}
+                          />
+                        );
+                      }}
                     >
                       {packageData.images.map((image, index) => (
                         <div key={index} className="relative">
                           <img
                             src={`${import.meta.env.VITE_APP_API_URL}${image}`}
                             alt={`Package Image ${index}`}
-                            className="w-full h-[400px] object-cover rounded-lg"
+                            className="w-full h-[400px] object-cover"
                           />
-
-                          {/* Slide Number */}
-                          <div className="absolute bottom-3 right-3 bg-black bg-opacity-50 text-white px-3 py-1 rounded-full text-sm">
-                            {index + 1}/{packageData.images.length}
-                          </div>
                         </div>
                       ))}
                     </Carousel>
-                    {/* Small Thumbnail View */}
-                    <div className="absolute bottom-3 left-3 flex space-x-2">
-                      {packageData.images.slice(0, 4).map((image, index) => (
+
+                    {/* Fixed Left Arrow - Outside carousel */}
+                    <button
+                      type="button"
+                      onClick={() => {
+                        const prevSlide = currentSlide === 0 ? packageData.images.length - 1 : currentSlide - 1;
+                        setCurrentSlide(prevSlide);
+                      }}
+                      className="absolute left-4 top-1/2 -translate-y-1/2 z-20 bg-white bg-opacity-50 rounded-full w-10 h-10 flex items-center justify-center hover:bg-opacity-70"
+                    >
+                      <FaChevronLeft className="text-gray-800" size={20} />
+                    </button>
+
+                    {/* Fixed Right Arrow - Outside carousel */}
+                    <button
+                      type="button"
+                      onClick={() => {
+                        const nextSlide = currentSlide === packageData.images.length - 1 ? 0 : currentSlide + 1;
+                        setCurrentSlide(nextSlide);
+                      }}
+                      className="absolute right-4 top-1/2 -translate-y-1/2 z-20 bg-white bg-opacity-50 rounded-full w-10 h-10 flex items-center justify-center hover:bg-opacity-70"
+                    >
+                      <FaChevronRight className="text-gray-800" size={20} />
+                    </button>
+
+                    {/* Fixed Slide Counter - Bottom center */}
+                    <div className="absolute bottom-6 left-0 right-0 z-20">
+                      <div className="flex justify-center">
+                        <div className="bg-black bg-opacity-50 text-white px-3 py-1 rounded-full text-sm">
+                          {currentSlide + 1}/{packageData.images.length}
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Fixed Left Content - Bottom left */}
+                    <div className="absolute bottom-5 left-6 z-20 text-white">
+                      <div className="DestinnationInfo_destinationInfoWrapper flex gap-[10px] flex-wrap">
+                        <div className="DestinationInfoItem flex items-center gap-2 flex-row">
+                          {/* Number of Days */}
+                          <div
+                            className="DestinationInfo_noOfDays text-[30px] md:text-[45px]"
+                            style={{
+                              // fontSize: "45px",
+                              fontWeight: "700",
+                              lineHeight: "47px",
+                              color: "#cbcbcb",
+                            }}
+                          >
+                            {packageData.duration.split(" ")[0]}
+                          </div>
+
+                          {/* Text Section */}
+                          <div
+                            className="DestinationInfo_rightsectionText flex flex-col justify-center"
+                            style={{
+                              display: "flex",
+                              alignItems: "start",
+                            }}
+                          >
+                            <div
+                              className="DestinationInfoStaticText"
+                              style={{
+                                fontSize: "9px",
+                                fontWeight: "400",
+                                lineHeight: "14px",
+                              }}
+                            >
+                              Days in
+                            </div>
+                            <div
+                              className="DestinationInfodestinationName "
+                              style={{
+                                fontSize: "11px",
+                                fontWeight: "500",
+                                lineHeight: "17px",
+                                color: "#202020",
+                              }}
+                            >
+                              {packageData.categoryId?.name || "N/A"}
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Fixed Right Content - Bottom right */}
+                    <div className="absolute bottom-5 right-6 z-20 flex space-x-2">
+                      {packageData.images.slice(0, window.innerWidth < 768 ? 1 : 3).map((img, idx) => (
                         <img
-                          key={index}
-                          src={`${import.meta.env.VITE_APP_API_URL}${image}`}
-                          alt={`Thumbnail ${index}`}
+                          key={idx}
+                          src={`${import.meta.env.VITE_APP_API_URL}${img}`}
+                          alt={`Thumbnail ${idx}`}
                           className="w-10 h-10 object-cover rounded-full border-2 border-white cursor-pointer"
                           onClick={() => setShowImageGallery(true)}
                         />
                       ))}
-                      {packageData.images.length > 4 && (
+                      {packageData.images.length > 3 && (
                         <div
                           className="w-10 h-10 flex items-center justify-center bg-white text-gray-800 text-sm font-bold border-2 border-white rounded-full cursor-pointer"
                           onClick={() => setShowImageGallery(true)}
                         >
-                          +{packageData.images.length - 4}
+                          +{packageData.images.length - 3}
                         </div>
                       )}
                     </div>
                   </div>
+
+                  {/* Itinerary Items */}
                   <div className="space-y-4">
                     {packageData.itinerary.map((day, index) => (
                       <div key={index} className="bg-white border border-gray-200 rounded-lg shadow-sm">
@@ -528,18 +623,20 @@ const PackageDetailsPage = () => {
                           className="p-4 cursor-pointer"
                           onClick={() => toggleDropdown(index)}
                         >
-                          {/* Updated Layout */}
-                          <div className="flex  items-center gap-3">
+                          {/* Updated Layout for Title and Day */}
+                          <div className="flex items-center gap-3">
                             {/* Day Label - Now as a flex-shrink-0 to prevent wrapping */}
                             <span className="flex-shrink-0 bg-[#BF500E] text-white text-sm font-semibold px-3 py-1 rounded-full">
                               DAY {index + 1}
                             </span>
 
-                            {/* Title - Now with flex-grow and proper truncation on mobile */}
+                            {/* Title - Now with flex-grow and truncation on mobile */}
                             <div className="flex-grow flex justify-between items-center">
-                              <h4 className="text-lg font-semibold text-gray-800 pr-2">{day.title}</h4>
+                              <h4 className="text-lg font-semibold text-gray-800 pr-4 line-clamp-1 md:line-clamp-none">
+                                {day.title}
+                              </h4>
 
-                              {/* Dropdown Icon - Moved to ensure it stays at the end */}
+                              {/* Dropdown Icon - Fixed position */}
                               <span className={`flex-shrink-0 text-gray-500 transition-transform ${openIndex === index ? "rotate-180" : ""}`}>
                                 <FaAngleDown />
                               </span>
@@ -551,6 +648,12 @@ const PackageDetailsPage = () => {
                         {openIndex === index && (
                           <>
                             <div className="my-4 mx-4 h-px bg-gray-200"></div>
+                            {/* Show full title if it was truncated */}
+                            {day.title.length > 30 && (
+                              <div className="px-4 pt-2">
+                                <h4 className="font-semibold text-gray-800">{day.title}</h4>
+                              </div>
+                            )}
                             <div className="p-4 rounded-lg text-gray-600">
                               <p>{day.description}</p>
                             </div>
