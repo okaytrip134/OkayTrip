@@ -72,7 +72,7 @@ const PackageDetailsPage = () => {
   return (
     <div className=" lg:px-16 py-8 min-h-screen max-w-[1400px] mx-auto">
       {/* Main Content */}
-      <div className="bg-white rounded p-6 mb-8">
+      <div className="bg-white rounded p-2 md:p-6 mb-8">
         {/* Images */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
           <div className="md:col-span-2">
@@ -366,7 +366,7 @@ const PackageDetailsPage = () => {
                 style={{
                   fontWeight: "700",
                   lineHeight: "45px",
-                  color: "#000",
+                  color: "#515151",
                 }}
               >{loading ? <Skeleton width={300} /> : packageData.title}</h1>
               <p className="text-gray-600 mt-2">{loading ? <Skeleton count={3} /> : packageData.description}</p>
@@ -445,20 +445,24 @@ const PackageDetailsPage = () => {
               </div>
 
               <div className="LineDivider_tourPackageDivider my-8 mx-0 w-[95%] h-[1px] border-t-[1px] border-t-[#e0e0e0]"></div>
-              {/* Package Hightlights */}
+              {/* Package Highlights */}
               {packageData.tripHighlights && packageData.tripHighlights.length > 0 && (
-                <div className="PackageHighlights">
+                <div className="bg-white rounded-lg my-6">
                   {/* Heading with Icon */}
-                  <h2 className="flex items-center text-[#202020] text-2xl font-bold mb-4">
+                  <h2 className="flex items-center text-[#515151] text-xl md:text-2xl font-bold mb-4">
                     Trip Highlights
                   </h2>
 
                   {/* Highlights List */}
-                  <ul className="space-y-3 pl-1">
+                  <ul className="grid grid-cols-1 gap-3 text-sm md:text-base">
                     {packageData.tripHighlights.map((highlight, index) => (
-                      <li key={index} className="flex items-start text-gray-700 text-lg">
-                        <span className="mr-2 text-green-500">✔</span>
-                        {highlight}
+                      <li key={index} className="flex items-start p-2 hover:bg-gray-50 rounded-md transition-colors">
+                        <span className="flex-shrink-0 h-5 w-5 bg-green-100 rounded-full flex items-center justify-center mr-3 mt-0.5">
+                          <svg className="h-3 w-3 text-green-600" fill="currentColor" viewBox="0 0 20 20">
+                            <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                          </svg>
+                        </span>
+                        <span className="text-gray-700">{highlight}</span>
                       </li>
                     ))}
                   </ul>
@@ -570,9 +574,10 @@ const PackageDetailsPage = () => {
                             <div
                               className="DestinationInfoStaticText"
                               style={{
-                                fontSize: "9px",
-                                fontWeight: "400",
+                                fontSize: "11px",
+                                fontWeight: "600",
                                 lineHeight: "14px",
+                                marginLeft:'2px'
                               }}
                             >
                               Days in
@@ -580,10 +585,10 @@ const PackageDetailsPage = () => {
                             <div
                               className="DestinationInfodestinationName "
                               style={{
-                                fontSize: "11px",
-                                fontWeight: "500",
-                                lineHeight: "17px",
-                                color: "#202020",
+                                fontSize: "30px",
+                                fontWeight: "700",
+                                lineHeight: "26px",
+                                color: "#fff",
                               }}
                             >
                               {packageData.categoryId?.name || "N/A"}
@@ -942,7 +947,7 @@ const PackageDetailsPage = () => {
         </div>
 
         {/* Exclusion Inclusion */}
-        <div className="max-w-[1440px] mx-auto my-0 p-6">
+        <div className="max-w-[1440px] mx-auto my-0 p-0 md:p-6">
           <div className="rounded-xl border border-gray-200 p-0 md:p-6">
             {/* ✅ Section Header */}
             <h2 className="text-xl sm:text-2xl font-bold text-gray-800 text-center mb-6 border-b-[1px]">
