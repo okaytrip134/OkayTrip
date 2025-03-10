@@ -13,9 +13,10 @@ import { Carousel } from "react-responsive-carousel";
 import UserAuth from "../components/UserAuth";
 import Skeleton from "react-loading-skeleton";
 import "react-loading-skeleton/dist/skeleton.css";
-import { FaAngleDown, FaAngleUp, FaChevronCircleLeft, FaChevronLeft, FaChevronRight } from "react-icons/fa";
+import { FaAngleDown, FaChevronCircleLeft, FaChevronLeft, FaChevronRight } from "react-icons/fa";
 import RelatedPackages from "../components/RelatedPackages";
 import ReviewsSection from "../components/ReviewsSections";
+// import { FaStar, FaRegStar, FaCamera } from "react-icons/fa";
 
 
 const PackageDetailsPage = () => {
@@ -27,9 +28,16 @@ const PackageDetailsPage = () => {
   const [openIndex, setOpenIndex] = useState(null);
   const [showAuthPopup, setShowAuthPopup] = useState(false);
   const [currentSlide, setCurrentSlide] = useState(0);
-
   const navigate = useNavigate();
+  const carouselRef = useRef(null);
+  const [galleryClosing, setGalleryClosing] = useState(false);
+  const [isFormVisible, setIsFormVisible] = useState(false);
+  const formRef = useRef(null);
+  // const [loading, setLoading] = useState(true);
   const userToken = localStorage.getItem("userToken");
+  const toggleForm = () => {
+    setIsFormVisible(!isFormVisible);
+  };
 
   const handleBooking = () => {
     if (!userToken) {
@@ -39,6 +47,14 @@ const PackageDetailsPage = () => {
       navigate(`/booking/${packageData._id}`);
     }
   };
+  const closeGallery = () => {
+    setGalleryClosing(true);
+    setTimeout(() => {
+      setShowImageGallery(false);
+      setGalleryClosing(false);
+    }, 300);
+  };
+
 
   useEffect(() => {
     const fetchPackageDetails = async () => {
@@ -69,47 +85,119 @@ const PackageDetailsPage = () => {
     return <div className="text-center py-10">Package not found.</div>;
   }
 
+
   return (
     <div className=" lg:px-16 py-8 min-h-screen max-w-[1400px] mx-auto">
       {/* Main Content */}
       <div className="bg-white rounded p-2 md:p-6 mb-8">
         {/* Images */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-          <div className="md:col-span-2">
+        <div className="mb-6">
+          {/* Desktop view (hidden on mobile) */}
+          <div className="hidden md:block">
+            <div className="grid grid-cols-3 gap-4">
+              <div className="col-span-2">
+                {loading ? (
+                  <Skeleton height={400} />
+                ) : (
+                  <img
+                    src={`${import.meta.env.VITE_APP_API_URL}${packageData.images[0]}`}
+                    alt={packageData.title}
+                    className="w-full h-[400px] object-cover"
+                  />
+                )}
+              </div>
+              <div className="grid grid-cols-2 gap-2">
+                {
+                  loading
+                    ? Array(4)
+                      .fill()
+                      .map((_, index) => <Skeleton key={index} height={160} />)
+                    : packageData.images.slice(1, 5).map((image, index) => (
+                      <div key={index} className="relative group">
+                        <img
+                          src={`${import.meta.env.VITE_APP_API_URL}${image}`}
+                          alt={`Thumbnail ${index}`}
+                          className="w-full h-[10rem] object-cover cursor-pointer"
+                        />
+                        <div className="absolute inset-0 bg-black bg-opacity-30 flex items-center justify-center opacity-0 group-hover:opacity-100 transition">
+                          <span className="text-white text-sm font-medium">View</span>
+                        </div>
+                      </div>
+                    ))}
+                {!loading && packageData.images.length > 5 && (
+                  <button
+                    onClick={() => setShowImageGallery(true)}
+                    className="col-span-2 bg-[#f37002] rounded-md font-mono font-semibold text-white hover:text-[#f37002] py-2 border border-[#f37002] text-center shadow hover:bg-transparent"
+                  >
+                    View All Images
+                  </button>
+                )}
+              </div>
+            </div>
+          </div>
+
+          {/* Mobile view (only visible on mobile) - with smooth transitions and limited thumbnails */}
+          <div className="block md:hidden">
             {loading ? (
               <Skeleton height={400} />
             ) : (
-              <img
-                src={`${import.meta.env.VITE_APP_API_URL}${packageData.images[0]}`}
-                alt={packageData.title}
-                className="w-full h-[400px] object-cover"
-              />
-            )}
-          </div>
-          <div className="grid grid-cols-2 gap-2">
-            {loading
-              ? Array(4)
-                .fill()
-                .map((_, index) => <Skeleton key={index} height={160} />)
-              : packageData.images.slice(1, 5).map((image, index) => (
-                <div key={index} className="relative group">
-                  <img
-                    src={`${import.meta.env.VITE_APP_API_URL}${image}`}
-                    alt={`Thumbnail ${index}`}
-                    className="w-full h-[10rem] object-cover cursor-pointer"
-                  />
-                  <div className="absolute inset-0 bg-black bg-opacity-30 flex items-center justify-center opacity-0 group-hover:opacity-100 transition">
-                    <span className="text-white text-sm font-medium">View</span>
+              <div className="relative">
+                {/* Main large image (current active slide) with smooth transition */}
+                <div className="relative overflow-hidden h-[400px]">
+                  <div
+                    className="flex transition-transform duration-300 ease-in-out h-full"
+                    style={{ transform: `translateX(-${currentSlide * 100}%)` }}
+                  >
+                    {packageData.images.map((image, index) => (
+                      <img
+                        key={index}
+                        src={`${import.meta.env.VITE_APP_API_URL}${image}`}
+                        alt={`Slide ${index}`}
+                        className="w-full h-full object-cover flex-shrink-0"
+                        onClick={() => setShowImageGallery(true)}
+                      />
+                    ))}
                   </div>
                 </div>
-              ))}
-            {!loading && packageData.images.length > 5 && (
-              <button
-                onClick={() => setShowImageGallery(true)}
-                className="col-span-2 bg-[#f37002] rounded-md font-mono font-semibold text-white hover:text-[#f37002] py-2 border border-[#f37002] text-center shadow hover:bg-transparent"
-              >
-                View All Images
-              </button>
+
+                {/* Indicator dashes */}
+                <div className="absolute bottom-16 left-0 right-0 flex justify-center gap-2">
+                  {packageData.images.slice(0, 3).map((_, index) => (
+                    <div
+                      key={index}
+                      className={`h-1 w-6 rounded-full ${currentSlide === index ? 'bg-white' : 'bg-white/40'}`}
+                      onClick={() => setCurrentSlide(index)}
+                    />
+                  ))}
+                </div>
+
+                {/* Circular thumbnails with +number indicator */}
+                <div className="absolute bottom-2 left-0 right-0 flex justify-center gap-2">
+                  {packageData.images.slice(0, 3).map((image, index) => (
+                    <div
+                      key={index}
+                      className={`w-12 h-12 rounded-full overflow-hidden border-2 ${currentSlide === index ? 'border-[#f37002]' : 'border-white'}`}
+                      onClick={() => setCurrentSlide(index)}
+                    >
+                      <img
+                        src={`${import.meta.env.VITE_APP_API_URL}${image}`}
+                        alt={`Thumbnail ${index}`}
+                        className="w-full h-full object-cover"
+                      />
+                    </div>
+                  ))}
+
+                  {/* Plus indicator for remaining images */}
+                  {packageData.images.length > 3 && (
+                    <div
+                      className="w-12 h-12 rounded-full overflow-hidden border-2 border-white bg-black/50 flex items-center justify-center text-white font-bold"
+                      onClick={() => setShowImageGallery(true)}
+                    >
+                      +{packageData.images.length - 3}
+                    </div>
+                  )}
+                </div>
+              </div>
             )}
           </div>
         </div>
@@ -122,7 +210,7 @@ const PackageDetailsPage = () => {
             overflow: 'hidden'
           }}
         >
-          {/* Right Section */}
+          {/*Mobbile Section */}
           <div className="TourPackage_body_upper sm:block md:hidden">
             <div className="tour_packageright_wrapper"
               style={{
@@ -137,7 +225,7 @@ const PackageDetailsPage = () => {
                   padding: "15px",
                   border: "1px solid #e0e0e0",
                   borderRadius: "10px",
-                  minWidth: "270px",
+                  minWidth: "360px",
                 }}
               >
                 <div className="pricing_top"
@@ -148,10 +236,7 @@ const PackageDetailsPage = () => {
                     marginBottom: "10px",
                   }}
                 >
-                  <div className="pricing_left_section"
-                    style={{
-                    }}
-                  >
+                  <div className="pricing_left_section">
                     <div className="undefined">
                       <div className="productpricing_currentprice"
                         style={{
@@ -221,155 +306,186 @@ const PackageDetailsPage = () => {
                   </button>
                 </div>
               </div>
-              {/*Lead Form */}
-              <div className="StickyForm_package shadow-sm"
-                style={{
-                  position: 'sticky',
-                  top: '10px',
-                  zIndex: 3,
-                  display: 'flex',
-                  flexDirection: 'column',
-                  gap: '20px',
-                  transition: "all 0.3s ease-in-out"
-                }}
+
+              {/* Mobile Lead Form - Slide Up Animation */}
+              <div
+                ref={formRef}
+                className={`StickyForm_package shadow-lg fixed left-0 right-0 bottom-0 w-full max-h-[90vh] overflow-auto bg-white rounded-t-2xl transition-transform duration-300 ease-in-out z-50 ${isFormVisible ? 'translate-y-0' : 'translate-y-full'}`}
               >
-                <div className="productEnquiryform_wrapper px-[5px] py-[15px] border border-[#b3afaf] rounded-lg mt-[10px] max-w-[290px] md:max-w-[360px] min-w-[240px]">
-                  <div className="LeadForm_infoBOx px-3">
-                    <div className="LeadFormProductName text-[#515151] text-[12px] font-bold truncate">
-                      {packageData.title}
-                    </div>
+                <div className="relative p-4">
+                  {/* Close button */}
+                  <button
+                    onClick={toggleForm}
+                    className="absolute top-2 right-2 w-8 h-8 flex items-center justify-center rounded-full bg-gray-100 text-gray-700 hover:bg-gray-200"
+                  >
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                      <path d="M4.646 4.646a.5.5 0 0 1 .708 0L8 7.293l2.646-2.647a.5.5 0 0 1 .708.708L8.707 8l2.647 2.646a.5.5 0 0 1-.708.708L8 8.707l-2.646 2.647a.5.5 0 0 1-.708-.708L7.293 8 4.646 5.354a.5.5 0 0 1 0-.708z" />
+                    </svg>
+                  </button>
 
-                    {/* Price Section */}
-                    <div className="LeadForm_priceWrapper flex items-center mt-2">
-                      <div className="package_actual_price font-semibold text-[16px] text-gray-900 mr-2">
-                        ₹ {packageData.discountedPrice}
-                      </div>
-                      <div className="package_dicounted_price line-through text-[12px] text-gray-500">
-                        ₹ {packageData.realPrice}
+                  {/* Handle/Drag indicator */}
+                  <div className="w-12 h-1 bg-gray-300 rounded-full mx-auto mb-4"></div>
+
+                  <div className="productEnquiryform_wrapper px-[5px] py-[15px] border border-[#b3afaf] rounded-lg max-w-full mx-auto">
+                    <div className="LeadForm_infoBOx px-3">
+                      <div className="LeadFormProductName text-[#515151] text-[12px] font-bold truncate">
+                        {packageData.title}
                       </div>
 
-                      {/* Save Price Tag */}
-                      <span className="LeadForm_SavePrice_leftBorderICon h-[24px] ml-[5px]"><svg width="4" height="24" viewBox="0 0 4 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M2.65992 3L0 6L2.65992 9L0 12L2.65992 15L0 18L2.65992 21L0 24H3.5V0H0L2.65992 3Z" fill="#E5F1E8"></path></svg>
-                      </span>
-                      {packageData.realPrice > packageData.discountedPrice && (
-                        <span className="LeadForm_saveprice"
+                      {/* Price Section */}
+                      <div className="LeadForm_priceWrapper flex items-center mt-2">
+                        <div className="package_actual_price font-semibold text-[16px] text-gray-900 mr-2">
+                          ₹ {packageData.discountedPrice}
+                        </div>
+                        <div className="package_dicounted_price line-through text-[12px] text-gray-500">
+                          ₹ {packageData.realPrice}
+                        </div>
+
+                        {/* Save Price Tag */}
+                        <span className="LeadForm_SavePrice_leftBorderICon h-[24px] ml-[5px]">
+                          <svg width="4" height="24" viewBox="0 0 4 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M2.65992 3L0 6L2.65992 9L0 12L2.65992 15L0 18L2.65992 21L0 24H3.5V0H0L2.65992 3Z" fill="#E5F1E8"></path>
+                          </svg>
+                        </span>
+                        {packageData.realPrice > packageData.discountedPrice && (
+                          <span className="LeadForm_saveprice"
+                            style={{
+                              display: 'flex',
+                              alignItems: 'center',
+                              padding: '5px 2px',
+                              color: '#0b822a',
+                              fontSize: '9px',
+                              fontWeight: '500',
+                              lineHeight: '14px',
+                              textTransform: "capitalize",
+                              background: 'linear-gradient(90deg, #0b822a1c 3.64%, #0b822a1a)',
+                              gap: '3px',
+                              marginLeft: '-.5px',
+                              marginRight: '-.5px'
+                            }}
+                          >
+                            Save ₹{(packageData.realPrice - packageData.discountedPrice).toLocaleString()}
+                          </span>
+                        )}
+                        <span className="LeadForm_savePrice_RightBorderIcon"
                           style={{
-                            display: 'flex',
-                            alignItems: 'center',
-                            padding: '5px 2px',
-                            color: '#0b822a',
-                            fontSize: '9px',
-                            fontWeight: '500',
-                            lineHeight: '14px',
-                            textTransform: "capitalize",
-                            background: 'linear-gradient(90deg, #0b822a1c 3.64%, #0b822a1a)',
-                            gap: '3px',
-                            marginLeft: '-.5px',
-                            marginRight: '-.5px'
+                            transform: 'rotate(180deg)',
+                            height: '24px'
                           }}
                         >
-                          Save ₹{(packageData.realPrice - packageData.discountedPrice).toLocaleString()}
+                          <svg width="4" height="24" viewBox="0 0 4 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M2.65992 3L0 6L2.65992 9L0 12L2.65992 15L0 18L2.65992 21L0 24H3.5V0H0L2.65992 3Z" fill="#E5F1E8"></path>
+                          </svg>
                         </span>
-                      )}
-                      <span className="LeadForm_savePrice_RightBorderIcon"
-                        style={{
-                          transform: 'rotate(180deg)',
-                          height: '24px'
-                        }}
-                      >
-                        <svg width="4" height="24" viewBox="0 0 4 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M2.65992 3L0 6L2.65992 9L0 12L2.65992 15L0 18L2.65992 21L0 24H3.5V0H0L2.65992 3Z" fill="#E5F1E8"></path></svg>
-                      </span>
-                    </div>
-                  </div>
-
-                  {/* Enquiry Form */}
-                  <div className="p-4">
-                    <form className="flex flex-col space-y-3">
-                      <input
-                        type="text"
-                        placeholder="Full Name*"
-                        className="w-full px-4 py-3 rounded border border-gray-300 focus:outline-none focus:ring-2 focus:ring-orange-400"
-                        required
-                      />
-
-                      <input
-                        type="email"
-                        placeholder="Email*"
-                        className="w-full px-4 py-3 rounded border border-gray-300 focus:outline-none focus:ring-2 focus:ring-orange-400"
-                        required
-                      />
-
-                      {/* Phone Input */}
-                      <div className="flex space-x-2">
-                        <select className="w-1/3 px-4 py-3 rounded border border-gray-300 focus:outline-none focus:ring-2 focus:ring-orange-400">
-                          <option value="+91">+91</option>
-                        </select>
-                        <input
-                          type="tel"
-                          placeholder="Your Phone*"
-                          className="w-2/3 px-4 py-3 rounded border border-gray-300 focus:outline-none focus:ring-2 focus:ring-orange-400"
-                          required
-                        />
                       </div>
+                    </div>
 
-                      {/* Travel Date & Traveller Count */}
-                      <div className="flex space-x-2">
+                    {/* Enquiry Form */}
+                    <div className="p-4">
+                      <form className="flex flex-col space-y-3">
                         <input
                           type="text"
-                          placeholder="Travel Date*"
-                          onFocus={(e) => (e.target.type = 'date')}
-                          onBlur={(e) => (e.target.type = 'text')}
-                          className="w-1/2 px-4 py-3 rounded border border-gray-300 focus:outline-none focus:ring-2 focus:ring-orange-400"
+                          placeholder="Full Name*"
+                          className="w-full px-4 py-3 rounded border border-gray-300 focus:outline-none focus:ring-2 focus:ring-orange-400"
                           required
                         />
+
                         <input
-                          type="number"
-                          placeholder="Traveller Count*"
-                          className="w-1/2 px-4 py-3 rounded border border-gray-300 focus:outline-none focus:ring-2 focus:ring-orange-400"
+                          type="email"
+                          placeholder="Email*"
+                          className="w-full px-4 py-3 rounded border border-gray-300 focus:outline-none focus:ring-2 focus:ring-orange-400"
                           required
                         />
-                      </div>
 
-                      <textarea
-                        placeholder="Message..."
-                        rows="3"
-                        className="w-full px-4 py-3 rounded border border-gray-300 focus:outline-none focus:ring-2 focus:ring-orange-400 resize-none"
-                      ></textarea>
+                        {/* Phone Input */}
+                        <div className="flex space-x-2">
+                          <select className="w-1/3 px-4 py-3 rounded border border-gray-300 focus:outline-none focus:ring-2 focus:ring-orange-400">
+                            <option value="+91">+91</option>
+                          </select>
+                          <input
+                            type="tel"
+                            placeholder="Your Phone*"
+                            className="w-2/3 px-4 py-3 rounded border border-gray-300 focus:outline-none focus:ring-2 focus:ring-orange-400"
+                            required
+                          />
+                        </div>
 
-                      {/* Enquiry Button */}
-                      <button className="Booking_button bg-transparent text-[#f37002] hover:bg-[#f37002] hover:text-white"
-                        style={{
-                          display: 'flex',
-                          justifyContent: 'center',
-                          alignItems: 'center',
-                          width: '100%',
-                          height: '51px',
-                          borderRadius: '7px',
-                          border: '1px solid #f37002',
-                          fontSize: '20px',
-                          fontWeight: '600',
-                          cursor: 'pointer'
-                        }}
-                      >
-                        <span>Enquiry Now</span>
-                      </button>
-                    </form>
+                        {/* Travel Date & Traveller Count */}
+                        <div className="flex space-x-2">
+                          <input
+                            type="text"
+                            placeholder="Travel Date*"
+                            onFocus={(e) => (e.target.type = 'date')}
+                            onBlur={(e) => (e.target.type = 'text')}
+                            className="w-1/2 px-4 py-3 rounded border border-gray-300 focus:outline-none focus:ring-2 focus:ring-orange-400"
+                            required
+                          />
+                          <input
+                            type="number"
+                            placeholder="Traveller Count*"
+                            className="w-1/2 px-4 py-3 rounded border border-gray-300 focus:outline-none focus:ring-2 focus:ring-orange-400"
+                            required
+                          />
+                        </div>
+
+                        <textarea
+                          placeholder="Message..."
+                          rows="3"
+                          className="w-full px-4 py-3 rounded border border-gray-300 focus:outline-none focus:ring-2 focus:ring-orange-400 resize-none"
+                        ></textarea>
+
+                        {/* Enquiry Button */}
+                        <button
+                          type="submit"
+                          className="Booking_button bg-transparent text-[#f37002] hover:bg-[#f37002] hover:text-white"
+                          style={{
+                            display: 'flex',
+                            justifyContent: 'center',
+                            alignItems: 'center',
+                            width: '100%',
+                            height: '51px',
+                            borderRadius: '7px',
+                            border: '1px solid #f37002',
+                            fontSize: '20px',
+                            fontWeight: '600',
+                            cursor: 'pointer'
+                          }}
+                        >
+                          <span>Enquiry Now</span>
+                        </button>
+                      </form>
+                    </div>
                   </div>
                 </div>
               </div>
             </div>
+
+            {/* Fixed Send Enquiry button at bottom */}
+            {!isFormVisible && (
+              <div className="fixed bottom-0 left-0 right-0 mx-auto w-[100%] max-w-md bg-white p-6 shadow-xl z-40">
+                <button
+                  onClick={toggleForm}
+                  className="w-full bg-[#f37002] text-white py-3 rounded-lg text-lg font-semibold flex items-center justify-center space-x-2"
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16" className="mr-2">
+                    <path d="M0 4a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V4Zm2-1a1 1 0 0 0-1 1v.217l7 4.2 7-4.2V4a1 1 0 0 0-1-1H2Zm13 2.383-4.708 2.825L15 11.105V5.383Zm-.034 6.876-5.64-3.471L8 9.583l-1.326-.795-5.64 3.47A1 1 0 0 0 2 13h12a1 1 0 0 0 .966-.741ZM1 11.105l4.708-2.897L1 5.383v5.722Z" />
+                  </svg>
+                  <span>Send Enquiry</span>
+                </button>
+              </div>
+            )}
           </div>
           <div className="TourPackage_body_left">
             <div className="TourPackage_body_left_title">
               {/* Title and Details */}
-              <h1 className="title_package text-[1.2rem] md:text-[1.5rem]"
+              <h1 className="title_package text-[1rem] md:text-[1.5rem]"
                 style={{
                   fontWeight: "700",
                   lineHeight: "45px",
                   color: "#515151",
                 }}
               >{loading ? <Skeleton width={300} /> : packageData.title}</h1>
-              <p className="text-gray-600 mt-2">{loading ? <Skeleton count={3} /> : packageData.description}</p>
+              <p className="text-gray-600 mt-2 text-[12px] md:text-[16px]">{loading ? <Skeleton count={3} /> : packageData.description}</p>
               <div className="package_duration"
                 style={{
                   display: "flex",
@@ -470,7 +586,7 @@ const PackageDetailsPage = () => {
               )}
 
               <div className="LineDivider_tourPackageDivider my-8 mx-0 w-[95%] h-[1px] border-t-[1px] border-t-[#e0e0e0]"></div>
-              {/* Itinerary */}
+
               {packageData.itinerary && packageData.itinerary.length > 0 && (
                 <div className="mb-6">
                   <h3 className="text-2xl font-bold mb-4">Itinerary</h3>
@@ -495,7 +611,7 @@ const PackageDetailsPage = () => {
                             onClick={onClickHandler}
                             key={index}
                             tabIndex={0}
-                            className={`inline-block h-2 w-2 mx-1 rounded-full ${isSelected ? 'bg-white' : 'bg-white bg-opacity-50'
+                            className={`hidden md:inline-block h-2 w-2 mx-1 rounded-full ${isSelected ? 'bg-white' : 'bg-white bg-opacity-50'
                               }`}
                             style={{ margin: '0 4px' }}
                           />
@@ -538,7 +654,7 @@ const PackageDetailsPage = () => {
                     </button>
 
                     {/* Fixed Slide Counter - Bottom center */}
-                    <div className="absolute bottom-6 left-0 right-0 z-20">
+                    <div className="absolute bottom-6 left-0 right-0 z-20 hidden md:block">
                       <div className="flex justify-center">
                         <div className="bg-black bg-opacity-50 text-white px-3 py-1 rounded-full text-sm">
                           {currentSlide + 1}/{packageData.images.length}
@@ -577,7 +693,7 @@ const PackageDetailsPage = () => {
                                 fontSize: "11px",
                                 fontWeight: "600",
                                 lineHeight: "14px",
-                                marginLeft:'2px'
+                                marginLeft: '2px'
                               }}
                             >
                               Days in
@@ -673,7 +789,7 @@ const PackageDetailsPage = () => {
             </div>
           </div>
           {/* Right Section */}
-          <div className="TourPackage_body_right hidden md:block ">
+          <div className="TourPackage_body_right hidden md:block">
             <div className="tour_packageright_wrapper"
               style={{
                 display: 'flex',
@@ -683,27 +799,25 @@ const PackageDetailsPage = () => {
               }}
             >
               {/* Pricing */}
-              <div className="pricing_card"
+              <div className="pricing_card w-full"
                 style={{
                   padding: "15px",
                   border: "1px solid #e0e0e0",
                   borderRadius: "10px",
-                  minWidth: "360px",
                 }}
               >
                 <div className="pricing_top"
                   style={{
                     display: "flex",
+                    flexDirection: "row",
                     justifyContent: "space-between",
-                    gap: "20px",
+                    gap: "10px",
                     marginBottom: "10px",
+                    flexWrap: "wrap",
                   }}
                 >
-                  <div className="pricing_left_section"
-                    style={{
-                    }}
-                  >
-                    <div className="undefined">
+                  <div className="pricing_left_section">
+                    <div>
                       <div className="productpricing_currentprice"
                         style={{
                           display: "flex",
@@ -733,22 +847,10 @@ const PackageDetailsPage = () => {
                       </div>
                     </div>
                   </div>
-                  <div className="package_pricing_rightsection relative">
+                  <div className="package_pricing_rightsection">
                     <div className="package_seat flex gap-[5px] items-center cursor-pointer font-semibold text-black">
                       Avilable Seat :
                       <span className="text-[#515151] font-bold">{packageData.availableSeats}</span>
-                    </div>
-                    <div className="packagepricing_dealwrapper"
-                      style={{
-                        minWidth: 'max-content',
-                        position: 'absolute',
-                        bottom: '0',
-                        right: '-15px',
-                        display: 'flex',
-                        justifyContent: 'flex-end',
-                        transform: 'scale(0.85)'
-                      }}
-                    >
                     </div>
                   </div>
                 </div>
@@ -772,8 +874,9 @@ const PackageDetailsPage = () => {
                   </button>
                 </div>
               </div>
+
               {/*Lead Form */}
-              <div className="StickyForm_package shadow-sm"
+              <div className="StickyForm_package shadow-sm w-full"
                 style={{
                   position: 'sticky',
                   top: '10px',
@@ -784,87 +887,59 @@ const PackageDetailsPage = () => {
                   transition: "all 0.3s ease-in-out"
                 }}
               >
-                <div className="productEnquiryform_wrapper px-[5px] py-[15px] border border-[#e0e0e0] rounded-lg mt-[10px] max-w-[390px] min-w-[340px] min-h-[500px]">
-                  <div className="LeadForm_infoBOx"
-                    style={{
-                      display: 'flex',
-                      flexDirection: 'column',
-                      padding: '0 10px',
-                      maxWidth: 'calc(100vw - 100ppx)',
-                      height: '45px'
-                    }}
-                  >
-                    <div className="LeadFormProductName text-[#515151] text-[14px] font-bold"
-                      style={{
-                        lineHeight: '19px',
-                        textTransform: 'capitalize',
-                        display: 'flex',
-                        overflow: 'hidden',
-                        textOverflow: 'ellipsis'
-                      }}
-                    >
+                <div className="productEnquiryform_wrapper px-[5px] py-[15px] border border-[#e0e0e0] rounded-lg mt-[10px] w-full">
+                  <div className="LeadForm_infoBOx px-3">
+                    <div className="LeadFormProductName text-[#515151] text-[14px] font-bold truncate">
                       {packageData.title}
                     </div>
-                    <div className="LeadForm_priceWrapper flex flex-row gap-0 items-center mt-1">
-                      <div className="package_actual_price"
-                        style={{
-                          display: 'flex',
-                          alignItems: 'center',
-                          fontSize: '15px',
-                          fontWeight: 600,
-                          lineHeight: '23px',
-                          marginRight: '5px',
-                          color: '#202020'
-                        }}
-                      >
+
+                    <div className="LeadForm_priceWrapper flex flex-wrap items-center mt-1">
+                      <div className="package_actual_price font-semibold text-[15px] text-gray-900 mr-2">
                         ₹ {packageData.discountedPrice}
                       </div>
-                      <div className="package_dicounted_price line-through"
-                        style={{
-                          display: 'flex',
-                          alignItems: 'center',
-                          fontSize: '12px',
-                          fontWeight: '300',
-                          lineHeight: '18px',
-                          color: '#515151',
-                        }}
-                      >
+                      <div className="package_dicounted_price line-through text-[12px] text-gray-500 mr-2">
                         ₹ {packageData.realPrice}
                       </div>
-                      <span className="LeadForm_SavePrice_leftBorderICon h-[24px] ml-[5px]"><svg width="4" height="24" viewBox="0 0 4 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M2.65992 3L0 6L2.65992 9L0 12L2.65992 15L0 18L2.65992 21L0 24H3.5V0H0L2.65992 3Z" fill="#E5F1E8"></path></svg>
-                      </span>
+
                       {packageData.realPrice > packageData.discountedPrice && (
-                        <span className="LeadForm_saveprice"
-                          style={{
-                            display: 'flex',
-                            alignItems: 'center',
-                            padding: '5px 2px',
-                            color: '#0b822a',
-                            fontSize: '9px',
-                            fontWeight: '500',
-                            lineHeight: '14px',
-                            textTransform: "capitalize",
-                            background: 'linear-gradient(90deg, #0b822a1c 3.64%, #0b822a1a)',
-                            gap: '3px',
-                            marginLeft: '-.5px',
-                            marginRight: '-.5px'
-                          }}
-                        >
-                          Save ₹{(packageData.realPrice - packageData.discountedPrice).toLocaleString()}
-                        </span>
+                        <div className="flex items-center">
+                          <span className="LeadForm_SavePrice_leftBorderICon h-[24px]">
+                            <svg width="4" height="24" viewBox="0 0 4 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                              <path d="M2.65992 3L0 6L2.65992 9L0 12L2.65992 15L0 18L2.65992 21L0 24H3.5V0H0L2.65992 3Z" fill="#E5F1E8"></path>
+                            </svg>
+                          </span>
+                          <span className="LeadForm_saveprice"
+                            style={{
+                              display: 'flex',
+                              alignItems: 'center',
+                              padding: '5px 2px',
+                              color: '#0b822a',
+                              fontSize: '9px',
+                              fontWeight: '500',
+                              lineHeight: '14px',
+                              textTransform: "capitalize",
+                              background: 'linear-gradient(90deg, #0b822a1c 3.64%, #0b822a1a)',
+                            }}
+                          >
+                            Save ₹{(packageData.realPrice - packageData.discountedPrice).toLocaleString()}
+                          </span>
+                          <span className="LeadForm_savePrice_RightBorderIcon"
+                            style={{
+                              transform: 'rotate(180deg)',
+                              height: '24px'
+                            }}
+                          >
+                            <svg width="4" height="24" viewBox="0 0 4 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                              <path d="M2.65992 3L0 6L2.65992 9L0 12L2.65992 15L0 18L2.65992 21L0 24H3.5V0H0L2.65992 3Z" fill="#E5F1E8"></path>
+                            </svg>
+                          </span>
+                        </div>
                       )}
-                      <span className="LeadForm_savePrice_RightBorderIcon"
-                        style={{
-                          transform: 'rotate(180deg)',
-                          height: '24px'
-                        }}
-                      >
-                        <svg width="4" height="24" viewBox="0 0 4 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M2.65992 3L0 6L2.65992 9L0 12L2.65992 15L0 18L2.65992 21L0 24H3.5V0H0L2.65992 3Z" fill="#E5F1E8"></path></svg>
-                      </span>
                     </div>
                   </div>
+
                   {/* Lead Form structure */}
-                  <div className="max-w-full mx-auto p-4">
+                  <div className="w-full mx-auto p-4">
                     <form className="flex flex-col space-y-4">
                       <input
                         type="text"
@@ -882,13 +957,13 @@ const PackageDetailsPage = () => {
 
                       {/* Phone Input */}
                       <div className="flex space-x-2">
-                        <select className="w-1/3 px-4 py-3 rounded border border-gray-300 focus:outline-none focus:ring-2 focus:ring-orange-400">
+                        <select className="w-1/4 px-2 py-3 rounded border border-gray-300 focus:outline-none focus:ring-2 focus:ring-orange-400">
                           <option value="+91">+91</option>
                         </select>
                         <input
                           type="tel"
                           placeholder="Your Phone*"
-                          className="w-2/3 px-4 py-3 rounded border border-gray-300 focus:outline-none focus:ring-2 focus:ring-orange-400"
+                          className="w-3/4 px-4 py-3 rounded border border-gray-300 focus:outline-none focus:ring-2 focus:ring-orange-400"
                           required
                         />
                       </div>
@@ -984,20 +1059,27 @@ const PackageDetailsPage = () => {
             </div>
           </div>
         </div>
+
         <div className="LineDivider_tourPackageDivider my-8 mx-0 w-[95%] h-[1px] border-t-[1px] border-t-[#e0e0e0]"></div>
         <RelatedPackages categoryId={packageData.categoryId?._id} currentPackageId={packageData._id} />
         <div className="LineDivider_tourPackageDivider my-8 mx-0 w-[95%] h-[1px] border-t-[1px] border-t-[#e0e0e0]"></div>
         <ReviewsSection packageId={packageData._id} />
-
       </div>
 
       {/* Image Gallery */}
       {
         showImageGallery && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex">
-            <div className="w-[80%] bg-white overflow-y-auto p-6">
+          <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex transition-opacity duration-300 ease-in-out">
+            <div
+              className="w-full md:w-[80%] bg-white overflow-y-auto p-6"
+              style={{
+                animation: galleryClosing
+                  ? 'slideOutToLeft 1s ease-in-out forwards'
+                  : 'slideInFromLeft 1s ease-out'
+              }}
+            >
               <button
-                onClick={() => setShowImageGallery(false)}
+                onClick={closeGallery}
                 className="mb-4 text-lg text-black hover:text-gray-800"
               >
                 ← Back

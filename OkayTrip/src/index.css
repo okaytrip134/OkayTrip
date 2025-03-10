@@ -130,3 +130,19 @@ body{
     margin: 0 auto;
     width: 84vw;
   } */
+  @keyframes slideInFromLeft {
+    from { 
+      transform: translateX(-100%);
+    }
+    to { 
+      transform: translateX(0);
+    }
+  }
+  @keyframes slideOutToLeft {
+    from { 
+      transform: translateX(0);
+    }
+    to { 
+      transform: translateX(-100%);
+    }
+  }
