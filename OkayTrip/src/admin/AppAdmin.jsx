@@ -10,6 +10,7 @@ import BookingReport from "./pages/BookingReport";
 import AdminBookings from "./pages/AdminBookings";
 import AdminBannerManager from "./pages/AdminBannerManager";
 import AdminReviews from "./pages/AdminReview";
+import LeadsPage from "./pages/AdminLeads";
 
 const AppAdmin = () => {
   return (
@@ -25,7 +26,7 @@ const AppAdmin = () => {
           <Route path="booking-report" element= {<AdminBookings/>}/>
           <Route path="banner-manager" element= {<AdminBannerManager/>}/>
           <Route path="Admin-reviews" element= {<AdminReviews/>}/>
-
+          <Route path="Leads" element={<LeadsPage/>} />
         </Route>
         <Route path="*" element={<div>404 Not Found</div>} />
       </Routes>

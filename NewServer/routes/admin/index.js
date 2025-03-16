@@ -10,16 +10,18 @@ const packageRoutes = require("./packageRoutes");
 const bookingRoutes = require("./bookingRoutes"); // Import the new route
 const bannerRoutes = require("./bannerRoutes");
 const reviewRoutes = require("./reviewRoutes");
+const leadRoutes = require('./leadRoutes');
 
 // Add all admin routes
-router.use("/auth", authRouter); // Admin authentication routes
-router.use("/top-sale-bar", topSaleBarAdminRoutes); // Top sale bar routes
-router.get("/users", authMiddleware, adminAuth, getAllUsers); // Ensure correct middleware
-router.delete("/users/:id", authMiddleware, adminAuth, deleteUser); // Add delete user route
+router.use("/auth", authRouter); 
+router.use("/top-sale-bar", topSaleBarAdminRoutes); 
+router.get("/users", authMiddleware, adminAuth, getAllUsers); 
+router.delete("/users/:id", authMiddleware, adminAuth, deleteUser); 
 router.use("/categories", categoryRoutes);
 router.use("/packages", packageRoutes);
-router.use("/bookings", bookingRoutes); // Add the booking route
+router.use("/bookings", bookingRoutes); 
 router.use("/banner", bannerRoutes);
-router.use("/reviews", reviewRoutes)
+router.use("/reviews", reviewRoutes);
+router.use("/leads", leadRoutes); 
 
 module.exports = router;

@@ -34,6 +34,12 @@ const PackageDetailsPage = () => {
   const [isFormVisible, setIsFormVisible] = useState(false);
   const [averageRating, setAverageRating] = useState(null);
   const [totalReviews, setTotalReviews] = useState(0);
+  const [fullName, setFullName] = useState("");
+  const [email, setEmail] = useState("");
+  const [phone, setPhone] = useState("");
+  const [travelDate, setTravelDate] = useState("");
+  const [travellerCount, setTravellerCount] = useState("");
+  const [message, setMessage] = useState("");
 
   const [reviews, setReviews] = useState([]);
   const [ratingStats, setRatingStats] = useState({
@@ -144,6 +150,40 @@ const PackageDetailsPage = () => {
   if (!packageData) {
     return <div className="text-center py-10">Package not found.</div>;
   }
+  // lead form submission
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+
+    const formData = {
+      packageId: packageData._id,
+      packageTitle: packageData.title, // 🟢 Send package title
+      fullName,
+      email,
+      phone,
+      travelDate,
+      travellerCount,
+      message,
+    };
+
+    try {
+      const response = await fetch(`${import.meta.env.VITE_APP_API_URL}/api/leads/submit`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(formData),
+      });
+
+      const data = await response.json();
+      if (response.ok) {
+        alert("Enquiry submitted successfully!");
+      } else {
+        alert(data.error || "Failed to submit enquiry");
+      }
+    } catch (error) {
+      console.error("Error submitting enquiry:", error);
+      alert("Something went wrong.");
+    }
+  };
+
 
 
   return (
@@ -328,26 +368,26 @@ const PackageDetailsPage = () => {
                     </div>
                   </div>
                   <div className="package_pricing_rightsection relative">
-                  <div className="flex flex-col gap-2 mt-2">
-                    <div className="text-lg font-semibold">Available Seats: {packageData.availableSeats}</div>
-                    {averageRating !== null ? (
-                      <div className="package_rating flex items-center justify-end gap-2">
-                        {/* <span className="text-black font-semibold">Rating:</span> */}
-                        <span className="flex items-center text-[#f39c12] font-bold">
-                          {averageRating.toFixed(1)}
-                          <span className="flex ml-1">
+                    <div className="flex flex-col gap-2 mt-2">
+                      <div className="text-lg font-semibold">Available Seats: {packageData.availableSeats}</div>
+                      {averageRating !== null ? (
+                        <div className="package_rating flex items-center justify-end gap-2">
+                          {/* <span className="text-black font-semibold">Rating:</span> */}
+                          <span className="flex items-center text-[#f39c12] font-bold">
+                            {averageRating.toFixed(1)}
+                            <span className="flex ml-1">
                               <FaStar
                                 size={16}
                               />
 
+                            </span>
                           </span>
-                        </span>
-                        <span className="text-gray-600 text-sm">({getTotalReviewCount()})</span>
-                      </div>
-                    ) : (
-                      <div className="text-gray-500">4.5 (<FaStar size={16}/>)</div>
-                    )}
-                  </div> 
+                          <span className="text-gray-600 text-sm">({getTotalReviewCount()})</span>
+                        </div>
+                      ) : (
+                        <div className="text-gray-500">4.5 (<FaStar size={16} />)</div>
+                      )}
+                    </div>
                     <div className="packagepricing_dealwrapper"
                       style={{
                         minWidth: 'max-content',
@@ -458,78 +498,87 @@ const PackageDetailsPage = () => {
 
                     {/* Enquiry Form */}
                     <div className="p-4">
-                      <form className="flex flex-col space-y-3">
+                    <form className="flex flex-col space-y-4" onSubmit={handleSubmit}>
+                      <input
+                        type="text"
+                        placeholder="Full Name*"
+                        className="w-full px-4 py-3 rounded border border-gray-300 focus:outline-none focus:ring-2 focus:ring-orange-400"
+                        required
+                        value={fullName}
+                        onChange={(e) => setFullName(e.target.value)}
+                      />
+
+                      <input
+                        type="email"
+                        placeholder="Email*"
+                        className="w-full px-4 py-3 rounded border border-gray-300 focus:outline-none focus:ring-2 focus:ring-orange-400"
+                        required
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)}
+                      />
+
+                      {/* Phone Input */}
+                      <div className="flex space-x-2">
+                        <select className="w-1/4 px-2 py-3 rounded border border-gray-300 focus:outline-none focus:ring-2 focus:ring-orange-400">
+                          <option value="+91">+91</option>
+                        </select>
+                        <input
+                          type="tel"
+                          placeholder="Your Phone*"
+                          className="w-3/4 px-4 py-3 rounded border border-gray-300 focus:outline-none focus:ring-2 focus:ring-orange-400"
+                          required
+                          value={phone}
+                          onChange={(e) => setPhone(e.target.value)}
+                        />
+                      </div>
+
+                      {/* Travel Date & Traveller Count */}
+                      <div className="flex space-x-2">
                         <input
                           type="text"
-                          placeholder="Full Name*"
-                          className="w-full px-4 py-3 rounded border border-gray-300 focus:outline-none focus:ring-2 focus:ring-orange-400"
+                          placeholder="Travel Date*"
+                          onFocus={(e) => (e.target.type = 'date')}
+                          onBlur={(e) => (e.target.type = 'text')}
+                          className="w-1/2 px-4 py-3 rounded border border-gray-300 focus:outline-none focus:ring-2 focus:ring-orange-400"
                           required
+                          value={travelDate}
+                          onChange={(e) => setTravelDate(e.target.value)}
                         />
-
                         <input
-                          type="email"
-                          placeholder="Email*"
-                          className="w-full px-4 py-3 rounded border border-gray-300 focus:outline-none focus:ring-2 focus:ring-orange-400"
+                          type="number"
+                          placeholder="Traveller Count*"
+                          className="w-1/2 px-4 py-3 rounded border border-gray-300 focus:outline-none focus:ring-2 focus:ring-orange-400"
                           required
+                          value={travellerCount}
+                          onChange={(e) => setTravellerCount(e.target.value)}
                         />
+                      </div>
 
-                        {/* Phone Input */}
-                        <div className="flex space-x-2">
-                          <select className="w-1/3 px-4 py-3 rounded border border-gray-300 focus:outline-none focus:ring-2 focus:ring-orange-400">
-                            <option value="+91">+91</option>
-                          </select>
-                          <input
-                            type="tel"
-                            placeholder="Your Phone*"
-                            className="w-2/3 px-4 py-3 rounded border border-gray-300 focus:outline-none focus:ring-2 focus:ring-orange-400"
-                            required
-                          />
-                        </div>
+                      <textarea
+                        placeholder="Message..."
+                        rows="3"
+                        className="w-full px-4 py-3 rounded border border-gray-300 focus:outline-none focus:ring-2 focus:ring-orange-400 resize-none"
+                        value={message}
+                        onChange={(e) => setMessage(e.target.value)}
+                      ></textarea>
 
-                        {/* Travel Date & Traveller Count */}
-                        <div className="flex space-x-2">
-                          <input
-                            type="text"
-                            placeholder="Travel Date*"
-                            onFocus={(e) => (e.target.type = 'date')}
-                            onBlur={(e) => (e.target.type = 'text')}
-                            className="w-1/2 px-4 py-3 rounded border border-gray-300 focus:outline-none focus:ring-2 focus:ring-orange-400"
-                            required
-                          />
-                          <input
-                            type="number"
-                            placeholder="Traveller Count*"
-                            className="w-1/2 px-4 py-3 rounded border border-gray-300 focus:outline-none focus:ring-2 focus:ring-orange-400"
-                            required
-                          />
-                        </div>
-
-                        <textarea
-                          placeholder="Message..."
-                          rows="3"
-                          className="w-full px-4 py-3 rounded border border-gray-300 focus:outline-none focus:ring-2 focus:ring-orange-400 resize-none"
-                        ></textarea>
-
-                        {/* Enquiry Button */}
-                        <button
-                          type="submit"
-                          className="Booking_button bg-transparent text-[#f37002] hover:bg-[#f37002] hover:text-white"
-                          style={{
-                            display: 'flex',
-                            justifyContent: 'center',
-                            alignItems: 'center',
-                            width: '100%',
-                            height: '51px',
-                            borderRadius: '7px',
-                            border: '1px solid #f37002',
-                            fontSize: '20px',
-                            fontWeight: '600',
-                            cursor: 'pointer'
-                          }}
-                        >
-                          <span>Enquiry Now</span>
-                        </button>
-                      </form>
+                      <button className="Booking_button bg-transparent text-[#f37002] hover:bg-[#f37002] hover:text-white"
+                        style={{
+                          display: 'flex',
+                          justifyContent: 'center',
+                          alignItems: 'center',
+                          width: '100%',
+                          height: '51px',
+                          borderRadius: '7px',
+                          border: '1px solid #f37002',
+                          fontSize: '20px',
+                          fontWeight: '600',
+                          cursor: 'pointer'
+                        }}
+                      >
+                        <span>Enquiry Now</span>
+                      </button>
+                    </form>
                     </div>
                   </div>
                 </div>
@@ -744,7 +793,7 @@ const PackageDetailsPage = () => {
                         <div className="DestinationInfoItem flex items-center gap-2 flex-row">
                           {/* Number of Days */}
                           <div
-                            className="DestinationInfo_noOfDays text-[35px] md:text-[45px]"
+                            className="DestinationInfo_noOfDays text-[30px] md:text-[45px]"
                             style={{
                               // fontSize: "45px",
                               fontWeight: "700",
@@ -931,16 +980,16 @@ const PackageDetailsPage = () => {
                         <span className="flex items-center text-[#f39c12] font-bold">
                           {averageRating.toFixed(1)}
                           <span className="flex ml-1">
-                              <FaStar
-                                size={16}
-                              />
+                            <FaStar
+                              size={16}
+                            />
 
                           </span>
                         </span>
                         <span className="text-gray-600 text-sm">({getTotalReviewCount()})</span>
                       </div>
                     ) : (
-                      <div className="text-gray-500">4.5 (<FaStar size={16}/>)</div>
+                      <div className="text-gray-500">4.5 (<FaStar size={16} />)</div>
                     )}
                   </div>
 
@@ -1031,12 +1080,14 @@ const PackageDetailsPage = () => {
 
                   {/* Lead Form structure */}
                   <div className="w-full mx-auto p-4">
-                    <form className="flex flex-col space-y-4">
+                    <form className="flex flex-col space-y-4" onSubmit={handleSubmit}>
                       <input
                         type="text"
                         placeholder="Full Name*"
                         className="w-full px-4 py-3 rounded border border-gray-300 focus:outline-none focus:ring-2 focus:ring-orange-400"
                         required
+                        value={fullName}
+                        onChange={(e) => setFullName(e.target.value)}
                       />
 
                       <input
@@ -1044,6 +1095,8 @@ const PackageDetailsPage = () => {
                         placeholder="Email*"
                         className="w-full px-4 py-3 rounded border border-gray-300 focus:outline-none focus:ring-2 focus:ring-orange-400"
                         required
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)}
                       />
 
                       {/* Phone Input */}
@@ -1056,6 +1109,8 @@ const PackageDetailsPage = () => {
                           placeholder="Your Phone*"
                           className="w-3/4 px-4 py-3 rounded border border-gray-300 focus:outline-none focus:ring-2 focus:ring-orange-400"
                           required
+                          value={phone}
+                          onChange={(e) => setPhone(e.target.value)}
                         />
                       </div>
 
@@ -1068,12 +1123,16 @@ const PackageDetailsPage = () => {
                           onBlur={(e) => (e.target.type = 'text')}
                           className="w-1/2 px-4 py-3 rounded border border-gray-300 focus:outline-none focus:ring-2 focus:ring-orange-400"
                           required
+                          value={travelDate}
+                          onChange={(e) => setTravelDate(e.target.value)}
                         />
                         <input
                           type="number"
                           placeholder="Traveller Count*"
                           className="w-1/2 px-4 py-3 rounded border border-gray-300 focus:outline-none focus:ring-2 focus:ring-orange-400"
                           required
+                          value={travellerCount}
+                          onChange={(e) => setTravellerCount(e.target.value)}
                         />
                       </div>
 
@@ -1081,6 +1140,8 @@ const PackageDetailsPage = () => {
                         placeholder="Message..."
                         rows="3"
                         className="w-full px-4 py-3 rounded border border-gray-300 focus:outline-none focus:ring-2 focus:ring-orange-400 resize-none"
+                        value={message}
+                        onChange={(e) => setMessage(e.target.value)}
                       ></textarea>
 
                       <button className="Booking_button bg-transparent text-[#f37002] hover:bg-[#f37002] hover:text-white"

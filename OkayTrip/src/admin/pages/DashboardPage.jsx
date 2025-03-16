@@ -12,6 +12,7 @@ import {
   MenuOutlined,
   DownOutlined,
   SettingOutlined,
+  PieChartOutlined,
 } from "@ant-design/icons";
 import { Dropdown, Menu } from "antd";
 import dasboard from '../../assets/icons/ic-analysis.svg';
@@ -26,15 +27,19 @@ import { FaComment } from "react-icons/fa";
 const DashboardPage = () => {
   const navigate = useNavigate();
   const [isSidebarOpen, setSidebarOpen] = useState(true);
-  const [managementOpen, setManagementOpen] = useState(false);
+  const [openDropdown, setOpenDropdown] = useState(null);
 
   const handleLogout = () => {
     localStorage.removeItem("adminToken");
     navigate("/admin/login");
   };
 
-  const toggleManagement = () => {
-    setManagementOpen(!managementOpen);
+  const toggleDropdown = (dropdownName) => {
+    if (openDropdown === dropdownName) {
+      setOpenDropdown(null); // Close if already open
+    } else {
+      setOpenDropdown(dropdownName); // Open the clicked dropdown
+    }
   };
 
   // Create a reusable SVG icon component
@@ -45,20 +50,30 @@ const DashboardPage = () => {
   const menuItems = [
     { name: "Dashboard", icon: <SvgIcon src={dasboard} alt="Dashboard" />, path: "/admin/dashboard" },
     { name: "Users", icon: <SvgIcon src={user} alt="User"/>, path: "/admin/dashboard/Users" },
+    { name: "Categories", icon: <SvgIcon src={categories} alt="Management" />, path: "/admin/dashboard/Categories" },
+    { name: "Packages", icon: <SvgIcon src={packages} alt="Management" />, path: "/admin/dashboard/Packages" },
     {
       name: "Management",
       icon: <SvgIcon src={setting} alt="Management" />,
       isDropdown: true,
+      dropdownName: "management",
       items: [
         { name: "Banners", icon: <SvgIcon src={packages} alt="Management" />, path: "/admin/dashboard/banner-manager" },
-        {name: "Reviews", icon:<FaComment/>, path: "/admin/dashboard/Admin-reviews"},
+        { name: "Reviews", icon: <FaComment/>, path: "/admin/dashboard/Admin-reviews"},
         { name: "Coupon-Report", icon: <SvgIcon src={packages} alt="Management" />, path: "/admin/dashboard/Coupon-Report" },
         { name: "Top Sale Bar", icon: <BarChartOutlined />, path: "/admin/dashboard/top-sale-bar" },
       ]
     },
-    { name: "Categories", icon: <SvgIcon src={categories} alt="Management" />, path: "/admin/dashboard/Categories" },
-    { name: "Packages", icon: <SvgIcon src={management} alt="Management" />, path: "/admin/dashboard/Packages" },
-    { name: "Booking Report", icon: <SvgIcon src={report} alt="Management" />, path: "/admin/dashboard/booking-report" },
+    {
+      name: "Reports",
+      icon: <PieChartOutlined />, // Changed to PieChartOutlined
+      isDropdown: true,
+      dropdownName: "reports",
+      items: [
+        { name: "Booking Report", icon: <SvgIcon src={report} alt="Reports" />, path: "/admin/dashboard/booking-report" },
+        { name: "Leads", icon: <FileTextOutlined />, path: "/admin/dashboard/Leads" },
+      ]
+    },
   ];
 
   const profileMenu = (
@@ -82,7 +97,7 @@ const DashboardPage = () => {
       >
         <div className="p-4 flex items-center justify-between">
           <h2
-            className={`text-xl font-bold  text-gray-800 transition-all duration-300 ${
+            className={`text-xl font-bold text-gray-800 transition-all duration-300 ${
               isSidebarOpen ? "block" : "hidden"
             }`}
           >
@@ -100,10 +115,10 @@ const DashboardPage = () => {
                 {item.isDropdown ? (
                   <div>
                     <button
-                      className={`w-full flex items-center px-4 py-4 text-gray-700 hover:bg-gray-200 transition-all duration-300 ${
+                      className={`w-full flex items-center px-4 py-2 text-gray-700 hover:bg-gray-200 transition-all duration-300 ${
                         isSidebarOpen ? "justify-start" : "justify-center"
                       }`}
-                      onClick={toggleManagement}
+                      onClick={() => toggleDropdown(item.dropdownName)}
                     >
                       <span className="text-xl">{item.icon}</span>
                       {isSidebarOpen && (
@@ -111,13 +126,13 @@ const DashboardPage = () => {
                           <span className="text-sm font-medium">{item.name}</span>
                           <DownOutlined 
                             className={`transition-transform duration-200 ${
-                              managementOpen ? "transform rotate-180" : ""
+                              openDropdown === item.dropdownName ? "transform rotate-180" : ""
                             }`}
                           />
                         </div>
                       )}
                     </button>
-                    {isSidebarOpen && managementOpen && (
+                    {isSidebarOpen && openDropdown === item.dropdownName && (
                       <ul className="pl-8 mt-1">
                         {item.items.map((subItem, subIndex) => (
                           <li key={subIndex} className="my-1">
