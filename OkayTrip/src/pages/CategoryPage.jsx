@@ -2,6 +2,8 @@ import React, { useEffect, useState, useRef, useCallback } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import axios from "axios";
 import UserAuth from "../components/UserAuth";
+import { FaStar } from "react-icons/fa"; // Add this import which was missing
+
 // Skeleton Component
 const PackageSkeleton = () => (
   <div className="rounded animate-pulse">
@@ -20,7 +22,6 @@ const PackageSkeleton = () => (
 
 // Blur Image Component
 const BlurImage = ({ src, alt }) => {
-
   const [imageLoaded, setImageLoaded] = useState(false);
 
   return (
@@ -42,6 +43,7 @@ const BlurImage = ({ src, alt }) => {
 };
 
 const CategoryPage = () => {
+  const API_URL = "http://localhost:8000";
   const { categoryId } = useParams();
   const [category, setCategory] = useState(""); // Store Category Name
   const [packages, setPackages] = useState([]);
@@ -53,6 +55,15 @@ const CategoryPage = () => {
   const [selectedPackageId, setSelectedPackageId] = useState(null); // Store package ID
   const navigate = useNavigate();
   const userToken = localStorage.getItem("userToken");
+  const [packageRatings, setPackageRatings] = useState({});
+  const [reviews, setReviews] = useState([]);
+  const [ratingStats, setRatingStats] = useState({
+    5: 0,
+    4: 0,
+    3: 0,
+    2: 0,
+    1: 0
+  });
 
   const handleBooking = (packageId) => {
     if (!userToken) {
@@ -63,22 +74,7 @@ const CategoryPage = () => {
     }
   };
 
-  const lastPackageElementRef = useCallback(
-    (node) => {
-      if (loading) return;
-      if (observer.current) observer.current.disconnect();
-
-      observer.current = new IntersectionObserver((entries) => {
-        if (entries[0].isIntersecting && hasMore) {
-          setPage((prevPage) => prevPage + 1);
-        }
-      });
-
-      if (node) observer.current.observe(node);
-    },
-    [loading, hasMore]
-  );
-
+  // Move all useEffect hooks to the top level of the component
   useEffect(() => {
     const fetchCategoryName = async () => {
       try {
@@ -108,7 +104,101 @@ const CategoryPage = () => {
 
     fetchPackages();
   }, [categoryId]);
-  if (!packages.length && loading) {
+
+  useEffect(() => {
+    if (Object.keys(packages).length === 0) return;
+
+    Object.values(packages).flat().forEach((pkg) => {
+      fetchReviews(pkg._id);
+    });
+  }, [packages]);
+
+  useEffect(() => {
+    const fetchRatingsForPackages = async () => {
+      // Only proceed if we have packages loaded
+      const allPackages = Object.values(packages).flat();
+      if (allPackages.length === 0) return;
+
+      // Create a batch of requests for all package ratings
+      const ratingPromises = allPackages.map(pkg =>
+        fetch(`${import.meta.env.VITE_APP_API_URL}/api/reviews/${pkg._id}/rating`)
+          .then(res => res.ok ? res.json() : { averageRating: 0, totalReviews: 0 })
+          .then(data => ({
+            packageId: pkg._id,
+            averageRating: data.averageRating || 0,
+            totalReviews: data.totalReviews || 0
+          }))
+          .catch(() => ({ packageId: pkg._id, averageRating: 0, totalReviews: 0 }))
+      );
+
+      // Wait for all requests to complete
+      const ratings = await Promise.all(ratingPromises);
+
+      // Convert array to object mapped by package ID
+      const ratingsMap = ratings.reduce((acc, item) => {
+        acc[item.packageId] = {
+          averageRating: item.averageRating,
+          totalReviews: item.totalReviews
+        };
+        return acc;
+      }, {});
+
+      setPackageRatings(ratingsMap);
+    };
+
+    fetchRatingsForPackages();
+  }, [packages]);
+
+  const fetchReviews = async (packageId) => {
+    try {
+      const response = await fetch(`${import.meta.env.VITE_APP_API_URL}/api/reviews/${packageId}`);
+
+      if (!response.ok) throw new Error("Failed to fetch reviews");
+
+      const data = await response.json();
+      console.log("Fetched Reviews for Package:", packageId, data);
+
+      setReviews((prev) => ({
+        ...prev,
+        [packageId]: data.reviews || [],
+      }));
+
+      // Calculate rating statistics
+      const stats = { 5: 0, 4: 0, 3: 0, 2: 0, 1: 0 };
+      data.reviews.forEach((review) => {
+        if (review.rating >= 1 && review.rating <= 5) {
+          stats[review.rating]++;
+        }
+      });
+
+      setRatingStats((prev) => ({
+        ...prev,
+        [packageId]: stats,
+      }));
+
+    } catch (error) {
+      console.error("Error fetching reviews for package:", packageId, error);
+    }
+  };
+
+  const lastPackageElementRef = useCallback(
+    (node) => {
+      if (loading) return;
+      if (observer.current) observer.current.disconnect();
+
+      observer.current = new IntersectionObserver((entries) => {
+        if (entries[0].isIntersecting && hasMore) {
+          setPage((prevPage) => prevPage + 1);
+        }
+      });
+
+      if (node) observer.current.observe(node);
+    },
+    [loading, hasMore]
+  );
+
+  // Only render the UI after all hooks have been called
+  if (loading && !packages.length) {
     return (
       <div className="px-8 lg:px-32 py-8 bg-gray-50 min-h-screen">
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -129,8 +219,8 @@ const CategoryPage = () => {
   }
 
   return (
-    <div className="px-8 lg:px-32 py-8 min-h-screen max-w-[1440px] mx-auto">
-      <h1 className="text-2xl font-bold mb-6">Tours In {category}</h1>
+    <div className="px-8 lg:px-32 py-8 bg-gray-50 min-h-screen max-w-[1440px] mx-auto">
+      <h1 className="text-2xl font-bold mb-6">Packages in this {category}</h1>
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
         {packages.map((pkg, index) => {
           const packageProps =
@@ -142,7 +232,7 @@ const CategoryPage = () => {
             <div
               key={pkg._id}
               {...packageProps}
-              className="rounded transition snap-center max-w-[340px] cursor-pointer"
+              className="rounded transition snap-center w-[340px] cursor-pointer"
               onClick={() => (window.location.href = `/package/${pkg._id}`)} // Redirect on click
             >
               <BlurImage
@@ -150,47 +240,55 @@ const CategoryPage = () => {
                 alt={pkg.title}
               />
 
-              <div className="bg-white rounded-b pt-4 max-w-[340px]">
+              <div className="bg-white rounded-b p-4 w-[340px]">
                 <div className="flex items-center justify-between mb-2">
                   <p className="text-sm text-gray-500">{pkg.duration}</p>
 
                   <div className="flex items-center space-x-1 text-green-600 text-xs">
                     <span className="text-gray-400">Avialable Seats</span>
-                    <span>{pkg.availableSeats}</span>
+                    <span>{pkg.totalSeats}</span>
                   </div>
                 </div>
 
-                <h3 className="text-lg font-semibold text-gray-800 mb-2">
-                  {pkg.title}
-                </h3>
+                {/* Content Element 2: Title */}
+                <div className="content-element mb-2 h-14 overflow-hidden">
+                  <h3 className="text-lg font-semibold text-gray-800">{pkg.title}</h3>
+                </div>
 
                 <p className="text-sm text-gray-500 mb-2">
                   {new Date(pkg.startDate).toLocaleDateString()} -{" "}
                   {new Date(pkg.endDate).toLocaleDateString()}
                 </p>
-
-                <div
-                  className="flex w-full relative rounded-md mb-[2px]"
-                  style={{
-                    background: 'linear-gradient(180deg, rgba(255, 186, 10, .1), rgba(255, 186, 10, 0));'
-                  }}
-                >
-                  <div className="productcard_destinationListBOx flex items-center overflow-hidden, gap-[5px] h-8 my-0 mr-32px ml-7px">
-                    <div className="flex w-max items-center gap-1">
-                      <span className="flex items-center text-xs font-semibold text-[#000]">
-                        {pkg.duration.split(" ")[0]}D
-                      </span>
-                      <span className="flex items-center text-[10px] font-normal text-[#515151] w-max uppercase"
-                        style={
-                          {
-                            fontFamily: 'Helvetica',
-                            letterSpacing: '1px'
-                          }
-                        }
-                      >
-                        {pkg.categoryId ? pkg.categoryId.name : "Category not available"}
-                      </span>
+                {/* Element: 6 */}
+                <div className="flex justify-between">
+                  <div
+                    className="flex w-full relative rounded-md mb-[2px]"
+                    style={{
+                      background: 'linear-gradient(180deg, rgba(255, 186, 10, .1), rgba(255, 186, 10, 0));'
+                    }}
+                  >
+                    <div className="productcard_destinationListBOx flex items-center overflow-hidden, gap-[5px] h-8 my-0 mr-32px ml-7px">
+                      <div className="flex w-max items-center gap-1">
+                        <span className="flex items-center text-xs font-semibold text-[#000]">
+                          {pkg.duration.split(" ")[0]}
+                        </span>
+                        <span className="flex items-center text-xs font-normal text-[#515151] w-max">
+                          {pkg.categoryId ? pkg.categoryId.name : "Category not available"}
+                        </span>
+                      </div>
                     </div>
+                  </div>
+                  {/* Package Rating */}
+                  <div className="package_rating flex items-center content-end gap-2">
+                    <span className="flex items-center text-[#f39c12] font-bold">
+                      {(packageRatings[pkg._id]?.averageRating || 4.3).toFixed(1)}
+                      <span className="flex ml-1">
+                        <FaStar size={16} />
+                      </span>
+                    </span>
+                    <span className="text-gray-600 text-sm">
+                      ({reviews[pkg._id]?.length || 20})
+                    </span>
                   </div>
                 </div>
 
@@ -245,8 +343,12 @@ const CategoryPage = () => {
                     style={{
                       width: 'calc(100% - 61px)'
                     }}
+                    onClick={(e) => {
+                      e.stopPropagation(); // Prevent navigation to package details
+                      handleBooking(pkg._id); // Handle booking logic
+                    }}
                   >
-                    <span className="  ">View Details</span>
+                    <span className="  ">Book Now</span>
                   </div>
                 </div>
               </div>

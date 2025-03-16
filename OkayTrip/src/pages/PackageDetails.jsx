@@ -13,10 +13,10 @@ import { Carousel } from "react-responsive-carousel";
 import UserAuth from "../components/UserAuth";
 import Skeleton from "react-loading-skeleton";
 import "react-loading-skeleton/dist/skeleton.css";
-import { FaAngleDown, FaChevronCircleLeft, FaChevronLeft, FaChevronRight } from "react-icons/fa";
+import { FaAngleDown, FaChevronCircleLeft, FaChevronLeft, FaChevronRight, FaStar } from "react-icons/fa";
 import RelatedPackages from "../components/RelatedPackages";
 import ReviewsSection from "../components/ReviewsSections";
-// import { FaStar, FaRegStar, FaCamera } from "react-icons/fa";
+// import { FaStar, FaRegStar, FaCamera } from "react-icons/fa";  
 
 
 const PackageDetailsPage = () => {
@@ -32,11 +32,55 @@ const PackageDetailsPage = () => {
   const carouselRef = useRef(null);
   const [galleryClosing, setGalleryClosing] = useState(false);
   const [isFormVisible, setIsFormVisible] = useState(false);
+  const [averageRating, setAverageRating] = useState(null);
+  const [totalReviews, setTotalReviews] = useState(0);
+
+  const [reviews, setReviews] = useState([]);
+  const [ratingStats, setRatingStats] = useState({
+    5: 0,
+    4: 0,
+    3: 0,
+    2: 0,
+    1: 0
+  });
   const formRef = useRef(null);
   // const [loading, setLoading] = useState(true);
   const userToken = localStorage.getItem("userToken");
   const toggleForm = () => {
     setIsFormVisible(!isFormVisible);
+  };
+
+  useEffect(() => {
+    fetchReviews();
+    // fetchAverageRating();
+  }, [packageId]);
+  const getTotalReviewCount = () => {
+    return Object.values(ratingStats).reduce((sum, count) => sum + count, 0);
+  };
+
+  const fetchReviews = async () => {
+    try {
+      const response = await fetch(`${import.meta.env.VITE_APP_API_URL}/api/reviews/${packageId}`);
+
+      if (!response.ok) throw new Error("Failed to fetch reviews");
+
+      const data = await response.json();
+      console.log("Fetched Reviews:", data); // ✅ Check if adminResponse is included
+      setReviews(data.reviews);
+      // Calculate rating statistics
+      const stats = { 5: 0, 4: 0, 3: 0, 2: 0, 1: 0 };
+      data.reviews.forEach(review => {
+        if (review.rating >= 1 && review.rating <= 5) {
+          stats[review.rating]++;
+        }
+      });
+      setRatingStats(stats);
+
+      setLoading(false);
+    } catch (error) {
+      console.error("Error fetching reviews:", error);
+      setLoading(false);
+    }
   };
 
   const handleBooking = () => {
@@ -69,8 +113,24 @@ const PackageDetailsPage = () => {
         setLoading(false);
       }
     };
+    const fetchAverageRating = async () => {
+      try {
+        const response = await fetch(
+          `${import.meta.env.VITE_APP_API_URL}/api/reviews/${packageId}/rating`
+        );
+        if (!response.ok) throw new Error("Failed to fetch average rating");
 
+        const data = await response.json();
+        setAverageRating(data.averageRating || 0);
+        setTotalReviews(data.totalReviews || 0);
+      } catch (error) {
+        console.error("Error fetching average rating:", error);
+        setAverageRating(0);
+        setTotalReviews(0);
+      }
+    };
     fetchPackageDetails();
+    fetchAverageRating();
   }, [packageId]);
 
   const toggleDropdown = (index) => {
@@ -225,7 +285,7 @@ const PackageDetailsPage = () => {
                   padding: "15px",
                   border: "1px solid #e0e0e0",
                   borderRadius: "10px",
-                  minWidth: "360px",
+                  // minWidth: "360px",
                 }}
               >
                 <div className="pricing_top"
@@ -268,10 +328,26 @@ const PackageDetailsPage = () => {
                     </div>
                   </div>
                   <div className="package_pricing_rightsection relative">
-                    <div className="package_seat flex gap-[5px] items-center cursor-pointer font-semibold text-black">
-                      Avilable Seat :
-                      <span className="text-[#515151] font-bold">{packageData.availableSeats}</span>
-                    </div>
+                  <div className="flex flex-col gap-2 mt-2">
+                    <div className="text-lg font-semibold">Available Seats: {packageData.availableSeats}</div>
+                    {averageRating !== null ? (
+                      <div className="package_rating flex items-center justify-end gap-2">
+                        {/* <span className="text-black font-semibold">Rating:</span> */}
+                        <span className="flex items-center text-[#f39c12] font-bold">
+                          {averageRating.toFixed(1)}
+                          <span className="flex ml-1">
+                              <FaStar
+                                size={16}
+                              />
+
+                          </span>
+                        </span>
+                        <span className="text-gray-600 text-sm">({getTotalReviewCount()})</span>
+                      </div>
+                    ) : (
+                      <div className="text-gray-500">4.5 (<FaStar size={16}/>)</div>
+                    )}
+                  </div> 
                     <div className="packagepricing_dealwrapper"
                       style={{
                         minWidth: 'max-content',
@@ -636,7 +712,7 @@ const PackageDetailsPage = () => {
                         const prevSlide = currentSlide === 0 ? packageData.images.length - 1 : currentSlide - 1;
                         setCurrentSlide(prevSlide);
                       }}
-                      className="absolute left-4 top-1/2 -translate-y-1/2 z-20 bg-white bg-opacity-50 rounded-full w-10 h-10 flex items-center justify-center hover:bg-opacity-70"
+                      className="absolute left-4 top-1/2 -translate-y-1/2 z-0 bg-white bg-opacity-50 rounded-full w-10 h-10 flex items-center justify-center hover:bg-opacity-70"
                     >
                       <FaChevronLeft className="text-gray-800" size={20} />
                     </button>
@@ -648,13 +724,13 @@ const PackageDetailsPage = () => {
                         const nextSlide = currentSlide === packageData.images.length - 1 ? 0 : currentSlide + 1;
                         setCurrentSlide(nextSlide);
                       }}
-                      className="absolute right-4 top-1/2 -translate-y-1/2 z-20 bg-white bg-opacity-50 rounded-full w-10 h-10 flex items-center justify-center hover:bg-opacity-70"
+                      className="absolute right-4 top-1/2 -translate-y-1/2 z-0 bg-white bg-opacity-50 rounded-full w-10 h-10 flex items-center justify-center hover:bg-opacity-70"
                     >
                       <FaChevronRight className="text-gray-800" size={20} />
                     </button>
 
                     {/* Fixed Slide Counter - Bottom center */}
-                    <div className="absolute bottom-6 left-0 right-0 z-20 hidden md:block">
+                    <div className="absolute bottom-6 left-0 right-0 z-0 hidden md:block">
                       <div className="flex justify-center">
                         <div className="bg-black bg-opacity-50 text-white px-3 py-1 rounded-full text-sm">
                           {currentSlide + 1}/{packageData.images.length}
@@ -663,12 +739,12 @@ const PackageDetailsPage = () => {
                     </div>
 
                     {/* Fixed Left Content - Bottom left */}
-                    <div className="absolute bottom-5 left-6 z-20 text-white">
+                    <div className="absolute bottom-5 left-6 z-0 text-white">
                       <div className="DestinnationInfo_destinationInfoWrapper flex gap-[10px] flex-wrap">
                         <div className="DestinationInfoItem flex items-center gap-2 flex-row">
                           {/* Number of Days */}
                           <div
-                            className="DestinationInfo_noOfDays text-[30px] md:text-[45px]"
+                            className="DestinationInfo_noOfDays text-[35px] md:text-[45px]"
                             style={{
                               // fontSize: "45px",
                               fontWeight: "700",
@@ -847,12 +923,27 @@ const PackageDetailsPage = () => {
                       </div>
                     </div>
                   </div>
-                  <div className="package_pricing_rightsection">
-                    <div className="package_seat flex gap-[5px] items-center cursor-pointer font-semibold text-black">
-                      Avilable Seat :
-                      <span className="text-[#515151] font-bold">{packageData.availableSeats}</span>
-                    </div>
+                  <div className="flex flex-col gap-2 mt-2">
+                    <div className="text-lg font-semibold">Available Seats: {packageData.availableSeats}</div>
+                    {averageRating !== null ? (
+                      <div className="package_rating flex items-center justify-end gap-2">
+                        {/* <span className="text-black font-semibold">Rating:</span> */}
+                        <span className="flex items-center text-[#f39c12] font-bold">
+                          {averageRating.toFixed(1)}
+                          <span className="flex ml-1">
+                              <FaStar
+                                size={16}
+                              />
+
+                          </span>
+                        </span>
+                        <span className="text-gray-600 text-sm">({getTotalReviewCount()})</span>
+                      </div>
+                    ) : (
+                      <div className="text-gray-500">4.5 (<FaStar size={16}/>)</div>
+                    )}
                   </div>
+
                 </div>
                 <div className="pricing_bottom border-t border-[#e0e0e0] pt-4">
                   <button className="Booking_button hover:bg-transparent hover:text-[#f37002] bg-[#f37002] text-white"

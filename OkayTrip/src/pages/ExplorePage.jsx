@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useRef } from "react";
-import { FaChevronRight, FaChevronLeft } from "react-icons/fa";
-import { useNavigate } from "react-router-dom";
+import { FaChevronRight, FaChevronLeft, FaStar } from "react-icons/fa";
+import { useParams, useNavigate } from "react-router-dom";
 import axios from "axios";
 import UserAuth from "../components/UserAuth";
 import Footer from "../components/Footer";
@@ -21,6 +21,7 @@ const PackageCardSkeleton = () => (
 );
 
 const ExplorePage = () => {
+  const { packageId } = useParams();
   const [categories, setCategories] = useState([]);
   const [packages, setPackages] = useState({});
   const [loadedCategories, setLoadedCategories] = useState({});
@@ -30,7 +31,20 @@ const ExplorePage = () => {
   const [visibleLeftButtons, setVisibleLeftButtons] = useState({}); // Track left button visibility
   const navigate = useNavigate();
   const userToken = localStorage.getItem("userToken");
+  const [packageRatings, setPackageRatings] = useState({});
+  const [reviews, setReviews] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [ratingStats, setRatingStats] = useState({
+    5: 0,
+    4: 0,
+    3: 0,
+    2: 0,
+    1: 0
+  });
 
+  const getTotalReviewCount = () => {
+    return Object.values(ratingStats).reduce((sum, count) => sum + count, 0);
+  };
   const handleBooking = (packageId) => {
     if (!userToken) {
       setSelectedPackageId(packageId); // Store package ID
@@ -39,6 +53,47 @@ const ExplorePage = () => {
       navigate(`/booking/${packageId}`); // Redirect if logged in
     }
   };
+  useEffect(() => {
+    if (Object.keys(packages).length === 0) return;
+
+    Object.values(packages).flat().forEach((pkg) => {
+      fetchReviews(pkg._id);
+    });
+  }, [packages]);
+  const fetchReviews = async (packageId) => {
+    try {
+      const response = await fetch(`${import.meta.env.VITE_APP_API_URL}/api/reviews/${packageId}`);
+
+      if (!response.ok) throw new Error("Failed to fetch reviews");
+
+      const data = await response.json();
+      console.log("Fetched Reviews for Package:", packageId, data); // ✅ Debugging ke liye
+
+      setReviews((prev) => ({
+        ...prev,
+        [packageId]: data.reviews || [],
+      }));
+
+      // Calculate rating statistics
+      const stats = { 5: 0, 4: 0, 3: 0, 2: 0, 1: 0 };
+      data.reviews.forEach((review) => {
+        if (review.rating >= 1 && review.rating <= 5) {
+          stats[review.rating]++;
+        }
+      });
+
+      setRatingStats((prev) => ({
+        ...prev,
+        [packageId]: stats,
+      }));
+
+      setLoading(false);
+    } catch (error) {
+      console.error("Error fetching reviews for package:", packageId, error);
+      setLoading(false);
+    }
+  };
+
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -77,6 +132,42 @@ const ExplorePage = () => {
 
     fetchData();
   }, []);
+
+  useEffect(() => {
+    const fetchRatingsForPackages = async () => {
+      // Only proceed if we have packages loaded
+      const allPackages = Object.values(packages).flat();
+      if (allPackages.length === 0) return;
+
+      // Create a batch of requests for all package ratings
+      const ratingPromises = allPackages.map(pkg =>
+        fetch(`${import.meta.env.VITE_APP_API_URL}/api/reviews/${pkg._id}/rating`)
+          .then(res => res.ok ? res.json() : { averageRating: 0, totalReviews: 0 })
+          .then(data => ({
+            packageId: pkg._id,
+            averageRating: data.averageRating || 0,
+            totalReviews: data.totalReviews || 0
+          }))
+          .catch(() => ({ packageId: pkg._id, averageRating: 0, totalReviews: 0 }))
+      );
+
+      // Wait for all requests to complete
+      const ratings = await Promise.all(ratingPromises);
+
+      // Convert array to object mapped by package ID
+      const ratingsMap = ratings.reduce((acc, item) => {
+        acc[item.packageId] = {
+          averageRating: item.averageRating,
+          totalReviews: item.totalReviews
+        };
+        return acc;
+      }, {});
+
+      setPackageRatings(ratingsMap);
+    };
+
+    fetchRatingsForPackages();
+  }, [packages]);
 
   useEffect(() => {
     const observerOptions = {
@@ -161,16 +252,19 @@ const ExplorePage = () => {
       behavior: "smooth",
     });
   };
+
   return (
-    <div className="px-4 md:px-8 lg:px-32 py-8 min-h-screen max-w-[1440px] mx-auto">
+    <div className="px-4 md:px-8 lg:px-32 py-8 bg-white min-h-screen max-w-[1440px] mx-auto" >
       {categories.length === 0 ? (
         <div></div>
       ) : (
+
         categories.map((category) => (
           <div
             key={category._id}
             id={`category-${category._id}`}
             className="mb-12"
+
           >
             {/* Category Header */}
             <div className="flex justify-between items-center mb-4">
@@ -187,13 +281,12 @@ const ExplorePage = () => {
             <div className="relative">
               {visibleLeftButtons[category._id] && (
                 <button
-                  className="absolute left-[-32px] top-[30%] border-[1px] border-solid border-gray-500 transform -translate-y-1/2 z-[4] bg-[hsla(0,0%,100%,.7)] p-5 rounded-full shadow hover:bg-gray-100 hidden md:block"
+                  className="absolute left-[-20px] md:left-[-32px] top-[30%] border-[1px] border-solid border-gray-500 transform -translate-y-1/2 z-[4] bg-[hsla(0,0%,100%,.7)] p-5 rounded-full shadow hover:bg-gray-100"
                   onClick={() => scrollCarousel(category._id, 'left')}
                 >
                   <FaChevronLeft size={16} />
                 </button>
               )}
-
               <div
                 id={`carousel-${category._id}`}
                 className="flex space-x-4 overflow-x-auto scrollbar-hide snap-x snap-mandatory"
@@ -209,7 +302,7 @@ const ExplorePage = () => {
                       onClick={() => (window.location.href = `/package/${pkg._id}`)}
                     >
                       {/* Top Container for Image */}
-                      <div className="top-container overflow-hidden rounded-t relative w-[285px] md:w-[340px] h-[340px]">
+                      <div className="top-container overflow-hidden rounded-t relative w-[295px] md:w-[340px] h-[340px]">
                         <img
                           src={`${import.meta.env.VITE_APP_API_URL}${pkg.images[0]}`}
                           alt={pkg.title}
@@ -233,12 +326,12 @@ const ExplorePage = () => {
                           <p className="text-sm text-gray-500">{pkg.duration}</p>
                           <div className="flex items-center space-x-1 text-green-600 text-xs">
                             <span className="text-gray-400">Avialable Seats</span>
-                            <span>{pkg.availableSeats}</span>
+                            <span>{pkg.totalSeats}</span>
                           </div>
                         </div>
 
                         {/* Content Element 2: Title */}
-                        <div className="content-element mb-2">
+                        <div className="content-element mb-2 h-14 overflow-hidden">
                           <h3 className="text-lg font-semibold text-gray-800">{pkg.title}</h3>
                         </div>
 
@@ -250,31 +343,37 @@ const ExplorePage = () => {
                           </p>
                         </div>
                         {/* Element: 6 */}
-                        <div
-                          className="flex w-full relative rounded-md mb-[2px]"
-                          style={{
-                            background: 'linear-gradient(180deg, rgba(255, 186, 10, .1), rgba(255, 186, 10, 0));'
-                          }}
-                        >
-                          <div className="productcard_destinationListBOx flex items-center overflow-hidden, gap-[5px] h-8 my-0 mr-32px ml-7px">
-                            <div className="flex w-max items-center gap-1">
-                              <span className="flex items-center text-xs font-semibold text-[#000]">
-                                {pkg.duration.split(" ")[0]}D
-                              </span>
-                              <span className="flex items-center text-[10px] font-normal text-[#515151] w-max uppercase"
-                                style={
-                                  {
-                                    fontFamily: 'Helvetica',
-                                    letterSpacing: '1px'
-                                  }
-                                }
-                              >
-                                {pkg.categoryId ? pkg.categoryId.name : "Category not available"}
-                              </span>
+                        <div className="flex justify-between">
+                          <div
+                            className="flex w-full relative rounded-md mb-[2px]"
+                            style={{
+                              background: 'linear-gradient(180deg, rgba(255, 186, 10, .1), rgba(255, 186, 10, 0));'
+                            }}
+                          >
+                            <div className="productcard_destinationListBOx flex items-center overflow-hidden, gap-[5px] h-8 my-0 mr-32px ml-7px">
+                              <div className="flex w-max items-center gap-1">
+                                <span className="flex items-center text-xs font-semibold text-[#000]">
+                                  {pkg.duration.split(" ")[0]}
+                                </span>
+                                <span className="flex items-center text-xs font-normal text-[#515151] w-max">
+                                  {pkg.categoryId ? pkg.categoryId.name : "Category not available"}
+                                </span>
+                              </div>
                             </div>
                           </div>
+                          {/* Package Rating */}
+                          <div className="package_rating flex items-center justify-end gap-2">
+                            <span className="flex items-center text-[#f39c12] font-bold">
+                              {(packageRatings[pkg._id]?.averageRating || 4.3).toFixed(1)}
+                              <span className="flex ml-1">
+                                <FaStar size={16} />
+                              </span>
+                            </span>
+                            <span className="text-gray-600 text-sm">
+                              ({reviews[pkg._id]?.length || 20})
+                            </span>
+                          </div>
                         </div>
-
                         {/* Content Element 4: Price */}
                         <div className="content-element flex items-center justify-between mb-4">
                           <div className="flex items-center space-x-2">
@@ -319,7 +418,7 @@ const ExplorePage = () => {
                         </div>
                         {/* Content Element 5: Buttons */}
                         <div className="ProductCard_ButtonContainer flex flex-row justify-between mt-[10px]">
-                          <a href="tel:+917542003073" className="flex items-center h-[51px] w-[51px] border rounded-md border-solid border-[#f37002] text-[#f37002] hover:bg-[#f37002] hover:text-white justify-center text-[14px] font-semibold">
+                          <a href="tel:+917542003073" className="flex items-center h-[51px] w-[51px] border rounded-md border-solid border-[#f37002] text-[#f37002] hover:text-white justify-center text-[14px] font-semibold">
                             <div className="flex items-center justify-center">
                               <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 16 16" fill="none"><path d="M12.7538 10.1683L11.0772 9.9768C10.8801 9.95363 10.6802 9.97547 10.4927 10.0407C10.3052 10.1059 10.1349 10.2128 9.99464 10.3533L8.78006 11.5685C6.90617 10.615 5.38306 9.09099 4.43002 7.21606L5.6512 5.9942C5.93505 5.7102 6.07367 5.30732 6.02746 4.91104L5.83603 3.24667C5.80038 2.92436 5.64748 2.62643 5.40646 2.40963C5.16544 2.19283 4.85314 2.07232 4.52904 2.07104H3.38707C2.64116 2.07104 2.02067 2.69188 2.06688 3.43821C2.41673 9.07857 6.92519 13.5829 12.5558 13.933C13.3017 13.9792 13.9222 13.3584 13.9222 12.6121V11.4694C13.9288 10.809 13.4205 10.241 12.7538 10.1683Z" fill="var(--primary, #f37002)"></path></svg>
                             </div>
@@ -339,6 +438,7 @@ const ExplorePage = () => {
                   ))}
 
               </div>
+
               {/* Show Authentication Popup */}
               {showAuthPopup && (
                 <UserAuth
@@ -352,7 +452,7 @@ const ExplorePage = () => {
                 />
               )}
               <button
-                className=" absolute right-[-32px] top-[30%] border-[1px] border-solid border-gray-500 transform -translate-y-1/2 z-0 bg-[hsla(0,0%,100%,.7)] p-5 rounded-full shadow hover:bg-gray-100 hidden md:block"
+                className=" absolute right-[-20px] md:right-[-32px] top-[30%] border-[1px] border-solid border-gray-500 transform -translate-y-1/2 z-0 bg-[hsla(0,0%,100%,.7)] p-5 rounded-full shadow hover:bg-gray-100"
                 onClick={() => scrollCarousel(category._id, 'right')}
               >
                 <FaChevronRight size={16} />

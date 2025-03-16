@@ -6,6 +6,7 @@ import { useNavigate } from "react-router-dom";
 const RelatedPackages = ({ categoryId, currentPackageId }) => {
     const [relatedPackages, setRelatedPackages] = useState([]);
     const [visibleLeftButton, setVisibleLeftButton] = useState(false);
+    const [isScrollable, setIsScrollable] = useState(false);
     const navigate = useNavigate();
     const carouselRef = useRef(null);
 
@@ -20,6 +21,9 @@ const RelatedPackages = ({ categoryId, currentPackageId }) => {
                 const filteredPackages = data.filter(pkg => pkg._id !== currentPackageId);
 
                 setRelatedPackages(filteredPackages);
+                
+                // Check if content is scrollable after packages are loaded
+                setTimeout(checkScrollable, 100);
             } catch (error) {
                 console.error("Error fetching related packages:", error.message);
             }
@@ -30,11 +34,48 @@ const RelatedPackages = ({ categoryId, currentPackageId }) => {
         }
     }, [categoryId, currentPackageId]);
 
-    // ✅ Handle Carousel Scroll
+    // Check if carousel is scrollable
+    const checkScrollable = () => {
+        if (carouselRef.current) {
+            const isContentScrollable = carouselRef.current.scrollWidth > carouselRef.current.clientWidth;
+            setIsScrollable(isContentScrollable);
+        }
+    };
+
+    useEffect(() => {
+        // Add scroll event listener to track left button visibility
+        const handleScroll = () => {
+            if (carouselRef.current) {
+                setVisibleLeftButton(carouselRef.current.scrollLeft > 10);
+            }
+        };
+
+        const carouselElement = carouselRef.current;
+        if (carouselElement) {
+            carouselElement.addEventListener('scroll', handleScroll);
+            // Check initial scrollability
+            checkScrollable();
+            
+            // Also check on window resize
+            window.addEventListener('resize', checkScrollable);
+        }
+
+        return () => {
+            if (carouselElement) {
+                carouselElement.removeEventListener('scroll', handleScroll);
+            }
+            window.removeEventListener('resize', checkScrollable);
+        };
+    }, [relatedPackages]);
+
+    // ✅ Handle Carousel Scroll with improved smoothness
     const scrollCarousel = (direction) => {
         if (!carouselRef.current) return;
 
-        const scrollAmount = 300;
+        const cardWidth = 340; // Width of a single card
+        const gap = 16; // Gap between cards (taken from space-x-4)
+        const scrollAmount = cardWidth + gap;
+        
         const newScrollPosition = direction === "left"
             ? carouselRef.current.scrollLeft - scrollAmount
             : carouselRef.current.scrollLeft + scrollAmount;
@@ -43,36 +84,39 @@ const RelatedPackages = ({ categoryId, currentPackageId }) => {
             left: newScrollPosition,
             behavior: "smooth",
         });
-
-        setVisibleLeftButton(carouselRef.current.scrollLeft > 0);
     };
 
     if (relatedPackages.length === 0) return null; // ✅ Hide section if no related products
 
     return (
-        <div className="max-w-[1440px] mx-auto p-6">
-            <div className="rounded-xl p-6 relative">
+        <div className="max-w-[1440px] mx-auto p-0">
+            <div className="rounded-xl p-1 relative">
                 {/* Section Header */}
                 <h2 className="text-xl sm:text-2xl font-bold text-gray-800 mb-6 pb-2">
                     Related Packages
                 </h2>
 
-                {/* Left Scroll Button */}
+                {/* Left Scroll Button - only visible after scrolling */}
                 {visibleLeftButton && (
                     <button
-                        className="absolute left-[-20px] md:left-[-32px] top-[45%] transform -translate-y-1/2 z-10 bg-white border border-gray-500 p-3 rounded-full shadow hover:bg-gray-100"
+                        className="hidden md:block absolute left-[-20px] md:left-[-32px] top-[45%] transform -translate-y-1/2 z-10 bg-white border border-gray-500 p-3 rounded-full shadow hover:bg-gray-100 transition-opacity duration-300"
                         onClick={() => scrollCarousel('left')}
+                        aria-label="Scroll left"
                     >
                         <FaChevronLeft size={16} />
                     </button>
                 )}
 
-                {/* Packages Carousel */}
-                <div ref={carouselRef} className="flex space-x-4 overflow-x-auto scrollbar-hide snap-x snap-mandatory">
+                {/* Packages Carousel with snap-type for smooth sliding */}
+                <div 
+                    ref={carouselRef} 
+                    className="flex space-x-4 overflow-x-auto scrollbar-hide snap-x snap-mandatory scroll-smooth"
+                    style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
+                >
                     {relatedPackages.map((pkg) => (
                         <div
                             key={pkg._id}
-                            className="rounded transition snap-center cursor-pointer w-[295px] md:w-[340px]"
+                            className="rounded transition snap-center cursor-pointer flex-shrink-0 w-[295px] md:w-[340px]"
                             onClick={() => navigate(`/package/${pkg._id}`)}
                         >
                             {/* Package Image */}
@@ -91,7 +135,7 @@ const RelatedPackages = ({ categoryId, currentPackageId }) => {
                             </div>
 
                             {/* Package Details */}
-                            <div className="bg-white rounded-b p-4 w-[295px] md:w-[340px]">
+                            <div className="bg-white rounded-b p-[0.5rem] w-[295px] md:w-[340px]">
                                 <p className="text-sm text-gray-500">{pkg.duration}</p>
                                 <h3 className="text-lg font-semibold text-gray-800">{pkg.title}</h3>
 
@@ -166,11 +210,12 @@ const RelatedPackages = ({ categoryId, currentPackageId }) => {
                     ))}
                 </div>
 
-                {/* Right Scroll Button */}
-                {relatedPackages.length > 2 && (
+                {/* Right Scroll Button - always visible if content is scrollable */}
+                {isScrollable && (
                     <button
-                        className="absolute right-[-20px] md:right-[-32px] top-[45%] transform -translate-y-1/2 z-10 bg-white border border-gray-500 p-3 rounded-full shadow hover:bg-gray-100"
+                        className="hidden md:block absolute right-[-20px] md:right-[-32px] top-[45%] transform -translate-y-1/2 z-10 bg-white border border-gray-500 p-3 rounded-full shadow hover:bg-gray-100 transition"
                         onClick={() => scrollCarousel('right')}
+                        aria-label="Scroll right"
                     >
                         <FaChevronRight size={16} />
                     </button>

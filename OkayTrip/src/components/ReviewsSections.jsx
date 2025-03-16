@@ -16,13 +16,27 @@ const ReviewsSection = ({ packageId }) => {
     2: 0,
     1: 0
   });
+  const [imageLimit, setImageLimit] = useState(5);
   const userToken = localStorage.getItem("userToken");
 
   useEffect(() => {
     fetchReviews();
     fetchAverageRating();
   }, [packageId]);
+  useEffect(()=>{
+    const updateLimit = () => {
+      if (window.innerWidth < 640){
+        setImageLimit(2);
+      }else{
+        setImageLimit(5);
+      }
+    };
 
+    updateLimit();
+    window.addEventListener('resize', updateLimit)
+
+    return () => window.removeEventListener('resize', updateLimit);
+  }, []);
   const handleSubmitReview = async () => {
     if (!userToken) {
       alert("Please log in to submit a review.");
@@ -152,15 +166,15 @@ const ReviewsSection = ({ packageId }) => {
   };
 
   return (
-    <div className="max-w-[1200px] mx-auto my-12 p-6 bg-white rounded-xl">
-      <h2 className="text-2xl font-bold text-gray-800 mb-6 pb-2">
+    <div className="max-w-[1200px] mx-auto my-12 p-0 bg-white rounded-xl">
+      <h2 className="text-2xl font-bold text-gray-800 mb-6 pb-2 text-center">
         Reviews ({getTotalReviewCount()})
       </h2>
 
       <div className="grid grid-cols-1 md:grid-cols-12 gap-8 mb-10">
         {/* Rating Summary */}
-        <div className="md:col-span-4 bg-gray-50 p-6 rounded-lg">
-          <div className="flex flex-col items-center justify-center mb-6">
+        <div className="md:col-span-4 bg-gray-50 pd-1 md:p-6 rounded-lg">
+          <div className="flex flex-col items-center md:items-center justify-center mb-6">
             <div className="text-5xl font-bold text-green-500 mb-2">
               {typeof averageRating === "number" ? averageRating.toFixed(1) : "N/A"}
             </div>
@@ -313,8 +327,8 @@ const ReviewsSection = ({ packageId }) => {
 
                       {review.images && review.images.length > 0 && (
                         <>
-                          <div className="grid grid-cols-5 gap-2 mt-4">
-                            {review.images.slice(0, showAllImages[review._id] ? review.images.length : 5).map((img, index) => (
+                          <div className="grid grid-cols-2 md:grid-cols-5 gap-2 mt-4">
+                            {review.images.slice(0, showAllImages[review._id] ? review.images.length : imageLimit).map((img, index) => (
                               <img
                                 key={index}
                                 src={`${import.meta.env.VITE_APP_API_URL}${img}`}
