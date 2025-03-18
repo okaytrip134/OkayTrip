@@ -281,7 +281,7 @@ const ExplorePage = () => {
             <div className="relative">
               {visibleLeftButtons[category._id] && (
                 <button
-                  className="absolute left-[-20px] md:left-[-32px] top-[30%] border-[1px] border-solid border-gray-500 transform -translate-y-1/2 z-[4] bg-[hsla(0,0%,100%,.7)] p-5 rounded-full shadow hover:bg-gray-100"
+                  className="hidden md:block absolute left-[-20px] md:left-[-32px] top-[30%] border-[1px] border-solid border-gray-500 transform -translate-y-1/2 z-[4] bg-[hsla(0,0%,100%,.7)] p-5 rounded-full shadow hover:bg-gray-100"
                   onClick={() => scrollCarousel(category._id, 'left')}
                 >
                   <FaChevronLeft size={16} />
@@ -326,7 +326,7 @@ const ExplorePage = () => {
                           <p className="text-sm text-gray-500">{pkg.duration}</p>
                           <div className="flex items-center space-x-1 text-green-600 text-xs">
                             <span className="text-gray-400">Avialable Seats</span>
-                            <span>{pkg.totalSeats}</span>
+                            <span>{pkg.availableSeats}</span>
                           </div>
                         </div>
 
@@ -452,7 +452,7 @@ const ExplorePage = () => {
                 />
               )}
               <button
-                className=" absolute right-[-20px] md:right-[-32px] top-[30%] border-[1px] border-solid border-gray-500 transform -translate-y-1/2 z-0 bg-[hsla(0,0%,100%,.7)] p-5 rounded-full shadow hover:bg-gray-100"
+                className="hidden md:block absolute right-[-20px] md:right-[-32px] top-[30%] border-[1px] border-solid border-gray-500 transform -translate-y-1/2 z-0 bg-[hsla(0,0%,100%,.7)] p-5 rounded-full shadow hover:bg-gray-100"
                 onClick={() => scrollCarousel(category._id, 'right')}
               >
                 <FaChevronRight size={16} />

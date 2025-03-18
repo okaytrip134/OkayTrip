@@ -127,8 +127,8 @@ const PackageDetailsPage = () => {
         if (!response.ok) throw new Error("Failed to fetch average rating");
 
         const data = await response.json();
-        setAverageRating(data.averageRating || 0);
-        setTotalReviews(data.totalReviews || 0);
+        setAverageRating(data.averageRating || 4.5);
+        setTotalReviews(data.totalReviews || 20);
       } catch (error) {
         console.error("Error fetching average rating:", error);
         setAverageRating(0);

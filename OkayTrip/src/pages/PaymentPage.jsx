@@ -79,6 +79,11 @@ const PaymentPage = () => {
         { headers: { Authorization: `Bearer ${userToken}` } }
       );
 
+      console.log("Payment API Response:", data); // ✅ Debug this
+
+      if (!data.success) {
+        throw new Error(data.message || "Payment initiation failed");
+      }
       const options = {
         key: import.meta.env.VITE_RAZORPAY_KEY_ID,
         amount: data.amount,
@@ -90,7 +95,15 @@ const PaymentPage = () => {
         handler: async function (response) {
           try {
             setLoadingRedirect(true);
-
+            console.log("Confirm Booking Payload:", {
+              packageId,
+              bookingId: data.bookingId,
+              paymentId: response.razorpay_payment_id,
+              amount: totalAmount,
+              paymentType,
+              seatsToBook: location.state?.numSeats,
+              travelers: location.state?.travelers,
+            });
             await axios.post(
               `${import.meta.env.VITE_APP_API_URL}/api/bookings/confirm`,
               {
@@ -138,6 +151,8 @@ const PaymentPage = () => {
       const razorpay = new window.Razorpay(options);
       razorpay.open();
     } catch (error) {
+      console.error("Error initiating payment:", error.response?.data || error.message);
+      toast.error(error.response?.data?.message || "Payment failed. Please try again.");
       console.error("Error initiating payment:", error);
       toast.error("Payment failed. Please try again.");
     }
@@ -179,9 +194,8 @@ const PaymentPage = () => {
           </div>
 
           <button
-            className={`mt-6 w-full py-3 rounded-lg text-white font-semibold text-lg transition-all ${
-              isScriptLoaded ? "bg-orange-500 hover:bg-orange-600" : "bg-gray-400"
-            }`}
+            className={`mt-6 w-full py-3 rounded-lg text-white font-semibold text-lg transition-all ${isScriptLoaded ? "bg-orange-500 hover:bg-orange-600" : "bg-gray-400"
+              }`}
             onClick={handlePayment}
             disabled={!isScriptLoaded}
           >
