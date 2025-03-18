@@ -16,6 +16,8 @@ import "react-loading-skeleton/dist/skeleton.css";
 import { FaAngleDown, FaChevronCircleLeft, FaChevronLeft, FaChevronRight, FaStar } from "react-icons/fa";
 import RelatedPackages from "../components/RelatedPackages";
 import ReviewsSection from "../components/ReviewsSections";
+import { toast, ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 // import { FaStar, FaRegStar, FaCamera } from "react-icons/fa";  
 
 
@@ -174,7 +176,7 @@ const PackageDetailsPage = () => {
 
       const data = await response.json();
       if (response.ok) {
-        alert("Enquiry submitted successfully!");
+        toast.success("Password reset successful!", { autoClose: 3000 });
       } else {
         alert(data.error || "Failed to submit enquiry");
       }
