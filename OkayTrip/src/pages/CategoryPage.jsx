@@ -217,6 +217,18 @@ const CategoryPage = () => {
       </div>
     );
   }
+  // Inside the CategoryPage component, add this function to check if a package is available
+  const isPackageAvailable = (pkg) => {
+    return pkg.isActive && pkg.availableSeats > 0;
+  };
+
+  // Update the handlePackageClick function to match the ExplorePage logic
+  const handlePackageClick = (pkg) => {
+    if (pkg.isActive && pkg.availableSeats > 0) {
+      window.location.href = `/package/${pkg._id}`;
+    }
+    // If not active or no seats available, do nothing (just show the appropriate overlay)
+  };
 
   return (
     <div className="px-8 lg:px-32 py-8 bg-gray-50 min-h-screen max-w-[1440px] mx-auto">
@@ -232,20 +244,44 @@ const CategoryPage = () => {
             <div
               key={pkg._id}
               {...packageProps}
-              className="rounded transition snap-center w-[340px] cursor-pointer"
-              onClick={() => (window.location.href = `/package/${pkg._id}`)} // Redirect on click
+              className="rounded transition snap-center w-[340px] cursor-pointer relative"
+              onClick={() => handlePackageClick(pkg)}
             >
-              <BlurImage
-                src={`${import.meta.env.VITE_APP_API_URL}${pkg.images[0]}`}
-                alt={pkg.title}
-              />
+              <div className="relative">
+                <BlurImage
+                  src={`${import.meta.env.VITE_APP_API_URL}${pkg.images[0]}`}
+                  alt={pkg.title}
+                />
 
-              <div className="bg-white rounded-b p-4 w-[340px]">
+                {/* Coming Soon Overlay for Inactive Packages */}
+                {!pkg.isActive && (
+                  <div className="absolute inset-0 flex items-center justify-center z-10">
+                    <div className="bg-black bg-opacity-70 w-full h-full absolute rounded-lg flex items-center justify-center">
+                      <div className="text-white text-2xl font-bold bg-orange-500 bg-opacity-90 px-6 py-3 rounded-lg transform rotate-[-10deg] shadow-lg">
+                        Coming Soon
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* Sold Out Overlay when no seats available */}
+                {pkg.isActive && pkg.availableSeats === 0 && (
+                  <div className="absolute inset-0 flex items-center justify-center z-10">
+                    <div className="bg-black bg-opacity-70 w-full h-full absolute rounded-lg flex items-center justify-center">
+                      <div className="text-white text-2xl font-bold bg-red-600 bg-opacity-90 px-6 py-3 rounded-lg transform rotate-[-10deg] shadow-lg">
+                        Sold Out
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              <div className={`bg-white rounded-b p-4 w-[340px] ${!isPackageAvailable(pkg) ? 'opacity-60' : ''}`}>
                 <div className="flex items-center justify-between mb-2">
                   <p className="text-sm text-gray-500">{pkg.duration}</p>
 
                   <div className="flex items-center space-x-1 text-green-600 text-xs">
-                    <span className="text-gray-400">Avialable Seats</span>
+                    <span className="text-gray-400">Available Seats</span>
                     <span>{pkg.availableSeats}</span>
                   </div>
                 </div>
@@ -256,7 +292,7 @@ const CategoryPage = () => {
                 </div>
 
                 <p className="text-sm text-gray-500 mb-2">
-                  {new Date(pkg.startDate).toLocaleDateString()} -{" "}
+                  {new Date(pkg.startDate).toLocaleDateString()} - {" "}
                   {new Date(pkg.endDate).toLocaleDateString()}
                 </p>
                 {/* Element: 6 */}
@@ -334,21 +370,26 @@ const CategoryPage = () => {
                   </div>
                 </div>
                 <div className="ProductCard_ButtonContainer flex flex-row justify-between mt-[10px]">
-                  <a href="tel:+917542003073" className="flex items-center h-[51px] w-[51px] border rounded-md border-solid border-[#f37002] text-[#f37002] hover:bg-[#f37002] hover:text-white justify-center text-[14px] font-semibold">
+                  <a href="tel:+917542003073" className={`flex items-center h-[51px] w-[51px] border rounded-md border-solid border-[#f37002] text-[#f37002] hover:bg-[#f37002] hover:text-white justify-center text-[14px] font-semibold ${!isPackageAvailable(pkg) ? 'pointer-events-none opacity-70' : ''}`}>
                     <div className="flex items-center justify-center">
                       <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 16 16" fill="none"><path d="M12.7538 10.1683L11.0772 9.9768C10.8801 9.95363 10.6802 9.97547 10.4927 10.0407C10.3052 10.1059 10.1349 10.2128 9.99464 10.3533L8.78006 11.5685C6.90617 10.615 5.38306 9.09099 4.43002 7.21606L5.6512 5.9942C5.93505 5.7102 6.07367 5.30732 6.02746 4.91104L5.83603 3.24667C5.80038 2.92436 5.64748 2.62643 5.40646 2.40963C5.16544 2.19283 4.85314 2.07232 4.52904 2.07104H3.38707C2.64116 2.07104 2.02067 2.69188 2.06688 3.43821C2.41673 9.07857 6.92519 13.5829 12.5558 13.933C13.3017 13.9792 13.9222 13.3584 13.9222 12.6121V11.4694C13.9288 10.809 13.4205 10.241 12.7538 10.1683Z" fill="var(--primary, #f37002)"></path></svg>
                     </div>
                   </a>
-                  <div className="productCard_Button bg-[#f37002] text-white flex items-center justify-center h-[51px] border border-solid border-[#f37002] rounded-md text-[14px] font-semibold hover:bg-transparent hover:text-[#f37002] "
+                  <div className={`productCard_Button bg-[#f37002] text-white flex items-center justify-center h-[51px] border border-solid border-[#f37002] rounded-md text-[14px] font-semibold hover:bg-transparent hover:text-[#f37002] ${!isPackageAvailable(pkg) ? 'opacity-70 cursor-not-allowed' : ''}`}
                     style={{
                       width: 'calc(100% - 61px)'
                     }}
                     onClick={(e) => {
                       e.stopPropagation(); // Prevent navigation to package details
-                      handleBooking(pkg._id); // Handle booking logic
+                      if (isPackageAvailable(pkg)) {
+                        handleBooking(pkg._id); // Handle booking logic only if available
+                      }
                     }}
                   >
-                    <span className="  ">Book Now</span>
+                    <span>
+                      {!pkg.isActive ? "Coming Soon" :
+                        pkg.availableSeats === 0 ? "Sold Out" : "Book Now"}
+                    </span>
                   </div>
                 </div>
               </div>

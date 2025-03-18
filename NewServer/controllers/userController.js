@@ -62,6 +62,7 @@ exports.loginUser = async (req, res) => {
     res.status(500).json({ message: "Internal server error" });
   }
 };
+
 // Forget password
 exports.forgotPassword = async (req, res) => {
   try {
@@ -98,7 +99,7 @@ exports.forgotPassword = async (req, res) => {
       to: user.email,
       subject: "Password Reset Request",
       text: `Click the following link to reset your password: \n\n
-      http://localhost:5173/reset-password/${resetToken}`,
+      http://okaytrip.in/reset-password/${resetToken}`,
     };
 
     // Send the email
@@ -126,26 +127,30 @@ exports.resetPassword = async (req, res) => {
       return res.status(400).json({ message: "Reset token is missing." });
     }
 
-    const user = await User.findOne({
-      resetToken: token,
-      resetTokenExpiration: { $gt: Date.now() },
-    });
-
-    if (!user) {
-      return res.status(400).json({ message: "Invalid or expired token." });
-    }
-
     if (!password || password.length < 6) {
       return res.status(400).json({ message: "Password must be at least 6 characters." });
     }
 
     const hashedPassword = await bcrypt.hash(password, 10);
-    user.password = hashedPassword;
 
-    user.resetToken = undefined;
-    user.resetTokenExpiration = undefined;
+    const user = await User.findOneAndUpdate(
+      {
+        resetToken: token,
+        resetTokenExpiration: { $gt: Date.now() },
+      },
+      {
+        $set: {
+          password: hashedPassword,
+          resetToken: undefined,
+          resetTokenExpiration: undefined,
+        },
+      },
+      { new: true }
+    );
 
-    await user.save();
+    if (!user) {
+      return res.status(400).json({ message: "Invalid or expired token." });
+    }
 
     return res.status(200).json({ message: "Password reset successful!", success: true });
   } catch (error) {
@@ -153,7 +158,6 @@ exports.resetPassword = async (req, res) => {
     return res.status(500).json({ message: "Internal server error" });
   }
 };
-
 
 // Get All Users
 exports.getAllUsers = async (req, res) => {
