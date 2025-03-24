@@ -230,3 +230,54 @@ exports.deletePackage = async (req, res) => {
     res.status(500).json({ message: "Internal server error." });
   }
 };
+exports.searchPackages = async (req, res) => {
+  try {
+    const { duration, minPrice, maxPrice, page = 1, limit = 10 } = req.query;
+    const query = {};
+    
+    // Parse duration filter (e.g., "2 to 3 Days")
+    if (duration) {
+      const durationMatch = duration.match(/(\d+)\s*to\s*(\d+)/);
+      if (durationMatch) {
+        const [_, minDays, maxDays] = durationMatch;
+        query.duration = { $gte: parseInt(minDays), $lte: parseInt(maxDays) };
+      } else if (duration.includes('+')) {
+        // Handle "5+ Days" format
+        const minDays = parseInt(duration);
+        query.duration = { $gte: minDays };
+      } else {
+        // Exact match (e.g. "2 Days")
+        query.duration = duration;
+      }
+    }
+    
+    // Price range filter
+    if (minPrice || maxPrice) {
+      query.discountedPrice = {};
+      if (minPrice) query.discountedPrice.$gte = parseInt(minPrice);
+      if (maxPrice) query.discountedPrice.$lte = parseInt(maxPrice);
+    }
+    
+    // Only show active packages
+    query.isActive = true;
+    
+    const skip = (parseInt(page) - 1) * parseInt(limit);
+    
+    const packages = await Package.find(query)
+      .populate("categoryId", "name")
+      .skip(skip)
+      .limit(parseInt(limit));
+      
+    const totalPackages = await Package.countDocuments(query);
+    
+    res.status(200).json({ 
+      packages, 
+      totalPackages,
+      currentPage: parseInt(page),
+      totalPages: Math.ceil(totalPackages / parseInt(limit))
+    });
+  } catch (error) {
+    console.error("Error searching packages:", error);
+    res.status(500).json({ message: "Internal server error." });
+  }
+};
