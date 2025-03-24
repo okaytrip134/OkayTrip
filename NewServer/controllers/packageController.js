@@ -92,7 +92,7 @@ exports.getAllPackages = async (req, res) => {
 exports.getPackagesByCategory = async (req, res) => {
   const { categoryId } = req.params;
   try {
-    const packages = await Package.find({ categoryId, isActive: true })
+    const packages = await Package.find({ categoryId})
       .populate("categoryId", "name");
     res.status(200).json(packages);
   } catch (error) {

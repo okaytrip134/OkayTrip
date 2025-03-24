@@ -1,5 +1,25 @@
 import React, { useState, useEffect } from "react";
 import { Calendar, Search, X } from "lucide-react";
+// Skeleton component for loading state
+const PackageSkeleton = () => {
+  return (
+    <div className="rounded-2xl overflow-hidden shadow-lg animate-pulse bg-white">
+      <div className="h-[340px] bg-gray-300"></div>
+      <div className="p-4 space-y-3">
+        <div className="h-4 bg-gray-200 rounded w-3/4"></div>
+        <div className="h-4 bg-gray-200 rounded"></div>
+        <div className="flex justify-between items-center">
+          <div className="h-4 bg-gray-200 rounded w-1/3"></div>
+          <div className="h-4 bg-gray-200 rounded w-1/4"></div>
+        </div>
+        <div className="flex justify-between">
+          <div className="h-10 bg-gray-200 rounded w-1/2"></div>
+          <div className="h-10 bg-gray-200 rounded w-1/3"></div>
+        </div>
+      </div>
+    </div>
+  );
+};
 
 const SearchPopup = ({ onClose }) => {
   const [searchTerm, setSearchTerm] = useState("");
@@ -13,6 +33,8 @@ const SearchPopup = ({ onClose }) => {
   const [loading, setLoading] = useState(false);
   const [packageRatings, setPackageRatings] = useState({});
   const [reviews, setReviews] = useState({});
+  const [error, setError] = useState(null);
+  const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
     if (searchTerm || startDate || endDate || tripDuration) {
@@ -24,10 +46,12 @@ const SearchPopup = ({ onClose }) => {
 
   const fetchPackages = async (searchParams) => {
     setLoading(true);
+    setError(null);
+
     try {
-      // This would be replaced with your actual API endpoint
+      // Get the API URL from environment variables or use default
       const API_URL = import.meta.env.VITE_APP_API_URL || "http://localhost:8000";
-      
+
       // Building query parameters
       const queryParams = new URLSearchParams();
       if (searchParams.searchTerm) queryParams.append("search", searchParams.searchTerm);
@@ -36,21 +60,41 @@ const SearchPopup = ({ onClose }) => {
       if (searchParams.tripDuration) queryParams.append("duration", searchParams.tripDuration);
       if (searchParams.priceRange.min) queryParams.append("minPrice", searchParams.priceRange.min);
       if (searchParams.priceRange.max) queryParams.append("maxPrice", searchParams.priceRange.max);
-      
-      // In a real app, you would fetch from your API
-      // For demonstration, we'll simulate a response
-      // const response = await fetch(`${API_URL}/api/packages/search?${queryParams}`);
-      // const data = await response.json();
-      
-      // Simulate API response with mock data
-      const mockData = generateMockPackages(searchParams);
-      setSearchResults(mockData);
-      
-      // Fetch ratings for each package
-      await fetchRatingsForPackages(mockData);
-      
+
+      // Make the actual API request
+      console.log(`Making API request to: ${API_URL}/api/admin/packages/search?${queryParams}`);
+      const response = await fetch(`${API_URL}/api/admin/packages/search?${queryParams}`);
+
+      if (!response.ok) {
+        throw new Error(`API request failed with status ${response.status}`);
+      }
+
+      const data = await response.json();
+      console.log("API Response:", data);
+
+      // Check if we have actual package data
+      if (data && Array.isArray(data.packages)) {
+        setSearchResults(data.packages);
+
+        // If we have real packages, fetch their ratings
+        await fetchRatingsForPackages(data.packages);
+      } else if (data && Array.isArray(data)) {
+        // Handle case where API returns direct array
+        setSearchResults(data);
+        await fetchRatingsForPackages(data);
+      } else {
+        // No packages found
+        setSearchResults([]);
+        console.log("No packages found in API response");
+      }
     } catch (error) {
       console.error("Error fetching packages:", error);
+      setError("Failed to fetch packages. Please try again.");
+
+      // Fallback to mock data only if API request fails
+      const mockData = generateMockPackages(searchParams);
+      setSearchResults(mockData);
+      await fetchRatingsForPackages(mockData);
     } finally {
       setLoading(false);
     }
@@ -61,83 +105,104 @@ const SearchPopup = ({ onClose }) => {
       const API_URL = import.meta.env.VITE_APP_API_URL || "http://localhost:8000";
       const ratings = {};
       const reviewsData = {};
-      
-      // In a real app, we'd make actual API calls
-      // Here we'll simulate ratings and reviews
-      packages.forEach(pkg => {
-        // Mock rating data
-        const avgRating = (3.5 + Math.random() * 1.5).toFixed(1);
-        const totalReviews = Math.floor(Math.random() * 50) + 10;
-        
-        ratings[pkg._id] = {
-          averageRating: parseFloat(avgRating),
-          totalReviews
-        };
-        
-        // Mock review data
-        reviewsData[pkg._id] = Array(totalReviews).fill().map(() => ({
-          rating: Math.floor(Math.random() * 5) + 1
-        }));
-      });
-      
+
+      // Try to fetch real ratings from API for each package
+      for (const pkg of packages) {
+        try {
+          const ratingResponse = await fetch(`${API_URL}/api/reviews/${pkg._id}/rating`);
+
+          if (ratingResponse.ok) {
+            const ratingData = await ratingResponse.json();
+            ratings[pkg._id] = ratingData;
+
+            // Also try to fetch reviews
+            const reviewResponse = await fetch(`${API_URL}/api/reviews/${pkg._id}`);
+            if (reviewResponse.ok) {
+              const reviewData = await reviewResponse.json();
+              reviewsData[pkg._id] = reviewData;
+            } else {
+              // Fallback to mock reviews if API fails
+              reviewsData[pkg._id] = Array(Math.floor(Math.random() * 50) + 10).fill().map(() => ({
+                rating: Math.floor(Math.random() * 5) + 1
+              }));
+            }
+          } else {
+            throw new Error("Rating API request failed");
+          }
+        } catch (error) {
+          // Fallback to mock ratings if API request fails
+          const avgRating = (3.5 + Math.random() * 1.5).toFixed(1);
+          const totalReviews = Math.floor(Math.random() * 50) + 10;
+
+          ratings[pkg._id] = {
+            averageRating: parseFloat(avgRating),
+            totalReviews
+          };
+
+          reviewsData[pkg._id] = Array(totalReviews).fill().map(() => ({
+            rating: Math.floor(Math.random() * 5) + 1
+          }));
+        }
+      }
+
       setPackageRatings(ratings);
       setReviews(reviewsData);
-      
+
     } catch (error) {
       console.error("Error fetching ratings:", error);
     }
   };
 
-  // Mock data generation function for demonstration
+  // Mock data generation function for fallback
   const generateMockPackages = (searchParams) => {
     const { searchTerm, dateRange, tripDuration, priceRange } = searchParams;
     const destinations = ["Goa", "Manali", "Shimla", "Kerala", "Rajasthan", "Ladakh", "Andaman", "Uttarakhand"];
     const durations = ["2 to 3 Days", "3 to 5 Days", "5 to 7 Days", "7+ Days"];
-    
+
     // Filter destinations based on search term if provided
     let filteredDestinations = destinations;
     if (searchTerm) {
-      filteredDestinations = destinations.filter(dest => 
+      filteredDestinations = destinations.filter(dest =>
         dest.toLowerCase().includes(searchTerm.toLowerCase())
       );
     }
-    
+
     // Generate between 0-8 packages based on search criteria
     const numPackages = filteredDestinations.length;
     const packages = [];
-    
+
     for (let i = 0; i < numPackages; i++) {
       const discountedPrice = Math.floor((Math.random() * (priceRange.max - priceRange.min) + priceRange.min) / 1000) * 1000;
       const realPrice = discountedPrice + Math.floor(Math.random() * 20000) + 5000;
-      
+
       // Create a date range that fits the search criteria if provided
       let packageStartDate = new Date();
       packageStartDate.setDate(packageStartDate.getDate() + Math.floor(Math.random() * 30));
-      
+
       if (dateRange.startDate) {
         packageStartDate = new Date(dateRange.startDate);
       }
-      
+
       // Duration based on search criteria
       let packageDuration = durations[Math.floor(Math.random() * durations.length)];
       if (tripDuration) {
         packageDuration = tripDuration;
       }
-      
+
       // Calculate end date based on duration
       let durationDays = 3;
       if (packageDuration === "3 to 5 Days") durationDays = 4;
       if (packageDuration === "5 to 7 Days") durationDays = 6;
       if (packageDuration === "7+ Days") durationDays = 8;
-      
+
       const packageEndDate = new Date(packageStartDate);
       packageEndDate.setDate(packageStartDate.getDate() + durationDays);
-      
+
       // Skip if doesn't match date criteria
       if (dateRange.endDate && new Date(dateRange.endDate) < packageEndDate) {
         continue;
       }
-      
+
       // Create package object
       packages.push({
         _id: `pkg_${i}_${Date.now()}`,
@@ -154,7 +219,7 @@ const SearchPopup = ({ onClose }) => {
         categoryId: { name: "Adventure" }
       });
     }
-    
+
     return packages;
   };
 
@@ -166,7 +231,7 @@ const SearchPopup = ({ onClose }) => {
       tripDuration,
       priceRange,
     };
-    
+
     console.log("Search Data: ", searchData);
     fetchPackages(searchData);
     setShowResults(true);
@@ -179,48 +244,49 @@ const SearchPopup = ({ onClose }) => {
     }));
   };
 
-  const handleBooking = (packageId) => {
-    const userToken = localStorage.getItem("userToken");
-    if (!userToken) {
-      // Handle authentication logic
-      alert("Please login to book this package");
-    } else {
-      // Redirect to booking page
-      window.location.href = `/booking/${packageId}`;
-    }
-  };
-
   const isPackageAvailable = (pkg) => {
     return pkg.isActive && pkg.availableSeats > 0;
   };
 
-  const handlePackageClick = (pkg) => {
-    if (pkg.isActive && pkg.availableSeats > 0) {
+  const navigateToPackageDetails = (pkg, e) => {
+    // Stop propagation to prevent the parent click handler from firing
+    if (e) {
+      e.stopPropagation();
+    }
+
+    if (isPackageAvailable(pkg)) {
       window.location.href = `/package/${pkg._id}`;
     }
   };
 
-  // BlurImage component for package cards
-  const BlurImage = ({ src, alt }) => {
+  const PackageImage = ({ src, alt }) => {
     const [imageLoaded, setImageLoaded] = useState(false);
   
+    const getImageUrl = (imagePath) => {
+      if (!imagePath) return "/api/placeholder/340/340";
+      if (imagePath.startsWith('http') || imagePath.startsWith('/api/placeholder')) return imagePath;
+      const API_URL = import.meta.env.VITE_APP_API_URL || "http://localhost:8000";
+      return `${API_URL}${imagePath}`;
+    };
+  
     return (
-      <div className="relative w-full h-[340px] overflow-hidden">
-        <img
-          src={src}
-          alt={alt}
-          className={`w-full h-full object-cover rounded-2xl ${imageLoaded ? "blur-none" : "blur-md"
-            } transition-all duration-300 ease-in-out`}
-          onLoad={() => setImageLoaded(true)}
-          loading="lazy"
-          onError={(e) => {
-            // Use a placeholder image on error
-            e.target.src = "/api/placeholder/340/340";
-          }}
-        />
+      <div className="relative w-full h-[340px] overflow-hidden rounded-2xl">
+        {/* Placeholder for loading */}
         {!imageLoaded && (
-          <div className="absolute inset-0 bg-gray-200 animate-pulse"></div>
+          <div className="absolute inset-0 bg-gray-200 animate-pulse rounded-2xl z-10"></div>
         )}
+        
+        <img
+          src={getImageUrl(src)}
+          alt={alt}
+          className={`w-full h-full object-cover rounded-2xl transition-all duration-300 ${imageLoaded ? 'opacity-100' : 'opacity-0'}`}
+          onLoad={() => setImageLoaded(true)}  // This ensures the image is marked as loaded
+          onError={(e) => {
+            e.target.src = "/api/placeholder/340/340";  // Fallback image in case of error
+            setImageLoaded(true);  // Mark as loaded even if there's an error
+          }}
+          loading="lazy"
+        />
       </div>
     );
   };
@@ -302,11 +368,10 @@ const SearchPopup = ({ onClose }) => {
                   (duration) => (
                     <button
                       key={duration}
-                      className={`px-6 py-3 border-2 rounded-xl font-medium transition-all ${
-                        tripDuration === duration
+                      className={`px-6 py-3 border-2 rounded-xl font-medium transition-all ${tripDuration === duration
                           ? "bg-orange-500 border-orange-500 text-white"
                           : "border-gray-200 text-gray-600 hover:border-orange-500 hover:text-orange-500"
-                      }`}
+                        }`}
                       onClick={() => setTripDuration(duration)}
                     >
                       {duration}
@@ -377,11 +442,10 @@ const SearchPopup = ({ onClose }) => {
             <button
               onClick={handleSearch}
               disabled={!canSearch}
-              className={`w-full px-8 py-4 rounded-xl text-lg font-semibold shadow-lg transition-all ${
-                canSearch
+              className={`w-full px-8 py-4 rounded-xl text-lg font-semibold shadow-lg transition-all ${canSearch
                   ? 'bg-orange-500 text-white hover:bg-orange-600 transform hover:-translate-y-0.5'
                   : 'bg-gray-200 text-gray-400 cursor-not-allowed'
-              }`}
+                }`}
             >
               Search Trips
             </button>
@@ -398,7 +462,7 @@ const SearchPopup = ({ onClose }) => {
                 Modify Search
               </button>
             </div>
-            
+
             {loading ? (
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                 {[...Array(6)].map((_, index) => (
@@ -416,17 +480,29 @@ const SearchPopup = ({ onClose }) => {
                   </div>
                 ))}
               </div>
+            ) : error ? (
+              <div className="text-center py-16">
+                <div className="text-6xl mb-4">⚠️</div>
+                <h3 className="text-xl font-semibold mb-2">Error Fetching Packages</h3>
+                <p className="text-gray-500 mb-4">{error}</p>
+                <button
+                  onClick={handleSearch}
+                  className="px-6 py-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition-colors"
+                >
+                  Try Again
+                </button>
+              </div>
             ) : searchResults.length > 0 ? (
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                 {searchResults.map((pkg) => (
                   <div
                     key={pkg._id}
                     className="rounded transition snap-center w-[340px] cursor-pointer relative"
-                    onClick={() => handlePackageClick(pkg)}
+                    onClick={() => navigateToPackageDetails(pkg)}
                   >
                     <div className="relative">
-                      <BlurImage
-                        src={import.meta.env.VITE_APP_API_URL ? `${import.meta.env.VITE_APP_API_URL}${pkg.images[0]}` : "/api/placeholder/340/340"}
+                      <PackageImage
+                        src={pkg.images && pkg.images.length > 0 ? pkg.images[0] : "/api/placeholder/340/340"}
                         alt={pkg.title}
                       />
 
@@ -472,7 +548,7 @@ const SearchPopup = ({ onClose }) => {
                         {new Date(pkg.startDate).toLocaleDateString()} - {" "}
                         {new Date(pkg.endDate).toLocaleDateString()}
                       </p>
-                      
+
                       <div className="flex justify-between">
                         <div
                           className="flex w-full relative rounded-md mb-[2px]"
@@ -483,15 +559,15 @@ const SearchPopup = ({ onClose }) => {
                           <div className="productcard_destinationListBOx flex items-center overflow-hidden, gap-[5px] h-8 my-0 mr-32px ml-7px">
                             <div className="flex w-max items-center gap-1">
                               <span className="flex items-center text-xs font-semibold text-[#000]">
-                                {pkg.duration.split(" ")[0]}
+                                {pkg.duration && pkg.duration.split(" ")[0]}
                               </span>
                               <span className="flex items-center text-xs font-normal text-[#515151] w-max">
-                                {pkg.categoryId ? pkg.categoryId.name : "Category not available"}
+                                {pkg.categoryId ? (typeof pkg.categoryId === 'object' ? pkg.categoryId.name : pkg.categoryId) : "Adventure"}
                               </span>
                             </div>
                           </div>
                         </div>
-                        
+
                         {/* Package Rating */}
                         <div className="package_rating flex items-center content-end gap-2">
                           <span className="flex items-center text-[#f39c12] font-bold">
@@ -521,7 +597,7 @@ const SearchPopup = ({ onClose }) => {
                               <path d="M2.65992 3L0 6L2.65992 9L0 12L2.65992 15L0 18L2.65992 21L0 24H3.5V0H0L2.65992 3Z" fill="#E5F1E8"></path>
                             </svg>
                           </span>
-                          
+
                           {pkg.realPrice > pkg.discountedPrice && (
                             <span className="LeadForm_saveprice"
                               style={{
@@ -542,7 +618,7 @@ const SearchPopup = ({ onClose }) => {
                               Save ₹{(pkg.realPrice - pkg.discountedPrice).toLocaleString()}
                             </span>
                           )}
-                          
+
                           <span className="LeadForm_savePrice_RightBorderIcon"
                             style={{
                               transform: 'rotate(180deg)',
@@ -556,7 +632,7 @@ const SearchPopup = ({ onClose }) => {
                           </span>
                         </div>
                       </div>
-                      
+
                       <div className="ProductCard_ButtonContainer flex flex-row justify-between mt-[10px]">
                         <a href="tel:+917542003073" className={`flex items-center h-[51px] w-[51px] border rounded-md border-solid border-[#f37002] text-[#f37002] hover:bg-[#f37002] hover:text-white justify-center text-[14px] font-semibold ${!isPackageAvailable(pkg) ? 'pointer-events-none opacity-70' : ''}`}>
                           <div className="flex items-center justify-center">
@@ -565,7 +641,7 @@ const SearchPopup = ({ onClose }) => {
                             </svg>
                           </div>
                         </a>
-                        
+
                         <div className={`productCard_Button bg-[#f37002] text-white flex items-center justify-center h-[51px] border border-solid border-[#f37002] rounded-md text-[14px] font-semibold hover:bg-transparent hover:text-[#f37002] ${!isPackageAvailable(pkg) ? 'opacity-70 cursor-not-allowed' : ''}`}
                           style={{
                             width: 'calc(100% - 61px)'

@@ -4,6 +4,29 @@ import { useParams, useNavigate } from "react-router-dom";
 import axios from "axios";
 import UserAuth from "../components/UserAuth";
 import Footer from "../components/Footer";
+
+// Blur Image Component (copied from CategoryPage)
+const BlurImage = ({ src, alt }) => {
+  const [imageLoaded, setImageLoaded] = useState(false);
+
+  return (
+    <div className="relative w-full h-full overflow-hidden">
+      <img
+        src={src}
+        alt={alt}
+        className={`w-full h-full object-cover rounded-2xl ${imageLoaded ? "blur-none" : "blur-md"
+          } transition-all duration-300 ease-in-out`}
+        onLoad={() => setImageLoaded(true)}
+        loading="lazy"
+        onError={(e) => (e.target.src = "/fallback-image.png")}
+      />
+      {!imageLoaded && (
+        <div className="absolute inset-0 bg-gray-200 animate-pulse"></div>
+      )}
+    </div>
+  );
+};
+
 // Skeleton Component for Package Card
 const PackageCardSkeleton = () => (
   <div className="w-[340px] min-w-[90%] sm:min-w-[45%] lg:min-w-[30%] rounded transition snap-center animate-pulse">
@@ -253,6 +276,9 @@ const ExplorePage = () => {
       behavior: "smooth",
     });
   };
+  const isPackageAvailable = (pkg) => {
+    return pkg.isActive && pkg.availableSeats > 0;
+  };
 
   // Function to handle package click based on active status and seats availability
   const handlePackageClick = (pkg) => {
@@ -262,10 +288,6 @@ const ExplorePage = () => {
     }
     // If not active or no seats available, do nothing (just show the appropriate overlay)
   };
-  const isPackageAvailable = (pkg) => {
-    return pkg.isActive && pkg.availableSeats > 0;
-  };
-
   return (
     <div className="px-4 md:px-8 lg:px-32 py-8 bg-white min-h-screen max-w-[1440px] mx-auto" >
       {categories.length === 0 ? (
@@ -314,44 +336,33 @@ const ExplorePage = () => {
                       className="rounded transition snap-center cursor-pointer relative"
                       onClick={() => handlePackageClick(pkg)}
                     >
-                      {/* Top Container for Image */}
+                      {/* Top Container for Image - Updated with BlurImage component */}
                       <div className="top-container overflow-hidden rounded-t relative w-[295px] md:w-[340px] h-[340px]">
-                        <img
+                        <BlurImage
                           src={`${import.meta.env.VITE_APP_API_URL}${pkg.images[0]}`}
                           alt={pkg.title}
-                          className={`w-full h-full object-cover rounded-2xl transition-all duration-300 ${!isPackageAvailable(pkg) ? 'blur-sm' : 'blur-sm hover:blur-none'}`}
-                          onLoad={(e) => isPackageAvailable(pkg) && e.target.classList.remove('blur-sm')}
-                          onError={(e) => {
-                            e.target.src = "/fallback-image.png";
-                            isPackageAvailable(pkg) && e.target.classList.remove('blur-sm');
-                          }}
-                          loading="lazy"
                         />
+                        {/* Coming Soon Overlay for Inactive Packages */}
+                        {!pkg.isActive && (
+                          <div className="absolute inset-0 flex items-center justify-center z-10">
+                            <div className="bg-black bg-opacity-70 w-full h-full absolute rounded-lg flex items-center justify-center">
+                              <div className="text-white text-2xl font-bold bg-orange-500 bg-opacity-90 px-6 py-3 rounded-lg transform rotate-[-10deg] shadow-lg">
+                                Coming Soon
+                              </div>
+                            </div>
+                          </div>
+                        )}
+                        {/* Sold Out Overlay when no seats available */}
+                        {pkg.isActive && pkg.availableSeats === 0 && (
+                          <div className="absolute inset-0 flex items-center justify-center z-10">
+                            <div className="bg-black bg-opacity-70 w-full h-full absolute rounded-lg flex items-center justify-center">
+                              <div className="text-white text-2xl font-bold bg-red-600 bg-opacity-90 px-6 py-3 rounded-lg transform rotate-[-10deg] shadow-lg">
+                                Seat Sold Out
+                              </div>
+                            </div>
+                          </div>
+                        )}
                       </div>
-
-                      {/* Coming Soon Overlay for Inactive Packages */}
-                      {!pkg.isActive && (
-                        <div className="absolute inset-0 flex items-center justify-center z-10">
-                          <div className="bg-black bg-opacity-70 w-full h-full absolute rounded-lg flex items-center justify-center">
-                            <div className="text-white text-2xl font-bold bg-orange-500 bg-opacity-90 px-6 py-3 rounded-lg transform rotate-[-10deg] shadow-lg">
-                              Coming Soon
-                            </div>
-                          </div>
-                        </div>
-                      )}
-                      {pkg.isActive && pkg.availableSeats === 0 && (
-                        <div className="absolute inset-0 flex items-center justify-center z-10">
-                          <div className="bg-black bg-opacity-70 w-full h-full absolute rounded-lg flex items-center justify-center">
-                            <div className="text-white text-2xl font-bold bg-red-600 bg-opacity-90 px-6 py-3 rounded-lg transform rotate-[-10deg] shadow-lg">
-                              Sold Out
-                            </div>
-                          </div>
-                        </div>
-                      )}
-
-
-
-                      {/* Create Space Between Image and Content */}
                       <div className="h-2"></div>
 
                       {/* Bottom Container for Content */}
