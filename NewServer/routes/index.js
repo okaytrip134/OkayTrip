@@ -13,7 +13,7 @@ const router = express.Router();
 // User Routes
 router.use("/user/auth", userAuthRoutes);
 router.use("/user/profile", profileRoutes);
-router.use("/contact", contactRouter); // Add the contact route
+router.use("/contact", contactRouter);
 router.use("/payment", paymentRoutes);
 router.use("/bookings", bookingRoutes);
 router.use("/reviews", reviewRoutes)
