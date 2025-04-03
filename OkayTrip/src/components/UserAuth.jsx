@@ -1,11 +1,10 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
-import toast, { Toaster } from "react-hot-toast"; // Import react-hot-toast
-
+import toast, { Toaster } from "react-hot-toast";
 import { FaEye, FaEyeSlash } from "react-icons/fa";
 
 const UserAuth = ({ onClose }) => {
-  const [isLogin, setIsLogin] = useState(true); // Toggle between Login and Signup
+  const [isLogin, setIsLogin] = useState(true);
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -17,8 +16,9 @@ const UserAuth = ({ onClose }) => {
   const [bannerData, setBannerData] = useState({
     title: "Welcome to Our Platform",
     subtitle: "Experience seamless login and signup with our user-friendly portal.",
-    imageUrl: "https://via.placeholder.com/500x500", // Placeholder for initial state
+    imageUrl: "https://via.placeholder.com/500x500",
   });
+
   useEffect(() => {
     // Fetch Banner Data
     const fetchBannerData = async () => {
@@ -35,7 +35,6 @@ const UserAuth = ({ onClose }) => {
     fetchBannerData();
   }, []);
 
-
   const [showPassword, setShowPassword] = useState(false);
 
   const handleInputChange = (e) => {
@@ -44,7 +43,7 @@ const UserAuth = ({ onClose }) => {
 
   const handleSubmit = async () => {
     try {
-      setError(""); // Reset error
+      setError("");
 
       const payload = isLogin
         ? { emailOrPhone: formData.emailOrPhone, password: formData.password }
@@ -61,7 +60,7 @@ const UserAuth = ({ onClose }) => {
 
       const { data } = await axios.post(endpoint, payload);
 
-      console.log("Response from API:", data); // Debugging
+      console.log("Response from API:", data);
 
       if (isLogin) {
         if (!data.token) {
@@ -73,15 +72,15 @@ const UserAuth = ({ onClose }) => {
 
         // Extract expiry from JWT
         const decodedToken = JSON.parse(atob(data.token.split(".")[1]));
-        const expiryTime = decodedToken.exp * 1000; // Convert to milliseconds
+        const expiryTime = decodedToken.exp * 1000;
         localStorage.setItem("tokenExpiry", expiryTime);
 
-        console.log("Token Expiry Set:", expiryTime); // Debugging
+        console.log("Token Expiry Set:", expiryTime);
       } else {
         toast.success("Signup successful!");
       }
 
-      onClose(); // Close the modal on success
+      onClose();
     } catch (error) {
       console.error("Login Error:", error);
       toast.error(
@@ -91,16 +90,16 @@ const UserAuth = ({ onClose }) => {
   };
 
   const handleForgotPassword = () => {
-    window.location.href = "/forgot-password"; // Redirect to Forgot Password page
+    window.location.href = "/forgot-password";
   };
 
   return (
-    <div className="fixed h-full md:h-auto inset-0 bg-black bg-opacity-20 z-50 flex justify-center items-center">
+    <div className="fixed h-full inset-0 bg-black bg-opacity-20 z-50 flex justify-center items-center">
       <div className="bg-white rounded-lg shadow-lg w-11/12 max-w-4xl flex overflow-hidden relative">
         {/* Close Button */}
         <button
           onClick={onClose}
-          className="absolute top-4 right-4 text-gray-500 hover:text-red-500 text-lg font-bold"
+          className="absolute top-4 right-4 text-gray-500 hover:text-red-500 text-lg font-bold z-10"
         >
           ✕
         </button>
@@ -112,104 +111,88 @@ const UserAuth = ({ onClose }) => {
             alt="Login Illustration"
             className="w-full h-full object-cover"
           />
-          {/* <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-t from-black/50 via-black/ to-transparent"></div> */}
-
         </div>
 
-        {/* Right Section: Form */}
-        <div className="w-full md:w-1/2 p-6">
-          {/* Header */}
-          <h2 className="text-2xl font-bold text-gray-700 text-center mb-6">
-            {isLogin ? "Log into Your Account" : "Create Your Account"}
-          </h2>
+        {/* Right Section: Form with Scroll */}
+        <div className="w-full md:w-1/2 flex flex-col h-full max-h-[80vh]">
+          {/* Fixed Header */}
+          <div className="px-6 pt-6 pb-2 bg-white">
+            <h2 className="text-2xl font-bold text-gray-700 text-center">
+              {isLogin ? "Log into Your Account" : "Create Your Account"}
+            </h2>
 
-          {/* Toggle Login/Signup */}
-          <div className="flex justify-center mb-6">
-            <button
-              className={`text-lg font-bold px-4 py-2 ${isLogin
-                ? "text-orange-500 border-b-2 border-orange-500"
-                : "text-gray-500"
-                }`}
-              onClick={() => setIsLogin(true)}
-            >
-              Login
-            </button>
-            <button
-              className={`text-lg font-bold px-4 py-2 ${!isLogin
-                ? "text-orange-500 border-b-2 border-orange-500"
-                : "text-gray-500"
-                }`}
-              onClick={() => setIsLogin(false)}
-            >
-              Sign Up
-            </button>
+            {/* Toggle Login/Signup */}
+            <div className="flex justify-center my-4">
+              <button
+                className={`text-lg font-bold px-4 py-2 ${isLogin
+                  ? "text-orange-500 border-b-2 border-orange-500"
+                  : "text-gray-500"
+                  }`}
+                onClick={() => setIsLogin(true)}
+              >
+                Login
+              </button>
+              <button
+                className={`text-lg font-bold px-4 py-2 ${!isLogin
+                  ? "text-orange-500 border-b-2 border-orange-500"
+                  : "text-gray-500"
+                  }`}
+                onClick={() => setIsLogin(false)}
+              >
+                Sign Up
+              </button>
+            </div>
           </div>
 
-          {/* Form */}
-          <div className="space-y-4">
-            {!isLogin && (
-              <>
-                <input
-                  type="text"
-                  name="name"
-                  placeholder="Full Name"
-                  value={formData.name}
-                  onChange={handleInputChange}
-                  className="w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
-                />
-                <input
-                  type="text"
-                  name="phone"
-                  placeholder="Phone Number"
-                  value={formData.phone}
-                  onChange={handleInputChange}
-                  className="w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
-                />
-                <input
-                  type="email"
-                  name="email"
-                  placeholder="Email"
-                  value={formData.email}
-                  onChange={handleInputChange}
-                  className="w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
-                />
-              </>
-            )}
-            {isLogin && (
-              <div className="relative">
-                <input
-                  type="text"
-                  name="emailOrPhone"
-                  placeholder="Email or Phone Number"
-                  value={formData.emailOrPhone}
-                  onChange={handleInputChange}
-                  className="w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
-                />
-              </div>
-            )}
-            <div className="relative">
-              <input
-                type={showPassword ? "text" : "password"}
-                name="password"
-                placeholder="Password"
-                value={formData.password}
-                onChange={handleInputChange}
-                className="w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
-              />
-              <span
-                className="absolute right-3 top-3 text-gray-500 cursor-pointer"
-                onClick={() => setShowPassword((prev) => !prev)}
-              >
-                {showPassword ? <FaEyeSlash size={20} /> : <FaEye size={20} />}
-              </span>
-            </div>
-            {!isLogin && (
+          {/* Scrollable Form Content */}
+          <div className="overflow-y-auto px-6 py-4 flex-grow">
+            <div className="space-y-4">
+              {!isLogin && (
+                <>
+                  <input
+                    type="text"
+                    name="name"
+                    placeholder="Full Name"
+                    value={formData.name}
+                    onChange={handleInputChange}
+                    className="w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
+                  />
+                  <input
+                    type="text"
+                    name="phone"
+                    placeholder="Phone Number"
+                    value={formData.phone}
+                    onChange={handleInputChange}
+                    className="w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
+                  />
+                  <input
+                    type="email"
+                    name="email"
+                    placeholder="Email"
+                    value={formData.email}
+                    onChange={handleInputChange}
+                    className="w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
+                  />
+                </>
+              )}
+              {isLogin && (
+                <div className="relative">
+                  <input
+                    type="text"
+                    name="emailOrPhone"
+                    placeholder="Email or Phone Number"
+                    value={formData.emailOrPhone}
+                    onChange={handleInputChange}
+                    className="w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
+                  />
+                </div>
+              )}
               <div className="relative">
                 <input
                   type={showPassword ? "text" : "password"}
-                  name="confirmPassword"
-                  placeholder="Confirm Password"
-                  value={formData.confirmPassword}
+                  name="password"
+                  placeholder="Password"
+                  value={formData.password}
                   onChange={handleInputChange}
                   className="w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
                 />
@@ -220,62 +203,82 @@ const UserAuth = ({ onClose }) => {
                   {showPassword ? <FaEyeSlash size={20} /> : <FaEye size={20} />}
                 </span>
               </div>
-            )}
-          </div>
+              {!isLogin && (
+                <div className="relative">
+                  <input
+                    type={showPassword ? "text" : "password"}
+                    name="confirmPassword"
+                    placeholder="Confirm Password"
+                    value={formData.confirmPassword}
+                    onChange={handleInputChange}
+                    className="w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
+                  />
+                  <span
+                    className="absolute right-3 top-3 text-gray-500 cursor-pointer"
+                    onClick={() => setShowPassword((prev) => !prev)}
+                  >
+                    {showPassword ? <FaEyeSlash size={20} /> : <FaEye size={20} />}
+                  </span>
+                </div>
+              )}
 
-          {error && <p className="text-red-500 text-sm mt-2">{error}</p>}
+              {error && <p className="text-red-500 text-sm mt-2">{error}</p>}
 
-          {/* Submit Button */}
-          <button
-            onClick={handleSubmit}
-            className="w-full mt-4 px-6 py-3 rounded-full bg-orange-500 text-white font-bold hover:bg-orange-600"
-          >
-            {isLogin ? "Login & Continue" : "Sign Up"}
-          </button>
+              {/* Submit Button */}
+              <button
+                onClick={handleSubmit}
+                className="w-full mt-4 px-6 py-3 rounded-full bg-orange-500 text-white font-bold hover:bg-orange-600"
+              >
+                {isLogin ? "Login & Continue" : "Sign Up"}
+              </button>
 
-          {/* Forgot Password Link */}
-          <div className="mt-4 text-center">
-            <button
-              onClick={handleForgotPassword}
-              className="text-blue-500 text-sm"
-            >
-              Forgot Password?
-            </button>
-          </div>
-
-
-          {/* Sign in with Google */}
-          <button className="w-full mt-4 px-6 py-3 rounded-full bg-gray-100 text-gray-700 font-bold hover:bg-gray-200 flex items-center justify-center">
-            <img
-              src="https://img.icons8.com/color/48/google-logo.png"
-              alt="Google Icon"
-              className="w-5 h-5 mr-2"
-            />
-            Sign in with Google
-          </button>
-
-          {/* Ratings Section */}
-          <div className="mt-6 text-center">
-            <h3 className="text-lg font-bold text-gray-700 mb-2">
-              Book With Confidence
-            </h3>
-            <div className="flex justify-center space-x-4">
-              <div className="text-center">
-                <p className="font-bold text-gray-700">4.5/5</p>
-                <p className="text-sm text-gray-500">Trip Advisor</p>
+              {/* Forgot Password Link */}
+              <div className="mt-4 text-center">
+                <button
+                  onClick={handleForgotPassword}
+                  className="text-blue-500 text-sm"
+                >
+                  Forgot Password?
+                </button>
               </div>
-              <div className="text-center">
-                <p className="font-bold text-gray-700">4.0/5</p>
-                <p className="text-sm text-gray-500">Trust Pilot</p>
+
+              {/* Sign in with Google */}
+              <button className="w-full mt-4 px-6 py-3 rounded-full bg-gray-100 text-gray-700 font-bold hover:bg-gray-200 flex items-center justify-center">
+                <img
+                  src="https://img.icons8.com/color/48/google-logo.png"
+                  alt="Google Icon"
+                  className="w-5 h-5 mr-2"
+                />
+                Sign in with Google
+              </button>
+
+              {/* Ratings Section */}
+              <div className="mt-6 text-center">
+                <h3 className="text-lg font-bold text-gray-700 mb-2">
+                  Book With Confidence
+                </h3>
+                <div className="flex justify-center space-x-4">
+                  <div className="text-center">
+                    <p className="font-bold text-gray-700">4.5/5</p>
+                    <p className="text-sm text-gray-500">Trip Advisor</p>
+                  </div>
+                  <div className="text-center">
+                    <p className="font-bold text-gray-700">4.0/5</p>
+                    <p className="text-sm text-gray-500">Trust Pilot</p>
+                  </div>
+                  <div className="text-center">
+                    <p className="font-bold text-gray-700">4.4/5</p>
+                    <p className="text-sm text-gray-500">Google</p>
+                  </div>
+                  <div className="text-center">
+                    <p className="font-bold text-gray-700">4.3/5</p>
+                    <p className="text-sm text-gray-500">Reviews.io</p>
+                  </div>
+                </div>
               </div>
-              <div className="text-center">
-                <p className="font-bold text-gray-700">4.4/5</p>
-                <p className="text-sm text-gray-500">Google</p>
-              </div>
-              <div className="text-center">
-                <p className="font-bold text-gray-700">4.3/5</p>
-                <p className="text-sm text-gray-500">Reviews.io</p>
-              </div>
+              
+              {/* Adding some extra padding at the bottom for better scrolling */}
+              <div className="h-4"></div>
             </div>
           </div>
         </div>

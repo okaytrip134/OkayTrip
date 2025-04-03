@@ -23,6 +23,7 @@ import report from '../../assets/icons/ic-workbench.svg'
 import packages from '../../assets/icons/ic-files.svg'
 import categories from '../../assets/icons/ic-category.svg'
 import { FaComment } from "react-icons/fa";
+import { RiCoupon2Fill } from "react-icons/ri";
 
 const DashboardPage = () => {
   const navigate = useNavigate();
@@ -72,6 +73,18 @@ const DashboardPage = () => {
       items: [
         { name: "Booking Report", icon: <SvgIcon src={report} alt="Reports" />, path: "/admin/dashboard/booking-report" },
         { name: "Leads", icon: <FileTextOutlined />, path: "/admin/dashboard/Leads" },
+      ]
+    },
+    {
+      name: "Coupon Generator",
+      icon: <RiCoupon2Fill />, // Changed to PieChartOutlined
+      isDropdown: true,
+      dropdownName: "coupon generator",
+      items: [
+        { name: "Create Offer", icon: <SvgIcon src={report} alt="Reports" />, path: "/admin/dashboard/create-offer" },
+        { name: "View Offer", icon: <FileTextOutlined />, path: "/admin/dashboard/view-offer" },
+        { name: "View Coupon", icon: <FileTextOutlined />, path: "/admin/dashboard/view-coupon" },
+        { name: "Announce Winner", icon: <GiftOutlined />, path: "/admin/dashboard/announce-winner" },
       ]
     },
   ];

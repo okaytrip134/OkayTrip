@@ -5,6 +5,7 @@ import UserProfileContent from "../components/UserProfileContent";
 import SupportAndFAQs from "./SupportAndFAQs";
 import UserFooter from "../users/UserFooter"; // Correctly imported
 import ProfileBookings from "./ProfileBooking";
+import UserCoupons from "./PurchasedCoupon";
 
 const Profile = () => {
   const API_URL = "http://localhost:8000";
@@ -42,6 +43,7 @@ const Profile = () => {
           )}
           {activeTab === "support" && <SupportAndFAQs />}
           {activeTab === "bookings" && <ProfileBookings />}
+          {activeTab === "usercoupons" && <UserCoupons/>}
         </div>
       </div>
       <UserFooter /> {/* Footer correctly placed */}

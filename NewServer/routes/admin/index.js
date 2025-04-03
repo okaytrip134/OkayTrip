@@ -11,6 +11,7 @@ const bookingRoutes = require("./bookingRoutes"); // Import the new route
 const bannerRoutes = require("./bannerRoutes");
 const reviewRoutes = require("./reviewRoutes");
 const leadRoutes = require('./leadRoutes');
+const offerRoutes = require('./offerRoutes')
 
 // Add all admin routes
 router.use("/auth", authRouter); 
@@ -23,5 +24,6 @@ router.use("/bookings", bookingRoutes);
 router.use("/banner", bannerRoutes);
 router.use("/reviews", reviewRoutes);
 router.use("/leads", leadRoutes); 
+router.use("/offer", offerRoutes)
 
 module.exports = router;

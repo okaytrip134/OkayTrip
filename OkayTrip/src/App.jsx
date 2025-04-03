@@ -18,6 +18,9 @@ import PrivacyPolicy from "./pages/PrivacyPolicy";
 import TermsConditions from "./pages/Term&conditions";
 import CopyrightPolicy from "./pages/CopyRightPolicy";
 import BookingSuccess from "./pages/BookingSuccess";
+import OfferCouponPopup from "./components/OfferPopup";
+import BookCoupon from "./pages/BuyCoupon";
+import CouponDetail from "./pages/CouponDetails";
 
 function App() {
   return (
@@ -33,6 +36,7 @@ const AppContent = () => {
   return (
     <div className="App">
       <NavWithConditionalNavbar />
+      <OfferCouponPopup/>
       <ScrollToTop/>
       <div className="content">
         <Routes>
@@ -51,6 +55,8 @@ const AppContent = () => {
           <Route path="/term-and-conditions" element={<TermsConditions/>}/>
           <Route path="/copyright-policy" element= {<CopyrightPolicy/>}/>
           <Route path="/booking-success" element={<BookingSuccess/>}/>
+          <Route path="/booking-offer/:offerId" element={<BookCoupon />} />
+          <Route path="/coupon/:couponId" element={<CouponDetail/>}/>
         </Routes>
       </div>
       {/* Conditionally render Footer */}

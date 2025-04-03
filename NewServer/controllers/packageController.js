@@ -281,3 +281,13 @@ exports.searchPackages = async (req, res) => {
     res.status(500).json({ message: "Internal server error." });
   }
 };
+// Add this to your packageController.js
+exports.getAdminPackages = async (req, res) => {
+  try {
+    const packages = await Package.find({}, '_id title discountedPrice');
+    res.status(200).json(packages);
+  } catch (error) {
+    console.error('Error fetching packages:', error);
+    res.status(500).json({ message: 'Error fetching packages' });
+  }
+};

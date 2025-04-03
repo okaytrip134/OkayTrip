@@ -8,7 +8,8 @@ const {
   updatePackage,
   togglePackageStatus,
   deletePackage,
-  searchPackages
+  searchPackages,
+  getAdminPackages
 } = require("../../controllers/packageController");
 const adminAuth = require("../../middlewares/authMiddleware");
 const multer = require("multer");
@@ -34,5 +35,5 @@ router.put("/:packageId", adminAuth, upload.array("images", 40), updatePackage);
 router.put("/:packageId/status", adminAuth, togglePackageStatus); 
 router.delete("/:packageId", adminAuth, deletePackage);
 router.get("/search", searchPackages);  
-
+router.get('/admin-packages', getAdminPackages);
 module.exports = router;

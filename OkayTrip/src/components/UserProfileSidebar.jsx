@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { FaUser, FaClipboardList, FaQuestionCircle } from "react-icons/fa";
+import { FaUser, FaClipboardList, FaQuestionCircle, FaTicketAlt } from "react-icons/fa";
 
 // eslint-disable-next-line react/prop-types
 const UserProfileSidebar = ({ activeTab, setActiveTab }) => {
@@ -9,6 +9,7 @@ const UserProfileSidebar = ({ activeTab, setActiveTab }) => {
   const tabs = [
     { id: "profile", label: "My Profile", icon: <FaUser /> },
     { id: "bookings", label: "My Bookings", icon: <FaClipboardList />},
+    { id: "usercoupons", label: "My Coupons", icon: <FaTicketAlt /> },
     { id: "support", label: "Support & FAQs", icon: <FaQuestionCircle /> },
   ];
 
