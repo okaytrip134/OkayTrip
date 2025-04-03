@@ -13,6 +13,7 @@ import {
   DownOutlined,
   SettingOutlined,
   PieChartOutlined,
+  GiftOutlined,
 } from "@ant-design/icons";
 import { Dropdown, Menu } from "antd";
 import dasboard from '../../assets/icons/ic-analysis.svg';
