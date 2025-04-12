@@ -1,119 +1,119 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
-import { LockOutlined, UserOutlined } from "@ant-design/icons";
-import { Button, Form, Input, Typography, message } from "antd";
-import icon from '../../assets/icons/ic-reset-password.svg'
-import { Subtitles } from "lucide-react";
-import '../../styles/Adminlogin.css'
+import { Button, Form, Input, Typography, message, Checkbox, Row, Col, Divider, Layout } from "antd";
+import { EyeInvisibleOutlined, EyeTwoTone } from "@ant-design/icons";
+import { AiFillGithub, AiFillGoogleCircle, AiFillWechat } from "react-icons/ai";
+import '../../styles/AdminLogin.css';
+import dashboardpng from '../../assets/dashboard.png';
+import overlayImg from '../../assets/overlay.jpg'; // You'll need to add this image
+import logo from '../../assets/Logo/Trip ok new 2 black-01.png'
+import { useAuth } from "../context/authContext";
 
-const { Title, Text } = Typography;
+const { Title } = Typography;
 
 const LoginPage = () => {
   const [loading, setLoading] = useState(false);
+  const { login } = useAuth();
   const navigate = useNavigate();
 
   const handleLogin = async (values) => {
     setLoading(true);
     try {
       const response = await axios.post(`${import.meta.env.VITE_APP_API_URL}/api/admin/auth/login`, {
-        email: values.email,
+        email: values.username,
         password: values.password,
       });
-      localStorage.setItem("adminToken", response.data.token);
+      // localStorage.setItem("adminToken", response.data.token);
+      login(response.data.token);
       message.success("Login successful!");
       navigate("/admin/dashboard");
     } catch (error) {
-      message.error("Invalid email or password");
+      message.error("Invalid username or password");
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div
-      style={{
-        display: "flex",
-        justifyContent: "center",
-        alignItems: "center",
-        height: "100vh",
-        background: "#f0f2f5",
-      }}
-    >
+    <Layout className="relative flex !min-h-screen !w-full !flex-row">
       <div
+        className="hidden grow flex-col items-center justify-center gap-[80px] bg-center bg-no-repeat md:flex"
         style={{
-          padding: "40px",
-          borderRadius: "8px",
-          maxWidth: "400px",
-          width: "100%",
+          background: `linear-gradient(rgba(255, 255, 255, 0.9), rgba(255, 255, 255, 0.9)) center center / cover no-repeat, url(${overlayImg})`,
         }}
       >
-        <div style={{ textAlign: "center", marginBottom: "20px", display:'flex', flexDirection:'column', alignItems:'center' }}>
-        <img
-            src={icon}
-            alt="Custom Icon"
-            style={{ width: "60px", height: "60px", marginBottom: "10px", alignItems:"center", display:'flex' }}
-          />
-          <Title level={2}>Welcome Back Admin</Title>
-          <h3>Please enter your details below to sign in.</h3>
+        <div className="text-3xl font-bold leading-normal lg:text-4xl xl:text-5xl">
+          <img src={logo} alt="okay trip" className="h-24 w-80" />
         </div>
+        <img className="max-w-[480px] xl:max-w-[560px]" src={dashboardpng} alt="Dashboard illustration" />
+        {/* <Typography.Text className="flex flex-row gap-[16px] text-2xl">
+          Backstage management system
+        </Typography.Text> */}
+      </div>
+
+      <div className="m-auto flex !h-screen w-full max-w-[480px] flex-col justify-center px-[16px] lg:px-[64px]">
+        <div className="mb-4 text-2xl font-bold xl:text-3xl">Admin Panel
+        </div>
+
         <Form
           name="login"
-          layout="vertical"
-          initialValues={{ remember: true }}
+          size="large"
+          initialValues={{
+            remember: true
+          }}
           onFinish={handleLogin}
         >
           <Form.Item
-            name="email"
-            label="Email"
-            rules={[
-              {
-                required: true,
-                message: "Please enter your email!",
-              },
-              {
-                type: "email",
-                message: "Please enter a valid email!",
-              },
-            ]}
+            name="username"
+            rules={[{ required: true, message: "Please enter your username!" }]}
           >
-            <Input
-              prefix={<UserOutlined />}
-              placeholder="Email"
-              size="large"
-            />
+            <Input placeholder="Username" />
           </Form.Item>
 
           <Form.Item
             name="password"
-            label="Password"
-            rules={[
-              {
-                required: true,
-                message: "Please enter your password!",
-              },
-            ]}
+            rules={[{ required: true, message: "Please enter your password!" }]}
           >
             <Input.Password
-              prefix={<LockOutlined />}
-              placeholder="Password"
-              size="large"
+              type="password"
+              placeholder="••••••••"
+              iconRender={visible => (visible ? <EyeTwoTone /> : <EyeInvisibleOutlined />)}
             />
           </Form.Item>
+
+          <Form.Item>
+            <Row align="middle">
+              <Col span={12}>
+                <Form.Item name="remember" valuePropName="checked" noStyle>
+                  <Checkbox>Remember me</Checkbox>
+                </Form.Item>
+              </Col>
+              <Col span={12} className="text-right">
+                <Button type="link" className="!underline" size="small">
+                  Forget Password?
+                </Button>
+              </Col>
+            </Row>
+          </Form.Item>
+
           <Form.Item>
             <Button
+              type="primary"
               htmlType="submit"
-              block
-              size="large"
+              className="w-full"
               loading={loading}
-              className="custom-button"
             >
-              Log in
+            Admin Login
             </Button>
           </Form.Item>
         </Form>
       </div>
-    </div>
+
+      <div className="absolute right-2 top-0 flex flex-row">
+        {/* Language selector and settings button would go here */}
+      </div>
+    </Layout>
   );
 };
 
