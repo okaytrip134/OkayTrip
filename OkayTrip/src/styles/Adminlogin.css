@@ -1,9 +1,198 @@
-.custom-button{
-    background-color: #f37002;
-    border-color: #f37002;
+/* AdminLogin.css */
+
+.login-container {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+    background-color: #f5f7fa;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  }
+  
+  .login-header {
+    padding: 16px 24px;
+    display: flex;
+    align-items: center;
+  }
+  
+  .login-header h1 {
+    margin: 0;
+    font-size: 24px;
+    font-weight: 600;
+  }
+  
+  .login-content {
+    flex: 1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 24px;
+  }
+  
+  .login-illustration {
+    display: none;
+    margin-right: 80px;
+  }
+  
+  .illustration-image {
+    max-width: 550px;
+  }
+  
+  .login-form-container {
+    width: 100%;
+    max-width: 400px;
+    background-color: #fff;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    padding: 24px;
+  }
+  
+  .login-form-header h2 {
+    font-size: 24px;
+    font-weight: 600;
+    margin-bottom: 24px;
+  }
+  
+  .login-info-box {
+    background-color: #e6f7ff;
+    border-radius: 8px;
+    padding: 16px;
+    margin-bottom: 24px;
+    display: flex;
+    align-items: flex-start;
+  }
+  
+  .info-icon {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    background-color: #1890ff;
     color: white;
-}
-.custom-button:hover{
+    font-weight: bold;
+    margin-right: 12px;
+  }
+  
+  .login-info p {
+    margin: 0;
+    color: #666;
+    line-height: 1.6;
+  }
+  
+  .login-form .ant-form-item {
+    margin-bottom: 24px;
+  }
+  
+  .login-form .ant-input,
+  .login-form .ant-input-password {
+    height: 48px;
+    border-radius: 4px;
+  }
+  
+  .login-options {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 24px;
+  }
+  
+  .forgot-link {
+    color: #1890ff;
+    text-decoration: none;
+  }
+  
+  .login-button {
+    height: 48px;
+    font-size: 16px;
+    background-color: #10b981;
+    border-color: #10b981;
+  }
+  
+  .login-button:hover {
+    background-color: #059669;
+    border-color: #059669;
+  }
+  
+  .additional-options {
+    margin-top: 24px;
+  }
+  
+  .login-alternatives {
+    display: flex;
+    justify-content: space-between;
+    gap: 8px;
+    margin-bottom: 24px;
+  }
+  
+  .alt-button {
+    flex: 1;
+    padding: 8px;
+    border: 1px solid #d9d9d9;
     background-color: transparent;
-    color: #f37002;
-}
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.3s;
+    font-size: 12px;
+  }
+  
+  .alt-button:hover {
+    border-color: #1890ff;
+    color: #1890ff;
+  }
+  
+  .social-login {
+    text-align: center;
+  }
+  
+  .social-login p {
+    color: #666;
+    margin-bottom: 16px;
+  }
+  
+  .social-buttons {
+    display: flex;
+    justify-content: center;
+    gap: 24px;
+  }
+  
+  .social-button {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    border: none;
+    background: transparent;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+  }
+  
+  .social-button img {
+    width: 24px;
+    height: 24px;
+  }
+  
+  .login-footer {
+    text-align: center;
+    padding: 16px;
+    color: #666;
+  }
+  
+  /* Media query for larger screens to show illustration */
+  @media (min-width: 992px) {
+    .login-illustration {
+      display: block;
+    }
+    
+    .login-content {
+      justify-content: center;
+    }
+  }
+  
+  /* For language selector and settings icons in header */
+  .header-actions {
+    margin-left: auto;
+    display: flex;
+    gap: 16px;
+  }

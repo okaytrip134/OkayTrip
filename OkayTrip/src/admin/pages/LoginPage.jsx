@@ -4,7 +4,7 @@ import axios from "axios";
 import { Button, Form, Input, Typography, message, Checkbox, Row, Col, Divider, Layout } from "antd";
 import { EyeInvisibleOutlined, EyeTwoTone } from "@ant-design/icons";
 import { AiFillGithub, AiFillGoogleCircle, AiFillWechat } from "react-icons/ai";
-import '../../styles/AdminLogin.css';
+import '../../styles/Adminlogin.css';
 import dashboardpng from '../../assets/dashboard.png';
 import overlayImg from '../../assets/overlay.jpg'; // You'll need to add this image
 import logo from '../../assets/Logo/Trip ok new 2 black-01.png'
