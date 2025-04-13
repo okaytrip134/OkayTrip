@@ -31,9 +31,24 @@ const DashboardPage = () => {
   const [isSidebarOpen, setSidebarOpen] = useState(true);
   const [openDropdown, setOpenDropdown] = useState(null);
 
-  const handleLogout = () => {
-    localStorage.removeItem("adminToken");
-    navigate("/admin/login");
+  const handleLogout = async () => {
+    try {
+      // Clear the token from storage
+      localStorage.removeItem("adminToken");
+      
+      // Force a hard redirect to ensure complete logout
+      window.location.href = "/admin/login";
+      
+      // Optional: Add a small delay before navigation
+      await new Promise(resolve => setTimeout(resolve, 50));
+      
+      // Navigate to login page (this will work if the above doesn't)
+      navigate("/admin/login", { replace: true });
+    } catch (err) {
+      console.error("Logout error:", err);
+      // Fallback to hard redirect if error occurs
+      window.location.href = "/admin/login";
+    }
   };
 
   const toggleDropdown = (dropdownName) => {

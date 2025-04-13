@@ -6,15 +6,29 @@ import axios from 'axios';
 const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
-  const [authToken, setAuthToken] = useState(localStorage.getItem('adminToken'));
+  const [authToken, setAuthToken] = useState(() => localStorage.getItem('adminToken'));
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [error, setError] = useState(null);
-  const [isRouterReady, setIsRouterReady] = useState(false);
   const navigate = useNavigate();
 
-  // Initialize router readiness
+  // Initialize authentication state on first render
   useEffect(() => {
-    setIsRouterReady(true);
+    const token = localStorage.getItem('adminToken');
+    if (token) {
+      try {
+        const decoded = jwtDecode(token);
+        if (decoded.exp * 1000 > Date.now()) {
+          setAuthToken(token);
+          setIsAuthenticated(true);
+        } else {
+          // Token expired, clear it
+          localStorage.removeItem('adminToken');
+        }
+      } catch (err) {
+        localStorage.removeItem('adminToken');
+        setError(err);
+      }
+    }
   }, []);
 
   const login = (token) => {
@@ -22,92 +36,63 @@ export const AuthProvider = ({ children }) => {
       localStorage.setItem('adminToken', token);
       setAuthToken(token);
       setIsAuthenticated(true);
-      if (isRouterReady) {
-        navigate('/admin/dashboard');
-      }
+      navigate('/admin/dashboard');
     } catch (err) {
       setError(err);
       console.error("Login error:", err);
     }
   };
-
-  const logout = () => {
+  const logout = async () => {
     try {
+      // First remove token from storage
       localStorage.removeItem('adminToken');
+      
+      // Then update states
       setAuthToken(null);
       setIsAuthenticated(false);
-      if (isRouterReady) {
-        navigate('/admin/login');
-      }
+      
+      // Force a navigation to login with replace
+      navigate('/admin/login', { replace: true });
+      
+      // Optional: Add a small delay to ensure state is cleared
+      await new Promise(resolve => setTimeout(resolve, 50));
+      
+      // Force navigation again if needed
+      navigate('/admin/login', { replace: true });
     } catch (err) {
       setError(err);
       console.error("Logout error:", err);
     }
   };
-
-  const checkTokenExpiration = () => {
-    try {
-      if (authToken) {
-        const decoded = jwtDecode(authToken);
-        if (decoded.exp * 1000 - Date.now() < 300000) {
-          refreshToken();
-        }
-      }
-    } catch (err) {
-      setError(err);
-      logout();
-    }
-  };
-
-  const refreshToken = async () => {
-    try {
-      const response = await axios.post(
-        `${import.meta.env.VITE_APP_API_URL}/api/admin/auth/refresh`,
-        {},
-        { headers: { Authorization: `Bearer ${authToken}` } }
-      );
-      login(response.data.token);
-    } catch (err) {
-      setError(err);
-      logout();
-    }
-  };
-
+  // Check token expiration periodically
   useEffect(() => {
-    if (!isRouterReady) return;
+    if (!authToken) return;
 
-    try {
-      const verifyToken = () => {
-        if (authToken) {
-          const decoded = jwtDecode(authToken);
-          if (decoded.exp * 1000 < Date.now()) {
-            refreshToken();
-          } else {
-            setIsAuthenticated(true);
-            const interval = setInterval(checkTokenExpiration, 60000);
-            return () => clearInterval(interval);
-          }
-        } else {
-          setIsAuthenticated(false);
-          if (window.location.pathname.startsWith('/admin') && 
-              !window.location.pathname.includes('/admin/login')) {
-            navigate('/admin/login');
-          }
+    const checkTokenExpiration = () => {
+      try {
+        const decoded = jwtDecode(authToken);
+        if (decoded.exp * 1000 < Date.now()) {
+          logout();
         }
-      };
-      return verifyToken();
-    } catch (err) {
-      setError(err);
-      logout();
-    }
-  }, [authToken, isRouterReady]);
+      } catch (err) {
+        logout();
+      }
+    };
+
+    // Check immediately
+    checkTokenExpiration();
+    
+    // Then check every minute
+    const interval = setInterval(checkTokenExpiration, 60000);
+    return () => clearInterval(interval);
+  }, [authToken]);
 
   if (error) {
     return <div>Authentication Error: {error.message}</div>;
   }
 
   return (
-    <AuthContext.Provider value={{ isAuthenticated, authToken, login, logout, refreshToken }}>
+    <AuthContext.Provider value={{ isAuthenticated, authToken, login, logout }}>
       {children}
     </AuthContext.Provider>
   );

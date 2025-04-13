@@ -14,7 +14,7 @@ const { Title } = Typography;
 
 const LoginPage = () => {
   const [loading, setLoading] = useState(false);
-  const { login } = useAuth();
+  const { login, isAuthenticated } = useAuth();
   const navigate = useNavigate();
 
   const [captchaText, setCaptchaText] = useState("");
@@ -24,6 +24,11 @@ const LoginPage = () => {
   useEffect(() => {
     generateCaptcha();
   }, []);
+  useEffect(() => {
+    if (isAuthenticated) {
+      navigate("/admin/dashboard");
+    }
+  }, [isAuthenticated, navigate]);
 
   const generateCaptcha = () => {
     const characters = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
@@ -86,56 +91,56 @@ const LoginPage = () => {
           </Form.Item>
 
           <Form.Item>
-  <div className="flex items-center justify-between mb-2">
-    <div className="relative bg-[#f5f5f5] px-4 py-2 border rounded shadow-sm">
-      <div className="flex gap-1">
-        {captchaText.split("").map((char, i) => (
-          <span
-            key={i}
-            style={{
-              fontFamily: "monospace",
-              fontWeight: "bold",
-              fontSize: `${18 + Math.floor(Math.random() * 6)}px`,
-              transform: `rotate(${Math.floor(Math.random() * 30 - 15)}deg)`,
-              display: "inline-block",
-              color: ["#000", "#444", "#666", "#111"][i % 4],
-              textShadow: "1px 1px #ccc",
-            }}
-          >
-            {char}
-          </span>
-        ))}
-      </div>
-      {/* Optional Noise Line */}
-      <svg width="100%" height="20" className="absolute left-0 top-0 opacity-20">
-        <line
-          x1="0"
-          y1="15"
-          x2="100%"
-          y2="5"
-          stroke="#888"
-          strokeWidth="1"
-          strokeDasharray="4"
-        />
-      </svg>
-    </div>
+            <div className="flex items-center justify-between mb-2">
+              <div className="relative bg-[#f5f5f5] px-4 py-2 border rounded shadow-sm">
+                <div className="flex gap-1">
+                  {captchaText.split("").map((char, i) => (
+                    <span
+                      key={i}
+                      style={{
+                        fontFamily: "monospace",
+                        fontWeight: "bold",
+                        fontSize: `${18 + Math.floor(Math.random() * 6)}px`,
+                        transform: `rotate(${Math.floor(Math.random() * 30 - 15)}deg)`,
+                        display: "inline-block",
+                        color: ["#000", "#444", "#666", "#111"][i % 4],
+                        textShadow: "1px 1px #ccc",
+                      }}
+                    >
+                      {char}
+                    </span>
+                  ))}
+                </div>
+                {/* Optional Noise Line */}
+                <svg width="100%" height="20" className="absolute left-0 top-0 opacity-20">
+                  <line
+                    x1="0"
+                    y1="15"
+                    x2="100%"
+                    y2="5"
+                    stroke="#888"
+                    strokeWidth="1"
+                    strokeDasharray="4"
+                  />
+                </svg>
+              </div>
 
-    <button
-      type="button"
-      className="ml-3 text-sm text-blue-500 underline"
-      onClick={generateCaptcha}
-    >
-      Refresh
-    </button>
-  </div>
+              <button
+                type="button"
+                className="ml-3 text-sm text-blue-500 underline"
+                onClick={generateCaptcha}
+              >
+                Refresh
+              </button>
+            </div>
 
-  <Input
-    placeholder="Enter CAPTCHA"
-    value={userCaptcha}
-    onChange={(e) => setUserCaptcha(e.target.value.toUpperCase())}
-    className="tracking-widest"
-  />
-</Form.Item>
+            <Input
+              placeholder="Enter CAPTCHA"
+              value={userCaptcha}
+              onChange={(e) => setUserCaptcha(e.target.value.toUpperCase())}
+              className="tracking-widest"
+            />
+          </Form.Item>
 
 
           <Form.Item>
