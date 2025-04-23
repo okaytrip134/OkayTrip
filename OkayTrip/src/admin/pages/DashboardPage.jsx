@@ -14,6 +14,7 @@ import {
   SettingOutlined,
   PieChartOutlined,
   GiftOutlined,
+  TagOutlined,
 } from "@ant-design/icons";
 import { Dropdown, Menu } from "antd";
 import dasboard from '../../assets/icons/ic-analysis.svg';
@@ -87,22 +88,26 @@ const DashboardPage = () => {
       isDropdown: true,
       dropdownName: "reports",
       items: [
-        { name: "Booking Report", icon: <SvgIcon src={report} alt="Reports" />, path: "/admin/dashboard/booking-report" },
-        { name: "Leads", icon: <FileTextOutlined />, path: "/admin/dashboard/Leads" },
+        { name: "Banners", icon: <PictureOutlined/>, path: "/admin/dashboard/banner" },
+        { name: "Reviews", icon: <FaComment />, path: "/admin/dashboard/Admin-reviews" },
+        { name: "Coupon-Report", icon: <SvgIcon src={packages} alt="Management" />, path: "/admin/dashboard/Coupon-Report" },
+        { name: "Top Sale Bar", icon: <BarChartOutlined />, path: "/admin/dashboard/top-sale-bar" },
+        { name: "Offer Management", icon: <GiftOutlined />, path: "/admin/dashboard/offer-manager" },
+        { name: "Coupon Management", icon: <TagOutlined />, path: "/admin/dashboard/coupon-manager" },
       ]
     },
-    {
-      name: "Coupon Generator",
-      icon: <RiCoupon2Fill />, // Changed to PieChartOutlined
-      isDropdown: true,
-      dropdownName: "coupon generator",
-      items: [
-        { name: "Create Offer", icon: <SvgIcon src={report} alt="Reports" />, path: "/admin/dashboard/create-offer" },
-        { name: "View Offer", icon: <FileTextOutlined />, path: "/admin/dashboard/view-offer" },
-        { name: "View Coupon", icon: <FileTextOutlined />, path: "/admin/dashboard/view-coupon" },
-        { name: "Announce Winner", icon: <GiftOutlined />, path: "/admin/dashboard/announce-winner" },
-      ]
-    },
+    // {
+    //   name: "Coupon Generator",
+    //   icon: <RiCoupon2Fill />, // Changed to PieChartOutlined
+    //   isDropdown: true,
+    //   dropdownName: "coupon generator",
+    //   items: [
+    //     { name: "Create Offer", icon: <SvgIcon src={report} alt="Reports" />, path: "/admin/dashboard/create-offer" },
+    //     { name: "View Offer", icon: <FileTextOutlined />, path: "/admin/dashboard/view-offer" },
+    //     { name: "View Coupon", icon: <FileTextOutlined />, path: "/admin/dashboard/view-coupon" },
+    //     { name: "Announce Winner", icon: <GiftOutlined />, path: "/admin/dashboard/announce-winner" },
+    //   ]
+    // },
   ];
 
   const profileMenu = (

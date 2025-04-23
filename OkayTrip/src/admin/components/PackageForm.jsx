@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
-import { 
-  Form, Input, Select, Button, Upload, InputNumber, 
+import {
+  Form, Input, Select, Button, Upload, InputNumber,
   DatePicker, Card, message, Modal, List, Divider
 } from "antd";
-import { 
+import {
   UploadOutlined, DeleteOutlined, PlusOutlined
 } from "@ant-design/icons";
 import moment from "moment";
@@ -18,7 +18,7 @@ const PackageForm = ({ visible, onClose, onSuccess, selectedPackage }) => {
   const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(false);
   const [fileList, setFileList] = useState([]);
-  
+
   // Form values
   const [formData, setFormData] = useState({
     title: "",
@@ -35,8 +35,12 @@ const PackageForm = ({ visible, onClose, onSuccess, selectedPackage }) => {
     exclusions: [],
     tripHighlights: [],
     itinerary: [],
+    metaTitle: "",         // ✅ Add this
+    metaDescription: "",   // ✅ Add this
+    metaKeywords: "",      // ✅ Add this
+    slug: ""
   });
-  
+
   // Dynamic inputs
   const [newInclusion, setNewInclusion] = useState("");
   const [newExclusion, setNewExclusion] = useState("");
@@ -78,8 +82,12 @@ const PackageForm = ({ visible, onClose, onSuccess, selectedPackage }) => {
         exclusions: selectedPackage.exclusions || [],
         tripHighlights: selectedPackage.tripHighlights || [],
         itinerary: selectedPackage.itinerary || [],
+        metaTitle: selectedPackage.metaTitle || "",
+        metaDescription: selectedPackage.metaDescription || "",
+        metaKeywords: selectedPackage.metaKeywords || "",
+        slug: selectedPackage.slug || ""
       });
-      
+
       // Handle image list display for existing packages
       if (selectedPackage.images && selectedPackage.images.length > 0) {
         const initialFileList = selectedPackage.images.map((url, index) => ({
@@ -218,7 +226,7 @@ const PackageForm = ({ visible, onClose, onSuccess, selectedPackage }) => {
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
       <div className="bg-white rounded-lg shadow-lg w-full max-w-3xl max-h-[90vh] overflow-auto">
-        <Card 
+        <Card
           title={selectedPackage ? "Edit Package" : "Add Package"}
           extra={
             <Button type="text" onClick={onClose} danger>
@@ -238,12 +246,12 @@ const PackageForm = ({ visible, onClose, onSuccess, selectedPackage }) => {
                   placeholder="Package Title"
                 />
               </Form.Item>
-              
+
               <Form.Item label="Category" required>
                 <Select
                   name="categoryId"
                   value={formData.categoryId}
-                  onChange={(value) => setFormData({...formData, categoryId: value})}
+                  onChange={(value) => setFormData({ ...formData, categoryId: value })}
                   placeholder="Select Category"
                 >
                   {categories.map((category) => (
@@ -253,7 +261,7 @@ const PackageForm = ({ visible, onClose, onSuccess, selectedPackage }) => {
                   ))}
                 </Select>
               </Form.Item>
-              
+
               <Form.Item label="Description" required>
                 <TextArea
                   name="description"
@@ -263,7 +271,43 @@ const PackageForm = ({ visible, onClose, onSuccess, selectedPackage }) => {
                   rows={4}
                 />
               </Form.Item>
-              
+              <Form.Item label="Meta Title" name="metaTitle">
+                <Input
+                  name="metaTitle"
+                  value={formData.metaTitle}
+                  onChange={handleInputChange}
+                  placeholder="Enter Meta Title"
+                />
+              </Form.Item>
+
+              <Form.Item label="Meta Description" name="metaDescription">
+                <Input.TextArea
+                  name="metaDescription"
+                  value={formData.metaDescription}
+                  onChange={handleInputChange}
+                  placeholder="Enter Meta Description"
+                  rows={2}
+                />
+              </Form.Item>
+
+              <Form.Item label="Meta Keywords" name="metaKeywords">
+                <Input
+                  name="metaKeywords"
+                  value={formData.metaKeywords}
+                  onChange={handleInputChange}
+                  placeholder="Enter Meta Keywords"
+                />
+              </Form.Item>
+
+              <Form.Item label="Slug" name="slug">
+                <Input
+                  name="slug"
+                  value={formData.slug}
+                  onChange={handleInputChange}
+                  placeholder="Auto generated from title if left empty"
+                />
+              </Form.Item>
+
               <Form.Item label="Images">
                 <Upload
                   listType="picture-card"
@@ -287,19 +331,19 @@ const PackageForm = ({ visible, onClose, onSuccess, selectedPackage }) => {
                 <InputNumber
                   name="realPrice"
                   value={formData.realPrice}
-                  onChange={(value) => setFormData({...formData, realPrice: value})}
+                  onChange={(value) => setFormData({ ...formData, realPrice: value })}
                   placeholder="Regular Price"
                   formatter={value => `₹ ${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')}
                   parser={value => value.replace(/₹\s?|(,*)/g, '')}
                   style={{ width: '100%' }}
                 />
               </Form.Item>
-              
+
               <Form.Item label="Discounted Price">
                 <InputNumber
                   name="discountedPrice"
                   value={formData.discountedPrice}
-                  onChange={(value) => setFormData({...formData, discountedPrice: value})}
+                  onChange={(value) => setFormData({ ...formData, discountedPrice: value })}
                   placeholder="Discounted Price"
                   formatter={value => `₹ ${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')}
                   parser={value => value.replace(/₹\s?|(,*)/g, '')}
@@ -321,7 +365,7 @@ const PackageForm = ({ visible, onClose, onSuccess, selectedPackage }) => {
               <RangePicker
                 style={{ width: '100%' }}
                 value={formData.startDate && formData.endDate ? [
-                  moment(formData.startDate), 
+                  moment(formData.startDate),
                   moment(formData.endDate)
                 ] : null}
                 onChange={handleDateRangeChange}
@@ -334,7 +378,7 @@ const PackageForm = ({ visible, onClose, onSuccess, selectedPackage }) => {
                   name="totalSeats"
                   value={formData.totalSeats}
                   onChange={(value) => setFormData({
-                    ...formData, 
+                    ...formData,
                     totalSeats: value,
                     availableSeats: value
                   })}
@@ -342,7 +386,7 @@ const PackageForm = ({ visible, onClose, onSuccess, selectedPackage }) => {
                   style={{ width: '100%' }}
                 />
               </Form.Item>
-              
+
               <Form.Item label="Available Seats">
                 <InputNumber
                   value={formData.availableSeats}
@@ -355,7 +399,7 @@ const PackageForm = ({ visible, onClose, onSuccess, selectedPackage }) => {
 
             {/* Dynamic Fields */}
             <Divider orientation="left">Package Details</Divider>
-            
+
             {/* Inclusions */}
             <Form.Item label="Inclusions">
               <div className="mb-2 flex gap-2">
@@ -365,7 +409,7 @@ const PackageForm = ({ visible, onClose, onSuccess, selectedPackage }) => {
                   placeholder="Add an inclusion"
                   style={{ flex: 1 }}
                 />
-                <Button 
+                <Button
                   type="primary"
                   onClick={() => handleAddToList("inclusions", newInclusion, setNewInclusion)}
                   icon={<PlusOutlined />}
@@ -380,10 +424,10 @@ const PackageForm = ({ visible, onClose, onSuccess, selectedPackage }) => {
                 renderItem={(item, index) => (
                   <List.Item
                     actions={[
-                      <Button 
-                        type="text" 
+                      <Button
+                        type="text"
                         danger
-                        icon={<DeleteOutlined />} 
+                        icon={<DeleteOutlined />}
                         onClick={() => handleRemoveFromList("inclusions", index)}
                       />
                     ]}
@@ -393,7 +437,7 @@ const PackageForm = ({ visible, onClose, onSuccess, selectedPackage }) => {
                 )}
               />
             </Form.Item>
-            
+
             {/* Exclusions */}
             <Form.Item label="Exclusions">
               <div className="mb-2 flex gap-2">
@@ -403,7 +447,7 @@ const PackageForm = ({ visible, onClose, onSuccess, selectedPackage }) => {
                   placeholder="Add an exclusion"
                   style={{ flex: 1 }}
                 />
-                <Button 
+                <Button
                   type="primary"
                   onClick={() => handleAddToList("exclusions", newExclusion, setNewExclusion)}
                   icon={<PlusOutlined />}
@@ -418,10 +462,10 @@ const PackageForm = ({ visible, onClose, onSuccess, selectedPackage }) => {
                 renderItem={(item, index) => (
                   <List.Item
                     actions={[
-                      <Button 
-                        type="text" 
+                      <Button
+                        type="text"
                         danger
-                        icon={<DeleteOutlined />} 
+                        icon={<DeleteOutlined />}
                         onClick={() => handleRemoveFromList("exclusions", index)}
                       />
                     ]}
@@ -431,7 +475,7 @@ const PackageForm = ({ visible, onClose, onSuccess, selectedPackage }) => {
                 )}
               />
             </Form.Item>
-            
+
             {/* Trip Highlights */}
             <Form.Item label="Trip Highlights">
               <div className="mb-2 flex gap-2">
@@ -441,7 +485,7 @@ const PackageForm = ({ visible, onClose, onSuccess, selectedPackage }) => {
                   placeholder="Add a trip highlight"
                   style={{ flex: 1 }}
                 />
-                <Button 
+                <Button
                   type="primary"
                   onClick={() => handleAddToList("tripHighlights", newTripHighlight, setNewTripHighlight)}
                   icon={<PlusOutlined />}
@@ -456,10 +500,10 @@ const PackageForm = ({ visible, onClose, onSuccess, selectedPackage }) => {
                 renderItem={(item, index) => (
                   <List.Item
                     actions={[
-                      <Button 
-                        type="text" 
+                      <Button
+                        type="text"
                         danger
-                        icon={<DeleteOutlined />} 
+                        icon={<DeleteOutlined />}
                         onClick={() => handleRemoveFromList("tripHighlights", index)}
                       />
                     ]}
@@ -505,10 +549,10 @@ const PackageForm = ({ visible, onClose, onSuccess, selectedPackage }) => {
                   renderItem={(item, index) => (
                     <List.Item
                       actions={[
-                        <Button 
-                          type="text" 
+                        <Button
+                          type="text"
                           danger
-                          icon={<DeleteOutlined />} 
+                          icon={<DeleteOutlined />}
                           onClick={() => handleRemoveFromList("itinerary", index)}
                         />
                       ]}
@@ -521,7 +565,7 @@ const PackageForm = ({ visible, onClose, onSuccess, selectedPackage }) => {
                 />
               </div>
             </Form.Item>
-            
+
             {/* Form Actions */}
             <div className="mt-4 flex justify-end space-x-4">
               <Button onClick={onClose}>

@@ -6,16 +6,13 @@ import DashboardStats from "../admin/components/DashboardStats";
 import AdminUserList from "./pages/AdminUserList";
 import CategoryManager from "./pages/CategoryManager";
 import PackageManager from "./pages/PackageManager";
-import BookingReport from "./pages/BookingReport";
 import AdminBookings from "./pages/AdminBookings";
 import AdminBannerManager from "./pages/AdminBannerManager";
 import AdminReviews from "./pages/AdminReview";
 import LeadsPage from "./pages/AdminLeads";
-import CreateOffer from "./components/CreateOffer";
-import ViewOffers from "./components/ViewOffer";
-import ViewCoupons from "./pages/ViewCoupons";
-import AdminSelectWinners from "./pages/AdminSelectWinners";
 import ProtectedRoute from "./components/ProtectedRoutes"; // Add this import
+import OffersManagement from "./pages/OfferManager";
+import CouponsManagement from "./pages/CouponManager";
 
 const AppAdmin = () => {
   return (
@@ -34,10 +31,8 @@ const AppAdmin = () => {
             <Route path="banner" element= {<AdminBannerManager/>}/>
             <Route path="Admin-reviews" element= {<AdminReviews/>}/>
             <Route path="Leads" element={<LeadsPage/>} />
-            <Route path="create-offer" element={<CreateOffer/>}/>
-            <Route path="view-offer" element={<ViewOffers/>}/>
-            <Route path="view-coupon" element= {<ViewCoupons/>}/>
-            <Route path="announce-winner" element={<AdminSelectWinners />} />
+            <Route path="Offer-Manager" element={<OffersManagement />} />
+            <Route path="Coupon-Manager" element={<CouponsManagement/>} />
           </Route>
         </Route>
         

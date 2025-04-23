@@ -2,6 +2,7 @@ const Package = require("../models/package");
 const path = require("path");
 const fs = require("fs");
 const sharp = require("sharp");
+const slugify = require("slugify");
 
 exports.createPackage = async (req, res) => {
   try {
@@ -19,6 +20,10 @@ exports.createPackage = async (req, res) => {
       exclusions,
       tripHighlights,
       itinerary,
+      metaTitle,
+      metaDescription,
+      metaKeywords,
+      slug
     } = req.body;
 
     if (!req.files || req.files.length === 0) {
@@ -34,15 +39,22 @@ exports.createPackage = async (req, res) => {
 
     const images = [];
     for (const file of req.files) {
-      const optimizedPath = `uploads/packages/optimized-${file.filename}`;
-      await sharp(file.path).resize(800).toFile(optimizedPath);
+      const filename = `optimized-${Date.now()}-${file.originalname}`;
+      const optimizedPath = path.join("uploads", "packages", filename);
 
-      images.push(`/${optimizedPath}`);
+      await sharp(file.path)
+        .resize({ width: 800 })
+        .jpeg({ quality: 70 })
+        .toFile(optimizedPath);
 
+      images.push(`/${optimizedPath.replace(/\\/g, "/")}`);
+
+      // delete original upload
       fs.unlink(file.path, (err) => {
-        if (err) console.error(`Error deleting file: ${file.path}`, err);
+        if (err) console.error(`Error deleting original file: ${file.path}`, err);
       });
     }
+    const generatedSlug = slug || slugify(title, { lower: true, strict: true });
 
     const newPackage = new Package({
       categoryId,
@@ -60,6 +72,10 @@ exports.createPackage = async (req, res) => {
       exclusions: Array.isArray(exclusions) ? exclusions : JSON.parse(exclusions),
       tripHighlights: Array.isArray(tripHighlights) ? tripHighlights : JSON.parse(tripHighlights),
       itinerary: formattedItinerary,
+      metaTitle,
+      metaDescription,
+      metaKeywords,
+      slug: generatedSlug,
     });
 
     await newPackage.save();
@@ -114,7 +130,6 @@ exports.getPackageById = async (req, res) => {
     res.status(500).json({ message: "Internal server error." });
   }
 };
-
 exports.updatePackage = async (req, res) => {
   try {
     const { packageId } = req.params;
@@ -132,6 +147,10 @@ exports.updatePackage = async (req, res) => {
       exclusions,
       tripHighlights,
       itinerary,
+      metaTitle,
+      metaDescription,
+      metaKeywords,
+      slug,
     } = req.body;
 
     const packageData = await Package.findById(packageId);
@@ -148,7 +167,6 @@ exports.updatePackage = async (req, res) => {
 
     if (totalSeats) {
       packageData.totalSeats = totalSeats;
-
       if (packageData.availableSeats === 0) {
         packageData.availableSeats = totalSeats;
       } else if (packageData.availableSeats > totalSeats) {
@@ -156,22 +174,54 @@ exports.updatePackage = async (req, res) => {
       }
     }
 
-    packageData.categoryId = categoryId || packageData.categoryId;
-    packageData.title = title || packageData.title;
-    packageData.description = description || packageData.description;
-    packageData.realPrice = realPrice || packageData.realPrice;
-    packageData.discountedPrice = discountedPrice || packageData.discountedPrice;
-    packageData.duration = duration || packageData.duration;
-    packageData.startDate = startDate || packageData.startDate;
-    packageData.endDate = endDate || packageData.endDate;
-    packageData.inclusions = inclusions ? (Array.isArray(inclusions) ? inclusions : JSON.parse(inclusions)) : packageData.inclusions;
-    packageData.exclusions = exclusions ? (Array.isArray(exclusions) ? exclusions : JSON.parse(exclusions)) : packageData.exclusions;
-    packageData.tripHighlights = tripHighlights ? (Array.isArray(tripHighlights) ? tripHighlights : JSON.parse(tripHighlights)) : packageData.tripHighlights;
+    // Update fields - don't use || operator as it prevents clearing fields
+    packageData.categoryId = categoryId !== undefined ? categoryId : packageData.categoryId;
+    packageData.title = title !== undefined ? title : packageData.title;
+    packageData.description = description !== undefined ? description : packageData.description;
+    packageData.realPrice = realPrice !== undefined ? realPrice : packageData.realPrice;
+    packageData.discountedPrice = discountedPrice !== undefined ? discountedPrice : packageData.discountedPrice;
+    packageData.duration = duration !== undefined ? duration : packageData.duration;
+    packageData.startDate = startDate !== undefined ? startDate : packageData.startDate;
+    packageData.endDate = endDate !== undefined ? endDate : packageData.endDate;
+    packageData.inclusions = inclusions !== undefined ? (Array.isArray(inclusions) ? inclusions : JSON.parse(inclusions)) : packageData.inclusions;
+    packageData.exclusions = exclusions !== undefined ? (Array.isArray(exclusions) ? exclusions : JSON.parse(exclusions)) : packageData.exclusions;
+    packageData.tripHighlights = tripHighlights !== undefined ? (Array.isArray(tripHighlights) ? tripHighlights : JSON.parse(tripHighlights)) : packageData.tripHighlights;
     packageData.itinerary = formattedItinerary;
+    packageData.metaTitle = metaTitle !== undefined ? metaTitle : packageData.metaTitle;
+    packageData.metaDescription = metaDescription !== undefined ? metaDescription : packageData.metaDescription;
+    packageData.metaKeywords = metaKeywords !== undefined ? metaKeywords : packageData.metaKeywords;
+    packageData.slug = slug || slugify(title, { lower: true, strict: true }) || packageData.slug;
 
-    // Handle image uploads
     if (req.files && req.files.length > 0) {
-      packageData.images = req.files.map((file) => `/uploads/packages/${file.filename}`);
+      const newImages = [];
+
+      for (const file of req.files) {
+        const filename = `optimized-${Date.now()}-${file.originalname}`;
+        const optimizedPath = path.join("uploads", "packages", filename);
+
+        await sharp(file.path)
+          .resize({ width: 800 })
+          .jpeg({ quality: 70 })
+          .toFile(optimizedPath);
+
+        newImages.push(`/${optimizedPath.replace(/\\/g, "/")}`);
+
+        fs.unlink(file.path, (err) => {
+          if (err) console.error(`Error deleting original file: ${file.path}`, err);
+        });
+      }
+
+      // Optional: Delete old images
+      packageData.images.forEach((imgPath) => {
+        const fullPath = path.join(__dirname, "../../", imgPath);
+        if (fs.existsSync(fullPath)) {
+          fs.unlink(fullPath, (err) => {
+            if (err) console.error(`Error deleting old image: ${fullPath}`, err);
+          });
+        }
+      });
+
+      packageData.images = newImages;
     }
 
     await packageData.save();
@@ -230,6 +280,7 @@ exports.deletePackage = async (req, res) => {
     res.status(500).json({ message: "Internal server error." });
   }
 };
+// Search packages with filters (duration, price range)
 exports.searchPackages = async (req, res) => {
   try {
     const { duration, minPrice, maxPrice, page = 1, limit = 10 } = req.query;
@@ -289,5 +340,14 @@ exports.getAdminPackages = async (req, res) => {
   } catch (error) {
     console.error('Error fetching packages:', error);
     res.status(500).json({ message: 'Error fetching packages' });
+  }
+};
+exports.getPackageBySlug = async (req, res) => {
+  try {
+    const data = await Package.findOne({ slug: req.params.slug });
+    if (!data) return res.status(404).json({ message: "Not found" });
+    res.json(data);
+  } catch (err) {
+    res.status(500).json({ message: "Server Error" });
   }
 };
