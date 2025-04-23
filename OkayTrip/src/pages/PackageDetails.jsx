@@ -193,7 +193,7 @@ const PackageDetailsPage = () => {
         <meta name="description" content={packageData.metaDescription} />
         <meta name="keywords" content={packageData.metaKeywords} />
       </Helmet>
-      <div className=" lg:px-16 py-8 min-h-screen max-w-[1400px] mx-auto">
+      <div className=" lg:px-2 py-2 min-h-screen max-w-[1400px] mx-auto">
         {/* Main Content */}
         <div className="bg-white rounded p-2 md:p-6 mb-8">
           {/* Images */}
