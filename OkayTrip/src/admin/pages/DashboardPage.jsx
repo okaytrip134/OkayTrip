@@ -76,11 +76,13 @@ const DashboardPage = () => {
       isDropdown: true,
       dropdownName: "management",
       items: [
-        { name: "Banners", icon: <SvgIcon src={packages} alt="Management" />, path: "/admin/dashboard/banner-manager" },
-        { name: "Reviews", icon: <FaComment/>, path: "/admin/dashboard/Admin-reviews"},
-        { name: "Coupon-Report", icon: <SvgIcon src={packages} alt="Management" />, path: "/admin/dashboard/Coupon-Report" },
-        { name: "Top Sale Bar", icon: <BarChartOutlined />, path: "/admin/dashboard/top-sale-bar" },
-      ]
+              { name: "Banners", icon: <PictureOutlined/>, path: "/admin/dashboard/banner" },
+              { name: "Reviews", icon: <FaComment />, path: "/admin/dashboard/Admin-reviews" },
+              { name: "Coupon-Report", icon: <SvgIcon src={packages} alt="Management" />, path: "/admin/dashboard/Coupon-Report" },
+              { name: "Top Sale Bar", icon: <BarChartOutlined />, path: "/admin/dashboard/top-sale-bar" },
+              { name: "Offer Management", icon: <GiftOutlined />, path: "/admin/dashboard/offer-manager" },
+              { name: "Coupon Management", icon: <TagOutlined />, path: "/admin/dashboard/coupon-manager" },
+            ]
     },
     {
       name: "Reports",
@@ -88,13 +90,9 @@ const DashboardPage = () => {
       isDropdown: true,
       dropdownName: "reports",
       items: [
-        { name: "Banners", icon: <PictureOutlined/>, path: "/admin/dashboard/banner" },
-        { name: "Reviews", icon: <FaComment />, path: "/admin/dashboard/Admin-reviews" },
-        { name: "Coupon-Report", icon: <SvgIcon src={packages} alt="Management" />, path: "/admin/dashboard/Coupon-Report" },
-        { name: "Top Sale Bar", icon: <BarChartOutlined />, path: "/admin/dashboard/top-sale-bar" },
-        { name: "Offer Management", icon: <GiftOutlined />, path: "/admin/dashboard/offer-manager" },
-        { name: "Coupon Management", icon: <TagOutlined />, path: "/admin/dashboard/coupon-manager" },
-      ]
+              { name: "Booking Report", icon: <SvgIcon src={report} alt="Reports" />, path: "/admin/dashboard/booking-report" },
+              { name: "Leads", icon: <FileTextOutlined />, path: "/admin/dashboard/Leads" },
+            ]
     },
     // {
     //   name: "Coupon Generator",
