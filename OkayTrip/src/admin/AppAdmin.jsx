@@ -13,6 +13,7 @@ import LeadsPage from "./pages/AdminLeads";
 import ProtectedRoute from "./components/ProtectedRoutes"; // Add this import
 import OffersManagement from "./pages/OfferManager";
 import CouponsManagement from "./pages/CouponManager";
+import AdminBlogs from "./pages/AdminBlogs";
 
 const AppAdmin = () => {
   return (
@@ -33,6 +34,7 @@ const AppAdmin = () => {
             <Route path="Leads" element={<LeadsPage/>} />
             <Route path="Offer-Manager" element={<OffersManagement />} />
             <Route path="Coupon-Manager" element={<CouponsManagement/>} />
+            <Route path="blogs" element={<AdminBlogs/>} />
           </Route>
         </Route>
         

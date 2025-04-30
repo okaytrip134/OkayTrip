@@ -1,0 +1,263 @@
+.blog-detail-page {
+  display: flex;
+  max-width: 1280px;
+  margin: 1rem auto;
+  padding: 0 1rem;
+  gap: 1rem;
+  position: relative;
+}
+
+.blog-main-content {
+  flex: 1;
+  min-width: 0;
+}
+
+.blog-sidebar {
+  width: 320px;
+  flex-shrink: 0;
+}
+
+.blog-article {
+  background: #fff;
+  border-radius: 8px;
+  padding: 0.5rem;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+}
+
+.blog-header {
+  margin-bottom: 0.2rem;
+}
+
+.blog-detail-page .blog-title {
+  font-size: 1.7rem;
+  font-weight: 700;
+  line-height: 0.7;
+  color: #222;
+  margin-bottom: 0.5rem;
+}
+
+.blog-meta {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: #666;
+  font-size: 0.9rem;
+}
+
+.blog-meta .separator {
+  opacity: 0.5;
+}
+
+.featured-image {
+  margin: 0.5rem 0;
+  /* border-radius: 6px; */
+  overflow: hidden;
+}
+
+.featured-image img {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+
+.blog-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  align-items: center;
+  margin-bottom: 0.5rem;
+}
+
+.blog-tags .tag {
+  background: #f0f2f5;
+  color: #444;
+  padding: 0.3rem 0.8rem;
+  border-radius: 20px;
+  font-size: 0.8rem;
+  transition: all 0.2s ease;
+}
+
+.blog-tags .tag:hover {
+  background: #007bff;
+  color: white;
+}
+
+.blog-content {
+  line-height: 1.7;
+  color: #333;
+}
+
+.blog-content p {
+  margin-bottom: 1.2rem;
+}
+
+.blog-content img {
+  max-width: 100%;
+  height: auto;
+  border-radius: 6px;
+  margin: 1rem 0;
+}
+
+.blog-sidebar .popular-stories {
+  position: sticky;
+  top: 1rem;
+  padding: 0.5rem;
+  background: #fff;
+  border-radius: 8px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+}
+
+.blog-sidebar .sidebar-title {
+  font-size: 1.2rem !important;
+  /* margin-bottom: 1rem; */
+  /* padding-bottom: 0.5rem; */
+  border-bottom: 1px solid #eee;
+}
+
+.blog-sidebar .stories-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+
+.blog-sidebar .story-card {
+  display: flex;
+  gap: 1rem;
+  text-decoration: none;
+  color: inherit;
+  transition: transform 0.2s ease;
+}
+
+.story-card:hover {
+  transform: translateX(3px);
+}
+
+.story-image {
+  width: 80px;
+  height: 60px;
+  flex-shrink: 0;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.story-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.story-content {
+  flex: 1;
+}
+
+.blog-sidebar .story-title {
+  font-size: 0.95rem;
+  font-weight: 500;
+  line-height: 1.4;
+  margin-bottom: 0;
+  color: #222;
+}
+
+.blog-sidebar.story-meta {
+  font-size: 0.8rem;
+  color: #888;
+  margin-bottom: 0 !important;
+}
+
+.loading-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 60vh;
+}
+
+.loading-spinner {
+  width: 40px;
+  height: 40px;
+  border: 4px solid #f3f3f3;
+  border-top: 4px solid #007bff;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.not-found {
+  text-align: center;
+  padding: 2rem;
+  font-size: 1.2rem;
+  color: #666;
+}
+
+@media (max-width: 992px) {
+  .blog-detail-page {
+    flex-direction: column;
+  }
+  
+  .blog-sidebar {
+    width: 100%;
+    margin-top: 2rem;
+  }
+  
+  .popular-stories {
+    position: static;
+  }
+}
+
+@media (max-width: 768px) {
+  .blog-title {
+    font-size: 1.6rem;
+  }
+  
+  .blog-article {
+    padding: 1.5rem;
+  }
+  
+  .story-card {
+    flex-direction: column;
+  }
+  
+  .story-image {
+    width: 100%;
+    height: 120px;
+  }
+}
+
+.story-card-horizontal {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 16px;
+  text-decoration: none;
+  color: inherit;
+}
+
+.story-card-horizontal:hover .story-title {
+  text-decoration: underline;
+}
+
+.story-thumb img {
+  width: 60px;
+  height: 60px;
+  object-fit: cover;
+  border-radius: 4px;
+  flex-shrink: 0;
+}
+
+.story-info {
+  flex: 1;
+}
+
+.story-info .story-title {
+  font-size: 0.875rem;
+  margin: 0 0 -6px 0;
+  color: #333;
+}
+
+.story-info .story-meta {
+  font-size: 0.85rem;
+  color: #777;
+}

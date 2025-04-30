@@ -21,6 +21,8 @@ import BookingSuccess from "./pages/BookingSuccess";
 import OfferCouponPopup from "./components/OfferPopup";
 import BookCoupon from "./pages/BuyCoupon";
 import CouponDetail from "./pages/CouponDetails";
+import NewsBlogs from "./components/NewsBlogs";
+import NewsBlogDetail from "./pages/NewsBlogDetail";
 
 function App() {
   return (
@@ -57,6 +59,8 @@ const AppContent = () => {
           <Route path="/booking-success" element={<BookingSuccess/>}/>
           <Route path="/booking-offer/:offerId" element={<BookCoupon />} />
           <Route path="/coupon/:couponId" element={<CouponDetail/>}/>
+          <Route path="/blogs" element={<NewsBlogs />} />
+          <Route path="/news-blog/:slug" element={<NewsBlogDetail />} />
         </Routes>
       </div>
       {/* Conditionally render Footer */}

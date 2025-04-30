@@ -92,7 +92,7 @@ const Footer = () => {
                   color: '#424242',
                   lineHeight: '18px',
                   letterSpacing: '1.6px'
-                }}>FOR SUPPLIERS</h3>
+                }}>News & Blogs</h3>
               <ul className="text-gray-600 space-y-2 uppercase"
                 style={{
                   fontSize: '10px',
@@ -101,7 +101,7 @@ const Footer = () => {
                   letterSpacing: '1.3px'
                 }}
               >
-                <li><a href="#" className="hover:text-[#f37002]">List Your Activities</a></li>
+                 <li><Link to="/blogs" className="hover:text-[#f37002]">Blogs</Link></li>
               </ul>
               <h3 className=" mb-3 mt-3"
                 style={{

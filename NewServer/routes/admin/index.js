@@ -25,5 +25,6 @@ router.use("/banner", bannerRoutes);
 router.use("/reviews", reviewRoutes);
 router.use("/leads", leadRoutes); 
 router.use("/offer", offerRoutes)
+router.use("/blogs", require("./blogRoutes"))
 
 module.exports = router;

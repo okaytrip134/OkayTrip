@@ -24,7 +24,7 @@ import user from '../../assets/icons/ic-user.svg'
 import report from '../../assets/icons/ic-workbench.svg'
 import packages from '../../assets/icons/ic-files.svg'
 import categories from '../../assets/icons/ic-category.svg'
-import { FaComment } from "react-icons/fa";
+import { FaComment, FaNewspaper } from "react-icons/fa";
 import { RiCoupon2Fill } from "react-icons/ri";
 
 const DashboardPage = () => {
@@ -36,13 +36,13 @@ const DashboardPage = () => {
     try {
       // Clear the token from storage
       localStorage.removeItem("adminToken");
-      
+
       // Force a hard redirect to ensure complete logout
       window.location.href = "/admin/login";
-      
+
       // Optional: Add a small delay before navigation
       await new Promise(resolve => setTimeout(resolve, 50));
-      
+
       // Navigate to login page (this will work if the above doesn't)
       navigate("/admin/login", { replace: true });
     } catch (err) {
@@ -67,22 +67,23 @@ const DashboardPage = () => {
 
   const menuItems = [
     { name: "Dashboard", icon: <SvgIcon src={dasboard} alt="Dashboard" />, path: "/admin/dashboard" },
-    { name: "Users", icon: <SvgIcon src={user} alt="User"/>, path: "/admin/dashboard/Users" },
+    { name: "Users", icon: <SvgIcon src={user} alt="User" />, path: "/admin/dashboard/Users" },
     { name: "Categories", icon: <SvgIcon src={categories} alt="Management" />, path: "/admin/dashboard/Categories" },
     { name: "Packages", icon: <SvgIcon src={packages} alt="Management" />, path: "/admin/dashboard/Packages" },
+    { name: "Blogs", icon: <FaNewspaper/>, path: "/admin/dashboard/blogs" },
     {
       name: "Management",
       icon: <SvgIcon src={setting} alt="Management" />,
       isDropdown: true,
       dropdownName: "management",
       items: [
-              { name: "Banners", icon: <PictureOutlined/>, path: "/admin/dashboard/banner" },
-              { name: "Reviews", icon: <FaComment />, path: "/admin/dashboard/Admin-reviews" },
-              { name: "Coupon-Report", icon: <SvgIcon src={packages} alt="Management" />, path: "/admin/dashboard/Coupon-Report" },
-              { name: "Top Sale Bar", icon: <BarChartOutlined />, path: "/admin/dashboard/top-sale-bar" },
-              { name: "Offer Management", icon: <GiftOutlined />, path: "/admin/dashboard/offer-manager" },
-              { name: "Coupon Management", icon: <TagOutlined />, path: "/admin/dashboard/coupon-manager" },
-            ]
+        { name: "Banners", icon: <PictureOutlined />, path: "/admin/dashboard/banner" },
+        { name: "Reviews", icon: <FaComment />, path: "/admin/dashboard/Admin-reviews" },
+        { name: "Coupon-Report", icon: <SvgIcon src={packages} alt="Management" />, path: "/admin/dashboard/Coupon-Report" },
+        { name: "Top Sale Bar", icon: <BarChartOutlined />, path: "/admin/dashboard/top-sale-bar" },
+        { name: "Offer Management", icon: <GiftOutlined />, path: "/admin/dashboard/offer-manager" },
+        { name: "Coupon Management", icon: <TagOutlined />, path: "/admin/dashboard/coupon-manager" },
+      ]
     },
     {
       name: "Reports",
@@ -90,9 +91,9 @@ const DashboardPage = () => {
       isDropdown: true,
       dropdownName: "reports",
       items: [
-              { name: "Booking Report", icon: <SvgIcon src={report} alt="Reports" />, path: "/admin/dashboard/booking-report" },
-              { name: "Leads", icon: <FileTextOutlined />, path: "/admin/dashboard/Leads" },
-            ]
+        { name: "Booking Report", icon: <SvgIcon src={report} alt="Reports" />, path: "/admin/dashboard/booking-report" },
+        { name: "Leads", icon: <FileTextOutlined />, path: "/admin/dashboard/Leads" },
+      ]
     },
     // {
     //   name: "Coupon Generator",
@@ -123,15 +124,13 @@ const DashboardPage = () => {
     <div className="flex h-screen bg-gray-100">
       {/* Sidebar */}
       <aside
-        className={`${
-          isSidebarOpen ? "w-64" : "w-20"
-        } bg-white fixed h-full transition-all duration-300`}
+        className={`${isSidebarOpen ? "w-64" : "w-20"
+          } bg-white fixed h-full transition-all duration-300`}
       >
         <div className="p-4 flex items-center justify-between">
           <h2
-            className={`text-xl font-bold text-gray-800 transition-all duration-300 ${
-              isSidebarOpen ? "block" : "hidden"
-            }`}
+            className={`text-xl font-bold text-gray-800 transition-all duration-300 ${isSidebarOpen ? "block" : "hidden"
+              }`}
           >
             OK-Admin
           </h2>
@@ -147,19 +146,17 @@ const DashboardPage = () => {
                 {item.isDropdown ? (
                   <div>
                     <button
-                      className={`w-full flex items-center px-4 py-2 text-gray-700 hover:bg-gray-200 transition-all duration-300 ${
-                        isSidebarOpen ? "justify-start" : "justify-center"
-                      }`}
+                      className={`w-full flex items-center px-4 py-2 text-gray-700 hover:bg-gray-200 transition-all duration-300 ${isSidebarOpen ? "justify-start" : "justify-center"
+                        }`}
                       onClick={() => toggleDropdown(item.dropdownName)}
                     >
                       <span className="text-xl">{item.icon}</span>
                       {isSidebarOpen && (
                         <div className="ml-4 flex items-center justify-between flex-1">
                           <span className="text-sm font-medium">{item.name}</span>
-                          <DownOutlined 
-                            className={`transition-transform duration-200 ${
-                              openDropdown === item.dropdownName ? "transform rotate-180" : ""
-                            }`}
+                          <DownOutlined
+                            className={`transition-transform duration-200 ${openDropdown === item.dropdownName ? "transform rotate-180" : ""
+                              }`}
                           />
                         </div>
                       )}
@@ -184,16 +181,14 @@ const DashboardPage = () => {
                   </div>
                 ) : (
                   <button
-                    className={`w-full flex items-center px-4 py-2 text-gray-700 hover:bg-gray-200 transition-all duration-300 ${
-                      isSidebarOpen ? "justify-start" : "justify-center"
-                    }`}
+                    className={`w-full flex items-center px-4 py-2 text-gray-700 hover:bg-gray-200 transition-all duration-300 ${isSidebarOpen ? "justify-start" : "justify-center"
+                      }`}
                     onClick={() => navigate(item.path)}
                   >
                     <span className="text-xl">{item.icon}</span>
                     <span
-                      className={`ml-4 text-sm font-medium transition-all duration-300 ${
-                        isSidebarOpen ? "block" : "hidden"
-                      }`}
+                      className={`ml-4 text-sm font-medium transition-all duration-300 ${isSidebarOpen ? "block" : "hidden"
+                        }`}
                     >
                       {item.name}
                     </span>
@@ -203,16 +198,14 @@ const DashboardPage = () => {
             ))}
             <li className="mt-6">
               <button
-                className={`w-full flex items-center px-4 py-2 text-red-600 hover:bg-red-100 transition-all duration-300 ${
-                  isSidebarOpen ? "justify-start" : "justify-center"
-                }`}
+                className={`w-full flex items-center px-4 py-2 text-red-600 hover:bg-red-100 transition-all duration-300 ${isSidebarOpen ? "justify-start" : "justify-center"
+                  }`}
                 onClick={handleLogout}
               >
                 <LogoutOutlined className="text-xl" />
                 <span
-                  className={`ml-4 text-sm font-medium transition-all duration-300 ${
-                    isSidebarOpen ? "block" : "hidden"
-                  }`}
+                  className={`ml-4 text-sm font-medium transition-all duration-300 ${isSidebarOpen ? "block" : "hidden"
+                    }`}
                 >
                   Logout
                 </span>
