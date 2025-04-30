@@ -425,7 +425,7 @@ const AdminBlogs = () => {
               type="warning"
               style={{ display: "block", marginBottom: "8px" }}
             >
-              Note: Image should not exceed 4MB and recommended size is
+              Note: Image should not exceed 1MB and recommended size is
               1024x1024 pixels.
             </Text>
 
