@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
@@ -5,9 +6,9 @@ import {
   Button, Form, Input, Typography, message, Checkbox, Row, Col, Layout,
 } from "antd";
 import { EyeInvisibleOutlined, EyeTwoTone } from "@ant-design/icons";
-import dashboardpng from '../../assets/dashboard.png';
+import dashboardpng from '../../assets/svg/login-security.svg';
 import overlayImg from '../../assets/overlay.jpg';
-import logo from '../../assets/Logo/Trip ok new 2 black-01.png';
+import logo from '../../assets/favicon.ico';
 import { useAuth } from "../context/authContext";
 
 const { Title } = Typography;
@@ -65,18 +66,16 @@ const LoginPage = () => {
 
   return (
     <Layout className="relative flex !min-h-screen !w-full !flex-row">
+
       <div
-        className="hidden grow flex-col items-center justify-center gap-[80px] bg-center bg-no-repeat md:flex"
-        style={{
-          background: `linear-gradient(rgba(255, 255, 255, 0.9), rgba(255, 255, 255, 0.9)) center center / cover no-repeat, url(${overlayImg})`,
-        }}
+        className="hidden grow flex-col items-center justify-center gap-[80px] bg-center  bg-no-repeat md:flex"
       >
-        <img src={logo} alt="trip logo" className="h-24 w-80" />
-        <img className="max-w-[480px]" src={dashboardpng} alt="dashboard" />
+                <img  className="absolute top-0 left-0 max-w-[70px] m-8" src={logo} alt="logo" />
+        <img className="max-w-[800px]" src={dashboardpng} alt="dashboard" />
       </div>
 
-      <div className="m-auto flex !h-screen w-full max-w-[480px] flex-col justify-center px-[16px] lg:px-[64px]">
-        <div className="mb-4 text-2xl font-bold xl:text-3xl">Admin Panel</div>
+      <div className="m-auto flex !h-screen w-full max-w-[480px] flex-col justify-center px-[16px] lg:px-[64px] " style={{ backgroundColor: "#ffff" }}>
+        <div className="mb-10 pb-10  text-2xl font-semibold xl:text-3xl">Welcome Back Admin</div>
 
         <Form name="login" size="large" onFinish={handleLogin}>
           <Form.Item name="username" rules={[{ required: true, message: "Please enter your username!" }]}>
@@ -92,13 +91,13 @@ const LoginPage = () => {
 
           <Form.Item>
             <div className="flex items-center justify-between mb-2">
-              <div className="relative bg-[#f5f5f5] px-4 py-2 border rounded shadow-sm">
-                <div className="flex gap-1">
+              <div className="relative bg-[#dddddd] px-6 py-2 border rounded shadow-sm">
+                <div className="flex gap-2">
                   {captchaText.split("").map((char, i) => (
                     <span
                       key={i}
                       style={{
-                        fontFamily: "monospace",
+                        fontFamily: "cursive",
                         fontWeight: "bold",
                         fontSize: `${18 + Math.floor(Math.random() * 6)}px`,
                         transform: `rotate(${Math.floor(Math.random() * 30 - 15)}deg)`,
@@ -127,7 +126,7 @@ const LoginPage = () => {
 
               <button
                 type="button"
-                className="ml-3 text-sm text-blue-500 underline"
+                className="ml-3 text-lg text-green-500 underline"
                 onClick={generateCaptcha}
               >
                 Refresh
@@ -147,11 +146,11 @@ const LoginPage = () => {
             <Row align="middle">
               <Col span={12}>
                 <Form.Item name="remember" valuePropName="checked" noStyle>
-                  <Checkbox>Remember me</Checkbox>
+                  <Checkbox className="text-lg">Remember me</Checkbox>
                 </Form.Item>
               </Col>
               <Col span={12} className="text-right">
-                <Button type="link" className="!underline" size="small">
+                <Button type="link" className="!underline text-green-500 " size="large">
                   Forget Password?
                 </Button>
               </Col>
@@ -159,8 +158,8 @@ const LoginPage = () => {
           </Form.Item>
 
           <Form.Item>
-            <Button type="primary" htmlType="submit" className="w-full" loading={loading}>
-              Admin Login
+            <Button  htmlType="submit" className="w-full bg-green-500 text-lg text-center hover:border-amber-300 " loading={loading}>
+              Login
             </Button>
           </Form.Item>
         </Form>
