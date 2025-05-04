@@ -236,7 +236,7 @@ const CategoryPage = () => {
   };
   return (
     <div className="ml-4 mr-[14px] lg:px-32 py-4 bg-gray-50 min-h-screen max-w-[1440px] mx-auto">
-      <h1 className="text-xl md:text-2xl font-bold mb-6">Packages in this {category}</h1>
+      <h1 className="text-[1.179rem] md:text-2xl font-bold mb-6">Packages in this {category}</h1>
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
         {packages.map((pkg, index) => {
           const packageProps =
@@ -280,7 +280,7 @@ const CategoryPage = () => {
                 )}
               </div>
 
-              <div className={`bg-white rounded-b py-4 px-2 w-[308px] ${!isPackageAvailable(pkg) ? 'opacity-60' : ''}`}>
+              <div className={`bg-white rounded-b py-4 px-2 w-full ${!isPackageAvailable(pkg) ? 'opacity-60' : ''}`}>
                 <div className="flex items-center justify-between mb-2">
                   <p className="text-sm text-gray-500">{pkg.duration}</p>
 
