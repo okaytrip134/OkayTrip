@@ -2,17 +2,17 @@ import React, { useState, useEffect } from "react";
 import axios from "axios";
 import {
   Form, Input, Select, Button, Upload, InputNumber,
-  DatePicker, Card, message, Modal, List, Divider
+  Card, message, List, Divider
 } from "antd";
 import {
   UploadOutlined, DeleteOutlined, PlusOutlined
 } from "@ant-design/icons";
 import moment from "moment";
+import DatePicker from "react-datepicker";
+import "react-datepicker/dist/react-datepicker.css";
 
 const { TextArea } = Input;
-const { RangePicker } = DatePicker;
 
-// Updated props to match new PackageManager implementation
 const PackageForm = ({ visible, onClose, onSuccess, selectedPackage }) => {
   const [form] = Form.useForm();
   const [categories, setCategories] = useState([]);
@@ -28,16 +28,16 @@ const PackageForm = ({ visible, onClose, onSuccess, selectedPackage }) => {
     realPrice: "",
     discountedPrice: "",
     duration: "",
-    startDate: "",
-    endDate: "",
+    startDate: null,
+    endDate: null,
     totalSeats: "",
     inclusions: [],
     exclusions: [],
     tripHighlights: [],
     itinerary: [],
-    metaTitle: "",         // ✅ Add this
-    metaDescription: "",   // ✅ Add this
-    metaKeywords: "",      // ✅ Add this
+    metaTitle: "",
+    metaDescription: "",
+    metaKeywords: "",
     slug: ""
   });
 
@@ -50,7 +50,6 @@ const PackageForm = ({ visible, onClose, onSuccess, selectedPackage }) => {
   const adminToken = localStorage.getItem("adminToken");
 
   useEffect(() => {
-    // Fetch categories for dropdown
     const fetchCategories = async () => {
       try {
         const { data } = await axios.get(`${import.meta.env.VITE_APP_API_URL}/api/admin/categories/`, {
@@ -64,7 +63,6 @@ const PackageForm = ({ visible, onClose, onSuccess, selectedPackage }) => {
 
     fetchCategories();
 
-    // Initialize form data if editing
     if (selectedPackage) {
       setFormData({
         title: selectedPackage.title,
@@ -74,8 +72,8 @@ const PackageForm = ({ visible, onClose, onSuccess, selectedPackage }) => {
         realPrice: selectedPackage.realPrice,
         discountedPrice: selectedPackage.discountedPrice,
         duration: selectedPackage.duration,
-        startDate: selectedPackage.startDate,
-        endDate: selectedPackage.endDate,
+        startDate: selectedPackage.startDate ? new Date(selectedPackage.startDate) : null,
+        endDate: selectedPackage.endDate ? new Date(selectedPackage.endDate) : null,
         totalSeats: selectedPackage.totalSeats,
         availableSeats: selectedPackage.availableSeats,
         inclusions: selectedPackage.inclusions || [],
@@ -88,7 +86,6 @@ const PackageForm = ({ visible, onClose, onSuccess, selectedPackage }) => {
         slug: selectedPackage.slug || ""
       });
 
-      // Handle image list display for existing packages
       if (selectedPackage.images && selectedPackage.images.length > 0) {
         const initialFileList = selectedPackage.images.map((url, index) => ({
           uid: `-${index}`,
@@ -101,7 +98,6 @@ const PackageForm = ({ visible, onClose, onSuccess, selectedPackage }) => {
     }
   }, [selectedPackage]);
 
-  // Handle regular input changes
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     if (name === "totalSeats") {
@@ -115,15 +111,12 @@ const PackageForm = ({ visible, onClose, onSuccess, selectedPackage }) => {
     }
   };
 
-  // Handle image upload
   const handleFileChange = ({ fileList }) => {
-    // Store the file objects in formData
     const files = fileList.map(file => file.originFileObj || file);
     setFormData({ ...formData, images: files });
     setFileList(fileList);
   };
 
-  // Handle dynamic list items
   const handleAddToList = (field, value, clearFn) => {
     if (value) {
       setFormData({ ...formData, [field]: [...formData[field], value] });
@@ -136,7 +129,6 @@ const PackageForm = ({ visible, onClose, onSuccess, selectedPackage }) => {
     setFormData({ ...formData, [field]: updatedList });
   };
 
-  // Handle itinerary items
   const handleAddItinerary = () => {
     if (newItineraryEntry.title && newItineraryEntry.description) {
       setFormData({
@@ -154,40 +146,44 @@ const PackageForm = ({ visible, onClose, onSuccess, selectedPackage }) => {
     }
   };
 
-  // Handle date range
-  const handleDateRangeChange = (dates) => {
-    if (dates) {
-      setFormData({
-        ...formData,
-        startDate: dates[0].format('YYYY-MM-DD'),
-        endDate: dates[1].format('YYYY-MM-DD'),
-      });
-    } else {
-      setFormData({
-        ...formData,
-        startDate: null,
-        endDate: null,
-      });
-    }
+  const handleStartDateChange = (date) => {
+    setFormData({
+      ...formData,
+      startDate: date,
+      // Reset end date if it's before start date
+      endDate: formData.endDate && date && formData.endDate < date ? null : formData.endDate
+    });
   };
 
-  // Form submission
+  const handleEndDateChange = (date) => {
+    setFormData({
+      ...formData,
+      endDate: date
+    });
+  };
+
   const handleSubmit = async () => {
     setLoading(true);
     const packageData = new FormData();
 
-    // Append all form data
-    for (let key in formData) {
+    // Format dates before submission
+    const formattedData = {
+      ...formData,
+      startDate: formData.startDate ? moment(formData.startDate).format('YYYY-MM-DD') : null,
+      endDate: formData.endDate ? moment(formData.endDate).format('YYYY-MM-DD') : null
+    };
+
+    for (let key in formattedData) {
       if (key === "images") {
-        formData[key].forEach((file) => {
+        formattedData[key].forEach((file) => {
           if (file instanceof File) {
             packageData.append("images", file);
           }
         });
       } else if (["inclusions", "exclusions", "tripHighlights", "itinerary"].includes(key)) {
-        packageData.append(key, JSON.stringify(formData[key]));
+        packageData.append(key, JSON.stringify(formattedData[key]));
       } else {
-        packageData.append(key, formData[key]);
+        packageData.append(key, formattedData[key]);
       }
     }
 
@@ -208,7 +204,6 @@ const PackageForm = ({ visible, onClose, onSuccess, selectedPackage }) => {
         message.success("Package created successfully");
       }
 
-      // Call onSuccess instead of fetchPackages
       if (onSuccess) {
         onSuccess();
       }
@@ -220,7 +215,6 @@ const PackageForm = ({ visible, onClose, onSuccess, selectedPackage }) => {
     }
   };
 
-  // If not visible, don't render
   if (!visible) return null;
 
   return (
@@ -360,16 +354,35 @@ const PackageForm = ({ visible, onClose, onSuccess, selectedPackage }) => {
                 placeholder="E.g., 5 days & 4 nights"
               />
             </Form.Item>
-
             <Form.Item label="Trip Dates" required>
-              <RangePicker
-                style={{ width: '100%' }}
-                value={formData.startDate && formData.endDate ? [
-                  moment(formData.startDate),
-                  moment(formData.endDate)
-                ] : null}
-                onChange={handleDateRangeChange}
-              />
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label>Start Date</label>
+                  <DatePicker
+                    selected={formData.startDate}
+                    onChange={handleStartDateChange}
+                    selectsStart
+                    startDate={formData.startDate}
+                    endDate={formData.endDate}
+                    minDate={new Date()}
+                    className="w-full p-2 border rounded"
+                    dateFormat="yyyy-MM-dd"
+                  />
+                </div>
+                <div>
+                  <label>End Date</label>
+                  <DatePicker
+                    selected={formData.endDate}
+                    onChange={handleEndDateChange}
+                    selectsEnd
+                    startDate={formData.startDate}
+                    endDate={formData.endDate}
+                    minDate={formData.startDate || new Date()}
+                    className="w-full p-2 border rounded"
+                    dateFormat="yyyy-MM-dd"
+                  />
+                </div>
+              </div>
             </Form.Item>
 
             <div className="grid grid-cols-2 gap-4">

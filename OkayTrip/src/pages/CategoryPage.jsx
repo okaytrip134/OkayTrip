@@ -200,7 +200,7 @@ const CategoryPage = () => {
   // Only render the UI after all hooks have been called
   if (loading && !packages.length) {
     return (
-      <div className="px-8 lg:px-32 py-8 bg-gray-50 min-h-screen">
+      <div className="px-4 lg:px-32 py-4 bg-gray-50 min-h-screen">
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
           {[...Array(6)].map((_, index) => (
             <PackageSkeleton key={index} />
@@ -217,21 +217,25 @@ const CategoryPage = () => {
       </div>
     );
   }
-  // Inside the CategoryPage component, add this function to check if a package is available
+  const isPackageDatePassed = (pkg) => {
+    if (!pkg.endDate) return false;
+    const endDate = new Date(pkg.endDate);
+    const today = new Date();
+    return endDate < today;
+  };
   const isPackageAvailable = (pkg) => {
-    return pkg.isActive && pkg.availableSeats > 0;
+    return pkg.isActive && pkg.availableSeats > 0 && !isPackageDatePassed(pkg);
   };
 
   // Update the handlePackageClick function to match the ExplorePage logic
+
   const handlePackageClick = (pkg) => {
-    if (pkg.isActive && pkg.availableSeats > 0) {
+    if (isPackageAvailable(pkg)) {
       window.location.href = `/package/${pkg._id}`;
     }
-    // If not active or no seats available, do nothing (just show the appropriate overlay)
   };
-
   return (
-    <div className="px-8 lg:px-32 py-8 bg-gray-50 min-h-screen max-w-[1440px] mx-auto">
+    <div className="px-4 lg:px-32 py-4 bg-gray-50 min-h-screen max-w-[1440px] mx-auto">
       <h1 className="text-2xl font-bold mb-6">Packages in this {category}</h1>
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
         {packages.map((pkg, index) => {
@@ -244,7 +248,7 @@ const CategoryPage = () => {
             <div
               key={pkg._id}
               {...packageProps}
-              className="rounded transition snap-center w-[340px] cursor-pointer relative"
+              className="rounded transition snap-center w-[308px] md:w-[374px] cursor-pointer relative"
               onClick={() => handlePackageClick(pkg)}
             >
               <div className="relative">
@@ -253,22 +257,22 @@ const CategoryPage = () => {
                   alt={pkg.title}
                 />
 
-                {/* Coming Soon Overlay for Inactive Packages */}
-                {!pkg.isActive && (
+                {(!pkg.isActive || isPackageDatePassed(pkg)) && (
                   <div className="absolute inset-0 flex items-center justify-center z-10">
                     <div className="bg-black bg-opacity-70 w-full h-full absolute rounded-lg flex items-center justify-center">
-                      <div className="text-white text-2xl font-bold bg-orange-500 bg-opacity-90 px-6 py-3 rounded-lg transform rotate-[-10deg] shadow-lg">
+                      <div className="text-white text-2xl font-bold bg-orange-500 bg-opacity-90 px-6 py-3 rounded-lg transform shadow-lg">
                         Coming Soon
                       </div>
                     </div>
                   </div>
                 )}
 
+
                 {/* Sold Out Overlay when no seats available */}
                 {pkg.isActive && pkg.availableSeats === 0 && (
                   <div className="absolute inset-0 flex items-center justify-center z-10">
                     <div className="bg-black bg-opacity-70 w-full h-full absolute rounded-lg flex items-center justify-center">
-                      <div className="text-white text-2xl font-bold bg-red-600 bg-opacity-90 px-6 py-3 rounded-lg transform rotate-[-10deg] shadow-lg">
+                      <div className="text-white text-2xl font-bold bg-red-600 bg-opacity-90 px-6 py-3 rounded-lg transform shadow-lg">
                         Sold Out
                       </div>
                     </div>
@@ -276,7 +280,7 @@ const CategoryPage = () => {
                 )}
               </div>
 
-              <div className={`bg-white rounded-b p-4 w-[340px] ${!isPackageAvailable(pkg) ? 'opacity-60' : ''}`}>
+              <div className={`bg-white rounded-b py-4 px-2 w-[308px] ${!isPackageAvailable(pkg) ? 'opacity-60' : ''}`}>
                 <div className="flex items-center justify-between mb-2">
                   <p className="text-sm text-gray-500">{pkg.duration}</p>
 
@@ -386,10 +390,10 @@ const CategoryPage = () => {
                       }
                     }}
                   >
-                    <span>
-                      {!pkg.isActive ? "Coming Soon" :
-                        pkg.availableSeats === 0 ? "Sold Out" : "Book Now"}
-                    </span>
+                        <span className="">
+                          {!pkg.isActive || isPackageDatePassed(pkg) ? "Coming Soon" :
+                            pkg.availableSeats === 0 ? "Sold Out" : "View Details"}
+                        </span>
                   </div>
                 </div>
               </div>

@@ -261,7 +261,12 @@ const ExplorePage = () => {
       }
     });
   }, [categories]);
-
+  const isPackageDatePassed = (pkg) => {
+    if (!pkg.endDate) return false;
+    const endDate = new Date(pkg.endDate);
+    const today = new Date();
+    return endDate < today;
+  };
   const scrollCarousel = (categoryId, direction) => {
     const carousel = document.getElementById(`carousel-${categoryId}`);
     if (!carousel) return;
@@ -277,17 +282,16 @@ const ExplorePage = () => {
     });
   };
   const isPackageAvailable = (pkg) => {
-    return pkg.isActive && pkg.availableSeats > 0;
+    return pkg.isActive && pkg.availableSeats > 0 && !isPackageDatePassed(pkg);
   };
 
-  // Function to handle package click based on active status and seats availability
+
   const handlePackageClick = (pkg) => {
-    // Only navigate if package is active AND has available seats
-    if (pkg.isActive && pkg.availableSeats > 0) {
+    if (isPackageAvailable(pkg)) {
       window.location.href = `/package/${pkg._id}`;
     }
-    // If not active or no seats available, do nothing (just show the appropriate overlay)
   };
+
   return (
     <div className="px-4 md:px-8 lg:px-32 py-8 bg-white min-h-screen max-w-[1440px] mx-auto" >
       {categories.length === 0 ? (
@@ -342,21 +346,22 @@ const ExplorePage = () => {
                           src={`${import.meta.env.VITE_APP_API_URL}${pkg.images[0]}`}
                           alt={pkg.title}
                         />
-                        {/* Coming Soon Overlay for Inactive Packages */}
-                        {!pkg.isActive && (
+                        {(!pkg.isActive || isPackageDatePassed(pkg)) && (
                           <div className="absolute inset-0 flex items-center justify-center z-10">
                             <div className="bg-black bg-opacity-70 w-full h-full absolute rounded-lg flex items-center justify-center">
-                              <div className="text-white text-2xl font-bold bg-orange-500 bg-opacity-90 px-6 py-3 rounded-lg transform rotate-[-10deg] shadow-lg">
+                              <div className="text-white text-2xl font-bold bg-orange-500 bg-opacity-90 px-6 py-3 rounded-lg transform shadow-lg">
                                 Coming Soon
                               </div>
                             </div>
                           </div>
                         )}
+
+
                         {/* Sold Out Overlay when no seats available */}
                         {pkg.isActive && pkg.availableSeats === 0 && (
                           <div className="absolute inset-0 flex items-center justify-center z-10">
                             <div className="bg-black bg-opacity-70 w-full h-full absolute rounded-lg flex items-center justify-center">
-                              <div className="text-white text-2xl font-bold bg-red-600 bg-opacity-90 px-6 py-3 rounded-lg transform rotate-[-10deg] shadow-lg">
+                              <div className="text-white text-2xl font-bold bg-red-600 bg-opacity-90 px-6 py-3 rounded-lg transform shadow-lg">
                                 Seat Sold Out
                               </div>
                             </div>
@@ -474,10 +479,10 @@ const ExplorePage = () => {
                               width: 'calc(100% - 61px)'
                             }}
                           >
-                            <span className="  ">
-                              {!pkg.isActive ? "Coming Soon" :
-                                pkg.availableSeats === 0 ? "Sold Out" : "View Details"}
-                            </span>
+                        <span className="">
+                          {!pkg.isActive || isPackageDatePassed(pkg) ? "Coming Soon" :
+                            pkg.availableSeats === 0 ? "Sold Out" : "View Details"}
+                        </span>
                           </div>
                         </div>
                       </div>

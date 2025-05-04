@@ -4,7 +4,6 @@ import axios from "axios";
 import explore from "../assets/svg/explore.svg";
 
 const HorizontalMenu = () => {
-  const API_URL = "http://localhost:8000";
   const navigate = useNavigate();
   const [categories, setCategories] = useState([]);
   const [activeCategory, setActiveCategory] = useState("explore");
@@ -14,12 +13,6 @@ const HorizontalMenu = () => {
 
   useEffect(() => {
     const fetchCategories = async () => {
-      // const adminToken = localStorage.getItem("adminToken");
-      // if (!adminToken) {
-      //   console.error("Admin token is missing. Please log in.");
-      //   return;
-      // }
-
       try {
         const { data } = await axios.get(`${import.meta.env.VITE_APP_API_URL}/api/admin/categories/`)
         setCategories(data.filter((category) => category.isActive));
