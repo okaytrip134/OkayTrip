@@ -235,8 +235,8 @@ const CategoryPage = () => {
     }
   };
   return (
-    <div className="px-4 lg:px-32 py-4 bg-gray-50 min-h-screen max-w-[1440px] mx-auto">
-      <h1 className="text-2xl font-bold mb-6">Packages in this {category}</h1>
+    <div className="ml-4 mr-[14px] lg:px-32 py-4 bg-gray-50 min-h-screen max-w-[1440px] mx-auto">
+      <h1 className="text-xl md:text-2xl font-bold mb-6">Packages in this {category}</h1>
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
         {packages.map((pkg, index) => {
           const packageProps =
@@ -248,7 +248,7 @@ const CategoryPage = () => {
             <div
               key={pkg._id}
               {...packageProps}
-              className="rounded transition snap-center w-[308px] md:w-[374px] cursor-pointer relative"
+              className="rounded transition snap-center w-[289px] md:w-[374px] cursor-pointer relative"
               onClick={() => handlePackageClick(pkg)}
             >
               <div className="relative">
