@@ -119,7 +119,7 @@ const Footer = () => {
                   letterSpacing: '1.3px'
                 }}
               >
-                <li><a href="#" className="hover:text-[#f37002]">Partner With Us</a></li>
+                <li><Link to="/contact-us" className="hover:text-[#f37002]">Contact With Us</Link></li>
                 <li><a href="#" className="hover:text-[#f37002]">Destination Marketing</a></li>
               </ul>
             </div>

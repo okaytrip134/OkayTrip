@@ -16,6 +16,7 @@ import {
   PieChartOutlined,
   GiftOutlined,
   TagOutlined,
+  PhoneFilled,
 } from "@ant-design/icons";
 import { Dropdown, Menu } from "antd";
 import dasboard from '../../assets/icons/ic-analysis.svg';
@@ -154,6 +155,7 @@ const DashboardPage = () => {
       items: [
         { name: "Booking Report", icon: <SvgIcon src={report} alt="Reports" />, path: "/admin/dashboard/booking-report" },
         { name: "Leads", icon: <FileTextOutlined />, path: "/admin/dashboard/Leads" },
+        { name: "Contact Enquiry", icon: <PhoneFilled />, path: "/admin/dashboard/Contact-enquiry" },
       ]
     },
   ];

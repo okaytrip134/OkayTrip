@@ -14,6 +14,7 @@ import ProtectedRoute from "./components/ProtectedRoutes"; // Add this import
 import OffersManagement from "./pages/OfferManager";
 import CouponsManagement from "./pages/CouponManager";
 import AdminBlogs from "./pages/AdminBlogs";
+import AdminContactEnquiries from "./pages/AdminContactEnquiry";
 
 const AppAdmin = () => {
   return (
@@ -35,6 +36,8 @@ const AppAdmin = () => {
             <Route path="Offer-Manager" element={<OffersManagement />} />
             <Route path="Coupon-Manager" element={<CouponsManagement/>} />
             <Route path="blogs" element={<AdminBlogs/>} />
+
+            <Route path="contact-enquiry" element={<AdminContactEnquiries/>}  />
           </Route>
         </Route>
         
