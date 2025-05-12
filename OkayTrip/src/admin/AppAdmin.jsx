@@ -16,6 +16,7 @@ import CouponsManagement from "./pages/CouponManager";
 import AdminBlogs from "./pages/AdminBlogs";
 import AdminContactEnquiries from "./pages/AdminContactEnquiry";
 
+
 const AppAdmin = () => {
   return (
       <Routes>

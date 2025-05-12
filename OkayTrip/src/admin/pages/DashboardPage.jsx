@@ -141,7 +141,7 @@ const DashboardPage = () => {
       items: [
         { name: "Banners", icon: <PictureOutlined/>, path: "/admin/dashboard/banner" },
         { name: "Reviews", icon: <FaComment />, path: "/admin/dashboard/Admin-reviews" },
-        { name: "Coupon-Report", icon: <SvgIcon src={packages} alt="Management" />, path: "/admin/dashboard/Coupon-Report" },
+        { name: "Blogs", icon: <SvgIcon src={packages} alt="Management" />, path: "/admin/dashboard/blogs" },
         { name: "Top Sale Bar", icon: <BarChartOutlined />, path: "/admin/dashboard/top-sale-bar" },
         { name: "Offer Management", icon: <GiftOutlined />, path: "/admin/dashboard/offer-manager" },
         { name: "Coupon Management", icon: <TagOutlined />, path: "/admin/dashboard/coupon-manager" },
