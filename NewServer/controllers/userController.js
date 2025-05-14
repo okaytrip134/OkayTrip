@@ -9,18 +9,15 @@ exports.registerUser = async (req, res) => {
   try {
     const { name, email, password, phone } = req.body;
 
-    // Check if the user already exists
     const existingUser = await User.findOne({ email });
     if (existingUser) {
       return res.status(400).json({ message: "User already exists" });
     }
 
-    // Save the user with the plain password (middleware will hash it)
     const newUser = new User({ name, email, password, phone });
     await newUser.save();
 
-    console.log("User Registered:", newUser); // Debug log
-
+    console.log("User Registered:", newUser);
     res.status(201).json({ message: "User registered successfully" });
   } catch (error) {
     console.error("Error during registration:", error);
@@ -28,6 +25,7 @@ exports.registerUser = async (req, res) => {
   }
 };
 
+// Login User
 exports.loginUser = async (req, res) => {
   try {
     const { emailOrPhone, password } = req.body;
@@ -44,8 +42,7 @@ exports.loginUser = async (req, res) => {
       return res.status(400).json({ message: "Invalid email/number or password" });
     }
 
-    // ✅ Set expiry time for the token
-    const expiresIn = 10 * 60 * 60; // 10 hours in seconds
+    const expiresIn = 10 * 60 * 60;
     const token = jwt.sign(
       { id: user._id, email: user.email, role: user.role },
       process.env.JWT_SECRET,
@@ -54,7 +51,7 @@ exports.loginUser = async (req, res) => {
 
     res.status(200).json({
       token,
-      expiresIn, // ✅ Send expiry time in response
+      expiresIn,
       user: { name: user.name, email: user.email, phone: user.phone },
     });
   } catch (error) {
@@ -63,29 +60,19 @@ exports.loginUser = async (req, res) => {
   }
 };
 
-// Forget password
-exports.forgotPassword = async (req, res) => {
+// ✅ Send OTP for Password Reset
+exports.sendOTP = async (req, res) => {
   try {
     const { email } = req.body;
 
-    // Find the user by email
     const user = await User.findOne({ email });
-    if (!user) {
-      return res.status(400).json({ message: "User not found" });
-    }
+    if (!user) return res.status(400).json({ message: "User not found" });
 
-    // Create a reset token (random string)
-    const resetToken = crypto.randomBytes(20).toString("hex");
-
-    // Set expiration time for the token (1 hour)
-    const resetTokenExpiration = Date.now() + 3600000; // 1 hour
-
-    // Update the user record with the reset token and expiration time
-    user.resetToken = resetToken;
-    user.resetTokenExpiration = resetTokenExpiration;
+    const otp = Math.floor(100000 + Math.random() * 900000).toString();
+    user.resetToken = otp;
+    user.resetTokenExpiration = Date.now() + 10 * 60 * 1000; // valid for 10 min
     await user.save();
 
-    // Send the reset token to the user's email
     const transporter = nodemailer.createTransport({
       service: process.env.SMPT_SERVICE,
       auth: {
@@ -97,72 +84,48 @@ exports.forgotPassword = async (req, res) => {
     const mailOptions = {
       from: process.env.SMPT_MAIL,
       to: user.email,
-      subject: "Password Reset Request",
-      text: `Click the following link to reset your password: \n\n
-      http://okaytrip.in/reset-password/${resetToken}`,
+      subject: "Your OTP for Password Reset",
+      text: `Use this OTP to reset your password: ${otp}`,
     };
 
-    // Send the email
-    transporter.sendMail(mailOptions, (err, info) => {
-      if (err) {
-        return res.status(500).json({ message: "Error sending email" });
-      }
-      res
-        .status(200)
-        .json({ message: "Password reset link sent to your email!" });
-    });
+    await transporter.sendMail(mailOptions);
+    return res.status(200).json({ message: "OTP sent to your email" });
   } catch (error) {
-    console.error("Error during forgot password:", error);
+    console.error("Error sending OTP:", error);
+    return res.status(500).json({ message: "Failed to send OTP" });
+  }
+};
+
+// ✅ Verify OTP and Reset Password
+exports.verifyOTPAndResetPassword = async (req, res) => {
+  try {
+    const { email, otp, password } = req.body;
+
+    const user = await User.findOne({
+      email,
+      resetToken: otp,
+      resetTokenExpiration: { $gt: Date.now() },
+    });
+
+    if (!user) return res.status(400).json({ message: "Invalid or expired OTP" });
+
+    user.password = password; // Let Mongoose hash this
+    user.resetToken = undefined;
+    user.resetTokenExpiration = undefined;
+    await user.save();
+
+    res.status(200).json({ message: "Password updated successfully!" });
+  } catch (error) {
+    console.error("Error resetting password:", error);
     res.status(500).json({ message: "Internal server error" });
   }
 };
 
-// Reset Password
-exports.resetPassword = async (req, res) => {
-  try {
-    const { token } = req.params; // Extract token from URL
-    const { password } = req.body;
-
-    if (!token) {
-      return res.status(400).json({ message: "Reset token is missing." });
-    }
-
-    if (!password || password.length < 6) {
-      return res.status(400).json({ message: "Password must be at least 6 characters." });
-    }
-
-    const hashedPassword = await bcrypt.hash(password, 10);
-
-    const user = await User.findOneAndUpdate(
-      {
-        resetToken: token,
-        resetTokenExpiration: { $gt: Date.now() },
-      },
-      {
-        $set: {
-          password: hashedPassword,
-          resetToken: undefined,
-          resetTokenExpiration: undefined,
-        },
-      },
-      { new: true }
-    );
-
-    if (!user) {
-      return res.status(400).json({ message: "Invalid or expired token." });
-    }
-
-    return res.status(200).json({ message: "Password reset successful!", success: true });
-  } catch (error) {
-    console.error("Error during password reset:", error);
-    return res.status(500).json({ message: "Internal server error" });
-  }
-};
 
 // Get All Users
 exports.getAllUsers = async (req, res) => {
   try {
-    const users = await User.find().select("-password"); // Exclude password
+    const users = await User.find().select("-password");
     res.status(200).json(users);
   } catch (error) {
     res.status(500).json({ message: "Internal server error", error: error.message });
@@ -178,9 +141,7 @@ exports.getUserProfile = async (req, res) => {
     }
     res.status(200).json(user);
   } catch (error) {
-    res
-      .status(500)
-      .json({ message: "Internal server error", error: error.message });
+    res.status(500).json({ message: "Internal server error", error: error.message });
   }
 };
 
@@ -204,11 +165,10 @@ exports.updateUserProfile = async (req, res) => {
     await user.save();
     res.status(200).json({ message: "Profile updated successfully" });
   } catch (error) {
-    res
-      .status(500)
-      .json({ message: "Internal server error", error: error.message });
+    res.status(500).json({ message: "Internal server error", error: error.message });
   }
 };
+
 // Get User Address
 exports.getUserAddress = async (req, res) => {
   try {
@@ -240,10 +200,12 @@ exports.updateUserAddress = async (req, res) => {
     res.status(500).json({ message: "Internal server error" });
   }
 };
+
+// Delete User
 exports.deleteUser = async (req, res) => {
   try {
-    const { id } = req.params; // Get user ID from params
-    const deletedUser = await User.findByIdAndDelete(id); // Delete user by ID
+    const { id } = req.params;
+    const deletedUser = await User.findByIdAndDelete(id);
 
     if (!deletedUser) {
       return res.status(404).json({ message: "User not found" });

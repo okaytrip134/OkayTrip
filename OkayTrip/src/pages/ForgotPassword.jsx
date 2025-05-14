@@ -1,111 +1,152 @@
 import React, { useState } from "react";
 import axios from "axios";
-import { useNavigate } from "react-router-dom";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { Eye, EyeOff } from "lucide-react";
-import logo from "../assets/Logo/Trip ok new 2 black-01.png"; // ✅ Import company logo
+import logo from "../assets/Logo/Trip ok new 2 black-01.png";
+
 const ForgotPassword = ({ onClose }) => {
+  const [step, setStep] = useState(1);
   const [email, setEmail] = useState("");
+  const [otp, setOtp] = useState("");
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
   const [loading, setLoading] = useState(false);
-  const navigate = useNavigate();
+  const [showPassword, setShowPassword] = useState(false);
 
-  const handleSubmit = async () => {
-    if (!email) {
-      toast.error("Please enter a valid email address!");
-      return;
-    }
-
+  const handleSendOTP = async () => {
+    if (!email) return toast.error("Please enter your email.");
     try {
       setLoading(true);
-      const { data } = await axios.post(
-        `${import.meta.env.VITE_APP_API_URL}/api/user/auth/forgot-password`,
-        { email }
-      );
-
-      // ✅ Show Success Notification
-      toast.success(data.message || "Password reset link sent to your email!", { autoClose: 3000 });
-
-      // ✅ Set flag to show login popup after redirection
-      localStorage.setItem("showLogin", "true");
-
-      // ✅ Wait for toast to close, then redirect to home page
-      toast.onChange((payload) => {
-        if (payload.status === "removed") {
-          navigate("/");
-        }
-      });
-
-    } catch (error) {
-      toast.error(error.response?.data?.message || "Something went wrong!");
+      const { data } = await axios.post(`${import.meta.env.VITE_APP_API_URL}/api/user/auth/send-otp`, { email });
+      toast.success(data.message || "OTP sent to your email");
+      setStep(2);
+    } catch (err) {
+      toast.error(err.response?.data?.message || "Failed to send OTP");
     } finally {
       setLoading(false);
     }
   };
 
+  const handleResetPassword = async () => {
+  if (!otp || !newPassword || !confirmPassword) return toast.error("All fields are required.");
+  if (newPassword !== confirmPassword) return toast.error("Passwords do not match.");
+  if (newPassword.length < 6) return toast.error("Password must be at least 6 characters.");
+
+  try {
+    setLoading(true);
+    const { data } = await axios.post(`${import.meta.env.VITE_APP_API_URL}/api/user/auth/reset-password-otp`, {
+      email,
+      otp,
+      password: newPassword,
+    });
+
+    toast.success(data.message || "Password reset successful");
+
+    setTimeout(() => {
+      onClose(); // ✅ Close the popup
+    }, 1000);
+
+  } catch (err) {
+    toast.error(err.response?.data?.message || "Reset failed");
+  } finally {
+    setLoading(false);
+  }
+};
+
   return (
-    <div className="fixed inset-0 bg-black flex items-center justify-center z-50">
-      {/* ✅ Toast Notification Container */}
+    <div className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50">
       <ToastContainer position="top-center" />
-      
       <div className="bg-white rounded-lg shadow-lg w-full max-w-md p-6 relative">
+        <button onClick={onClose} className="absolute top-3 right-4 text-gray-500 hover:text-red-500 text-xl">×</button>
 
         <div className="flex flex-col items-center mb-6">
-          {/* Company Logo */}
-          <div className="w-50 h-32 mb-4">
-            <img 
-              src={logo} 
-              alt="Company Logo" 
-              className="w-full h-full object-contain"
-              onError={(e) => {
-                e.target.onerror = null;
-                e.target.src = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100' height='100' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' fill='%23f97316'/%3E%3Ctext x='50' y='50' font-family='Arial' font-size='20' text-anchor='middle' fill='white' dominant-baseline='middle'%3ELOGO%3C/text%3E%3C/svg%3E";
-              }}
-            />
+          <div className="w-32 h-20 mb-4">
+            <img src={logo} alt="Logo" className="w-full h-full object-contain" />
           </div>
-
-          <h2 className="text-2xl font-bold text-gray-800 mb-4">
-            Forgot Password
+          <h2 className="text-2xl font-bold text-gray-800">
+            {step === 1 ? "Forgot Password" : step === 2 ? "Enter OTP" : "Set New Password"}
           </h2>
         </div>
 
         <div className="space-y-4">
-          <div>
-            <label className="block text-gray-700 text-sm font-medium mb-2">
-              Email Address
-            </label>
-            <input
-              type="email"
-              placeholder="Enter your email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              className="w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
-            />
-          </div>
-
-          <button
-            onClick={handleSubmit}
-            disabled={loading}
-            className="w-full bg-orange-500 hover:bg-orange-600 text-white font-bold py-3 px-4 rounded-lg transition duration-300 disabled:opacity-50"
-          >
-            {loading ? "Processing..." : "Reset Password"}
-          </button>
-
-          {/* ✅ Redirect to Login */}
-          <div className="text-center mt-4">
-            <p className="text-gray-600">
-              Remember your password? 
+          {step === 1 && (
+            <>
+              <label className="block text-gray-700 text-sm font-medium">Email</label>
+              <input
+                type="email"
+                className="w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
+                placeholder="Enter your email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+              />
               <button
-                onClick={() => {
-                  localStorage.setItem("showLogin", "true");
-                  navigate("/");
-                }}
-                className="text-orange-500 hover:text-orange-600 font-bold ml-1"
+                onClick={handleSendOTP}
+                disabled={loading}
+                className="w-full bg-orange-500 hover:bg-orange-600 text-white font-bold py-3 px-4 rounded-lg transition duration-300 disabled:opacity-50"
               >
-                Go to Login
+                {loading ? "Sending OTP..." : "Send OTP"}
               </button>
-            </p>
-          </div>
+            </>
+          )}
+
+          {step === 2 && (
+            <>
+              <label className="block text-gray-700 text-sm font-medium">OTP</label>
+              <input
+                type="text"
+                className="w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
+                placeholder="Enter OTP sent to your email"
+                value={otp}
+                onChange={(e) => setOtp(e.target.value)}
+              />
+              <button
+                onClick={() => setStep(3)}
+                className="w-full bg-orange-500 hover:bg-orange-600 text-white font-bold py-3 px-4 rounded-lg transition duration-300"
+              >
+                Verify OTP
+              </button>
+            </>
+          )}
+
+          {step === 3 && (
+            <>
+              <label className="block text-gray-700 text-sm font-medium">New Password</label>
+              <div className="relative">
+                <input
+                  type={showPassword ? "text" : "password"}
+                  className="w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
+                  placeholder="New password"
+                  value={newPassword}
+                  onChange={(e) => setNewPassword(e.target.value)}
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500"
+                >
+                  {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                </button>
+              </div>
+
+              <label className="block text-gray-700 text-sm font-medium">Confirm Password</label>
+              <input
+                type="password"
+                className="w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
+                placeholder="Confirm new password"
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+              />
+
+              <button
+                onClick={handleResetPassword}
+                disabled={loading}
+                className="w-full bg-orange-500 hover:bg-orange-600 text-white font-bold py-3 px-4 rounded-lg transition duration-300 disabled:opacity-50"
+              >
+                {loading ? "Resetting..." : "Reset Password"}
+              </button>
+            </>
+          )}
         </div>
       </div>
     </div>

@@ -10,9 +10,9 @@ const BookingPage = () => {
   const [selectedPayment, setSelectedPayment] = useState("full");
   const [showRefundPolicy, setShowRefundPolicy] = useState(false);
   const [agreedToPolicy, setAgreedToPolicy] = useState(false);
-  const [numSeats, setNumSeats] = useState(1); // ✅ Default 1 seat
-  const [travelers, setTravelers] = useState([]); // ✅ Traveler details
-
+  const [groupType, setGroupType] = useState("solo"); // 'solo', 'duo', or 'squad'
+  const [numSeats, setNumSeats] = useState(1); // Only used when groupType is 'squad'
+  const [travelers, setTravelers] = useState([]);
 
   const navigate = useNavigate();
   const userToken = localStorage.getItem("userToken");
@@ -39,23 +39,30 @@ const BookingPage = () => {
     fetchPackage();
   }, [packageId, userToken, navigate]);
 
-  // ✅ Initialize traveler details with at least 1 traveler (Logged-in user info if available)
+  // Initialize traveler details based on group type
   useEffect(() => {
-    const user = JSON.parse(localStorage.getItem("userData")); // Fetch user data from storage
+    const user = JSON.parse(localStorage.getItem("userData"));
+    let travelerCount = 1;
+    
+    if (groupType === "duo") {
+      travelerCount = 2;
+    } else if (groupType === "squad") {
+      travelerCount = numSeats;
+    }
 
     setTravelers((prev) => {
       const updatedTravelers = [...prev];
 
-      // ✅ Ensure traveler form always matches the number of seats
-      while (updatedTravelers.length < numSeats) {
+      // Ensure traveler form always matches the required number
+      while (updatedTravelers.length < travelerCount) {
         updatedTravelers.push({ name: "", age: "", gender: "", aadhar: "" });
       }
-      while (updatedTravelers.length > numSeats) {
+      while (updatedTravelers.length > travelerCount) {
         updatedTravelers.pop();
       }
 
-      // ✅ If first traveler & user exists, pre-fill user details
-      if (numSeats === 1 && user) {
+      // If first traveler & user exists, pre-fill user details
+      if (travelerCount >= 1 && user) {
         updatedTravelers[0] = {
           name: user.name || "",
           age: user.age || "",
@@ -66,63 +73,68 @@ const BookingPage = () => {
 
       return updatedTravelers;
     });
-  }, [numSeats]);
+  }, [groupType, numSeats]);
 
   const calculatePaymentAmount = () => {
     let baseAmount = packageData?.discountedPrice || 0;
     let tax = 0;
+    let travelerCount = 1;
+
+    if (groupType === "duo") {
+      travelerCount = 2;
+    } else if (groupType === "squad") {
+      travelerCount = numSeats;
+    }
 
     if (selectedPayment === "partial") {
       baseAmount *= 0.5;
     } else if (selectedPayment === "advance") {
       baseAmount *= 0.2;
     } else if (selectedPayment === "full") {
-      tax = baseAmount * 0.18; // ✅ Apply 18% GST for full payment
+      tax = baseAmount * 0.18; // Apply 18% GST for full payment
     }
 
     return {
-      baseAmount: baseAmount * numSeats,
-      taxAmount: tax * numSeats,
-      totalAmount: (baseAmount + tax) * numSeats, // ✅ Total including tax
+      baseAmount: baseAmount * travelerCount,
+      taxAmount: tax * travelerCount,
+      totalAmount: (baseAmount + tax) * travelerCount,
+      travelerCount,
     };
   };
-  const { baseAmount, taxAmount, totalAmount } = calculatePaymentAmount();
+
+  const { baseAmount, taxAmount, totalAmount, travelerCount } = calculatePaymentAmount();
+
   const handleInputChange = (index, field, value) => {
     const updatedTravelers = [...travelers];
     updatedTravelers[index][field] = value;
     setTravelers(updatedTravelers);
   };
+
   const handleProceedToPayment = () => {
     if (!agreedToPolicy) {
       alert("Please agree to the refund policy before proceeding.");
       return;
     }
 
-    // ✅ Ensure all traveler details are filled
     if (travelers.some((t) => !t.name || !t.age || !t.gender || !t.aadhar)) {
       alert("Please fill all traveler details.");
       return;
     }
 
-    // ✅ Save traveler details & seat count in localStorage
     localStorage.setItem("travelers", JSON.stringify(travelers));
-    localStorage.setItem("numSeats", numSeats);
+    localStorage.setItem("numSeats", travelerCount);
 
-
-    const { totalAmount } = calculatePaymentAmount();
-    // ✅ Pass only totalAmount to Payment Page
     navigate("/payment", {
       state: {
         packageId: packageData._id,
         packageTitle: packageData.title,
-        amount: totalAmount, // ✅ Fixed: Passing only total amount
+        amount: totalAmount,
         paymentType: selectedPayment,
         travelers,
-        numSeats,
+        numSeats: travelerCount,
       },
     });
   };
-
 
   if (loading) {
     return <div className="text-center py-10 text-lg font-semibold">Loading package details...</div>;
@@ -147,25 +159,60 @@ const BookingPage = () => {
         </div>
       </div>
 
-      {/* ✅ Select Number of Seats */}
+      {/* Group Type Selection */}
       <div className="mt-6 bg-white shadow-lg rounded-lg p-6">
-        <h3 className="text-lg font-semibold text-gray-800">Select Number of Seats</h3>
-        <input
-          type="number"
-          min="1"
-          max="10"
-          value={numSeats}
-          onChange={(e) => setNumSeats(parseInt(e.target.value) || 1)}
-          className="w-full mt-2 p-2 border rounded-md"
-        />
+        <h3 className="text-lg font-semibold text-gray-800">Select Group Type</h3>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
+          {[
+            { value: "solo", label: "Solo Traveler", description: "1 person" },
+            { value: "duo", label: "Duo", description: "2 persons" },
+            { value: "squad", label: "Squad", description: "3+ persons" },
+          ].map((option) => (
+            <div
+              key={option.value}
+              className={`border-2 rounded-lg p-4 cursor-pointer transition-all ${
+                groupType === option.value
+                  ? "border-orange-500 bg-orange-100"
+                  : "border-gray-300"
+              }`}
+              onClick={() => setGroupType(option.value)}
+            >
+              <h4 className="font-semibold text-gray-800">{option.label}</h4>
+              <p className="text-sm text-gray-600">{option.description}</p>
+            </div>
+          ))}
+        </div>
+
+        {/* Number of seats input (only shown for Squad) */}
+        {groupType === "squad" && (
+          <div className="mt-4">
+            <label className="block text-gray-700 font-medium mb-2">
+              Number of Travelers
+            </label>
+            <input
+              type="number"
+              min="3"
+              max="10"
+              value={numSeats}
+              onChange={(e) => setNumSeats(Math.max(3, parseInt(e.target.value) || 3))}
+              className="w-full p-2 border rounded-md"
+            />
+            <p className="text-sm text-gray-500 mt-1">
+              Minimum 3 travelers required for Squad option
+            </p>
+          </div>
+        )}
       </div>
 
-      {/* ✅ Traveler Details (Always Show at Least One) */}
       <div className="mt-6 bg-white shadow-lg rounded-lg p-6">
-        <h3 className="text-lg font-semibold text-gray-800">Traveler Details</h3>
+        <h3 className="text-lg font-semibold text-gray-800">
+          Traveler Details ({travelerCount} {travelerCount === 1 ? "Person" : "Persons"})
+        </h3>
         {travelers.map((traveler, index) => (
           <div key={index} className="mb-4 p-4 border rounded-md">
-            <h4 className="font-semibold text-gray-700">Traveler {index + 1}</h4>
+            <h4 className="font-semibold text-gray-700">
+              Traveler {index + 1} {index === 0 && "(Primary)"}
+            </h4>
             <input
               placeholder="Full Name"
               className="w-full my-2 p-2 border rounded-md"
@@ -198,6 +245,7 @@ const BookingPage = () => {
           </div>
         ))}
       </div>
+
       {/* Payment Options */}
       <div className="mt-6 bg-white shadow-lg rounded-lg p-6">
         <h3 className="text-lg font-semibold mb-4 text-gray-800">Choose Payment Method</h3>
@@ -209,8 +257,11 @@ const BookingPage = () => {
           ].map((option) => (
             <div
               key={option.value}
-              className={`border-2 rounded-lg p-4 flex items-center justify-between cursor-pointer transition-all ${selectedPayment === option.value ? "border-orange-500 bg-orange-100" : "border-gray-300"
-                }`}
+              className={`border-2 rounded-lg p-4 flex items-center justify-between cursor-pointer transition-all ${
+                selectedPayment === option.value
+                  ? "border-orange-500 bg-orange-100"
+                  : "border-gray-300"
+              }`}
               onClick={() => setSelectedPayment(option.value)}
             >
               <div className="flex items-center space-x-3">
@@ -222,19 +273,23 @@ const BookingPage = () => {
         </div>
       </div>
 
+      {/* Total Payment */}
       <div className="mt-6 bg-white shadow-lg rounded-lg p-6">
         <h3 className="text-lg font-semibold text-gray-800">Total Payment</h3>
         <div className="bg-gray-100 p-4 rounded-lg">
           <p className="text-gray-700 text-lg mb-1">
-            <span className="font-semibold text-gray-900">Base Amount:</span> ₹{baseAmount.toFixed(2)}
+            <span className="font-semibold text-gray-900">Base Amount:</span> ₹
+            {baseAmount.toFixed(2)} ({travelerCount} {travelerCount === 1 ? "person" : "persons"})
           </p>
-          {/* ✅ Show this message only if payment type is NOT "full" */}
           {selectedPayment !== "full" && (
-            <p className="text-red-600 text-sm font-medium">Tax will be included after full payment.</p>
+            <p className="text-red-600 text-sm font-medium">
+              Tax will be included after full payment.
+            </p>
           )}
           {selectedPayment === "full" && (
             <p className="text-gray-700 text-lg mb-1">
-              <span className="font-semibold text-gray-900">GST (18%):</span> ₹{taxAmount.toFixed(2)}
+              <span className="font-semibold text-gray-900">GST (18%):</span> ₹
+              {taxAmount.toFixed(2)}
             </p>
           )}
           <p className="text-xl font-bold text-orange-500 mt-1">
@@ -335,15 +390,19 @@ const BookingPage = () => {
           </label>
         </div>
       </div>
+
       {/* Proceed to Payment */}
       <div className="mt-6 bg-white shadow-lg rounded-lg p-6 flex flex-col md:flex-row items-center justify-between">
         <div>
           <h3 className="text-lg font-semibold text-gray-800">Total Payable:</h3>
-          <p className="text-2xl font-bold text-orange-500 mt-1">      ₹{calculatePaymentAmount().totalAmount.toFixed(2)} {/* ✅ FIXED */} </p>
+          <p className="text-2xl font-bold text-orange-500 mt-1">
+            ₹{totalAmount.toFixed(2)}
+          </p>
         </div>
         <button
-          className={`mt-4 md:mt-0 px-6 py-3 rounded-lg text-white font-semibold text-lg ${agreedToPolicy ? "bg-orange-500 hover:bg-orange-600" : "bg-gray-400 cursor-not-allowed"
-            }`}
+          className={`mt-4 md:mt-0 px-6 py-3 rounded-lg text-white font-semibold text-lg ${
+            agreedToPolicy ? "bg-orange-500 hover:bg-orange-600" : "bg-gray-400 cursor-not-allowed"
+          }`}
           onClick={handleProceedToPayment}
           disabled={!agreedToPolicy}
         >

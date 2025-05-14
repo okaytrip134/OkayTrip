@@ -2,9 +2,11 @@ import React, { useState, useEffect } from "react";
 import axios from "axios";
 import toast, { Toaster } from "react-hot-toast";
 import { FaEye, FaEyeSlash } from "react-icons/fa";
+import ForgotPassword from "../pages/ForgotPassword";
 
 const UserAuth = ({ onClose }) => {
   const [isLogin, setIsLogin] = useState(true);
+  const [showForgotPassword, setShowForgotPassword] = useState(false);
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -90,7 +92,7 @@ const UserAuth = ({ onClose }) => {
   };
 
   const handleForgotPassword = () => {
-    window.location.href = "/forgot-password";
+    setShowForgotPassword(true);
   };
 
   return (
@@ -276,14 +278,19 @@ const UserAuth = ({ onClose }) => {
                   </div>
                 </div>
               </div>
-              
+
               {/* Adding some extra padding at the bottom for better scrolling */}
               <div className="h-4"></div>
             </div>
           </div>
         </div>
       </div>
+      {showForgotPassword && (
+        <ForgotPassword onClose={() => setShowForgotPassword(false)} />
+      )}
+
     </div>
+
   );
 };
 
