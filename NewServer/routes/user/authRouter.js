@@ -4,7 +4,8 @@ const {
   loginUser,
   getAllUsers,
   sendOTP,
-  verifyOTPAndResetPassword
+  verifyOTPAndResetPassword,
+  verifyOnlyOTP
 } = require("../../controllers/userController");
 const authMiddleware = require("../../middlewares/authMiddleware");
 
@@ -17,6 +18,7 @@ router.post("/login", loginUser);
 // ✅ OTP-Based Password Reset
 router.post("/send-otp", sendOTP);
 router.post("/reset-password-otp", verifyOTPAndResetPassword);
+router.post("/verify-otp", verifyOnlyOTP);
 
 // Other Routes
 router.get("/all", authMiddleware, getAllUsers);

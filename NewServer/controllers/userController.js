@@ -70,7 +70,7 @@ exports.sendOTP = async (req, res) => {
 
     const otp = Math.floor(100000 + Math.random() * 900000).toString();
     user.resetToken = otp;
-    user.resetTokenExpiration = Date.now() + 10 * 60 * 1000; // valid for 10 min
+    user.resetTokenExpiration = Date.now() + 30 * 60 * 1000; // valid for 10 min
     await user.save();
 
     const transporter = nodemailer.createTransport({
@@ -96,7 +96,6 @@ exports.sendOTP = async (req, res) => {
   }
 };
 
-// ✅ Verify OTP and Reset Password
 exports.verifyOTPAndResetPassword = async (req, res) => {
   try {
     const { email, otp, password } = req.body;
@@ -107,16 +106,43 @@ exports.verifyOTPAndResetPassword = async (req, res) => {
       resetTokenExpiration: { $gt: Date.now() },
     });
 
-    if (!user) return res.status(400).json({ message: "Invalid or expired OTP" });
+    if (!user) {
+      return res.status(400).json({ message: "Invalid or expired OTP" });
+    }
 
-    user.password = password; // Let Mongoose hash this
+    if (!password || password.length < 6) {
+      return res.status(400).json({ message: "Password must be at least 6 characters." });
+    }
+
+    user.password = password; // Let Mongoose pre-save hook hash it
     user.resetToken = undefined;
     user.resetTokenExpiration = undefined;
     await user.save();
 
-    res.status(200).json({ message: "Password updated successfully!" });
+    return res.status(200).json({ message: "Password updated successfully!" });
   } catch (error) {
     console.error("Error resetting password:", error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+};
+
+exports.verifyOnlyOTP = async (req, res) => {
+  try {
+    const { email, otp } = req.body;
+
+    const user = await User.findOne({
+      email,
+      resetToken: otp,
+      resetTokenExpiration: { $gt: Date.now() }, // expires in 3 min
+    });
+
+    if (!user) {
+      return res.status(400).json({ message: "Invalid or expired OTP" });
+    }
+
+    return res.status(200).json({ message: "OTP verified successfully" });
+  } catch (error) {
+    console.error("Error verifying OTP:", error);
     res.status(500).json({ message: "Internal server error" });
   }
 };

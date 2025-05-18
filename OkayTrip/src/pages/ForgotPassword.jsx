@@ -53,6 +53,27 @@ const ForgotPassword = ({ onClose }) => {
     setLoading(false);
   }
 };
+const handleVerifyOTP = async () => {
+  if (!otp.trim()) {
+    toast.error("Please enter the OTP.");
+    return;
+  }
+
+  try {
+    setLoading(true);
+    const { data } = await axios.post(`${import.meta.env.VITE_APP_API_URL}/api/user/auth/verify-otp`, {
+      email,
+      otp,
+    });
+    toast.success(data.message);
+    setStep(3);
+  } catch (err) {
+    toast.error(err.response?.data?.message || "Invalid or expired OTP");
+  } finally {
+    setLoading(false);
+  }
+};
+
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50">
@@ -101,7 +122,7 @@ const ForgotPassword = ({ onClose }) => {
                 onChange={(e) => setOtp(e.target.value)}
               />
               <button
-                onClick={() => setStep(3)}
+                  onClick={handleVerifyOTP}
                 className="w-full bg-orange-500 hover:bg-orange-600 text-white font-bold py-3 px-4 rounded-lg transition duration-300"
               >
                 Verify OTP
