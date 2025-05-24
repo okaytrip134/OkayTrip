@@ -22,49 +22,43 @@ import {
     ReloadOutlined,
     EyeOutlined,
     ExclamationCircleOutlined,
-    FilterOutlined
+    FilterOutlined,
+    SearchOutlined
 } from "@ant-design/icons";
 
 const { Title } = Typography;
 const { confirm } = Modal;
 const { RangePicker } = DatePicker;
-
+const { Search } = Input;
 
 const AdminBookings = () => {
     const [bookings, setBookings] = useState([]);
+    const [filteredBookings, setFilteredBookings] = useState([]);
     const [loading, setLoading] = useState(true);
     const [selectedBooking, setSelectedBooking] = useState(null);
     const [isModalVisible, setIsModalVisible] = useState(false);
     const [isFilterModalVisible, setIsFilterModalVisible] = useState(false);
     const [filters, setFilters] = useState({});
+    const [searchText, setSearchText] = useState("");
     const [filterForm] = Form.useForm();
-    const [pagination, setPagination] = useState({
-        current: 1,
-        pageSize: 7,
-        total: 0,
-    });
 
-    const fetchBookings = async (page = 1, pageSize = 7, filterParams = {}) => {
+    const fetchBookings = async (filterParams = {}) => {
         try {
             setLoading(true);
             const { data } = await axios.get(
                 `${import.meta.env.VITE_APP_API_URL}/api/admin/bookings`,
                 {
-                    params: { 
-                        page, 
-                        limit: pageSize,
-                        ...filterParams 
+                    params: {
+                        // Remove pagination parameters to fetch all bookings
+                        limit: 1000, // Set a high limit to get all bookings
+                        ...filterParams
                     },
                     headers: { Authorization: `Bearer ${localStorage.getItem("adminToken")}` },
                 }
             );
 
             setBookings(data.bookings);
-            setPagination({
-                ...pagination,
-                total: data.totalPages * pageSize,
-                current: page,
-            });
+            setFilteredBookings(data.bookings);
         } catch (error) {
             message.error("Failed to fetch bookings");
         } finally {
@@ -73,12 +67,28 @@ const AdminBookings = () => {
     };
 
     useEffect(() => {
-        fetchBookings(1, pagination.pageSize, filters);
+        fetchBookings(filters);
     }, [filters]);
 
     useEffect(() => {
         fetchBookings();
     }, []);
+
+    // Handle search functionality
+    useEffect(() => {
+        if (!searchText) {
+            setFilteredBookings(bookings);
+        } else {
+            const filtered = bookings.filter(booking => 
+                booking.bookingId?.toLowerCase().includes(searchText.toLowerCase()) ||
+                booking.userId?.name?.toLowerCase().includes(searchText.toLowerCase()) ||
+                booking.packageId?.title?.toLowerCase().includes(searchText.toLowerCase()) ||
+                booking.userId?.email?.toLowerCase().includes(searchText.toLowerCase()) ||
+                booking.userId?.phone?.toLowerCase().includes(searchText.toLowerCase())
+            );
+            setFilteredBookings(filtered);
+        }
+    }, [searchText, bookings]);
 
     const handleStatusChange = async (bookingId, newStatus) => {
         try {
@@ -90,7 +100,7 @@ const AdminBookings = () => {
                 }
             );
             message.success(`Booking status updated to ${newStatus}`);
-            fetchBookings(pagination.current);
+            fetchBookings(filters);
         } catch (error) {
             message.error("Failed to update booking status");
         }
@@ -114,7 +124,7 @@ const AdminBookings = () => {
                         }
                     );
                     message.success("Booking cancelled successfully");
-                    fetchBookings(pagination.current);
+                    fetchBookings(filters);
                 } catch (error) {
                     message.error("Failed to cancel booking");
                 }
@@ -139,7 +149,7 @@ const AdminBookings = () => {
                         }
                     );
                     message.success("Booking deleted successfully");
-                    fetchBookings(pagination.current);
+                    fetchBookings(filters);
                 } catch (error) {
                     message.error("Failed to delete booking");
                 }
@@ -152,7 +162,7 @@ const AdminBookings = () => {
             const response = await axios.get(
                 `${import.meta.env.VITE_APP_API_URL}/api/admin/bookings/download`,
                 {
-                    params: { ...filters },
+                    params: { ...filters, search: searchText },
                     headers: { Authorization: `Bearer ${localStorage.getItem("adminToken")}` },
                     responseType: "blob",
                 }
@@ -170,7 +180,6 @@ const AdminBookings = () => {
             message.error("Failed to download report");
         }
     };
-
 
     const columns = [
         {
@@ -254,30 +263,31 @@ const AdminBookings = () => {
                     >
                         Cancel
                     </Button>
-                    <Button
+                    {/* <Button
                         danger
                         type="primary"
                         onClick={() => handleDelete(record.bookingId)}
                         disabled={record.status === "Canceled"}
                     >
                         Delete
-                    </Button>
+                    </Button> */}
                 </Space>
             ),
         },
     ];
+
     const handleFilter = async (values) => {
         const formattedFilters = {};
-        
+
         if (values.dateRange) {
             formattedFilters.startDate = values.dateRange[0].format('YYYY-MM-DD');
             formattedFilters.endDate = values.dateRange[1].format('YYYY-MM-DD');
         }
-        
+
         if (values.status) {
             formattedFilters.status = values.status;
         }
-        
+
         if (values.paymentType) {
             formattedFilters.paymentType = values.paymentType;
         }
@@ -298,8 +308,10 @@ const AdminBookings = () => {
     const clearFilters = () => {
         filterForm.resetFields();
         setFilters({});
+        setSearchText("");
         setIsFilterModalVisible(false);
     };
+
     const FilterModal = () => (
         <Modal
             title="Filter Bookings"
@@ -346,13 +358,13 @@ const AdminBookings = () => {
 
                 <Form.Item name="priceRange" label="Price Range">
                     <Input.Group compact>
-                        <Input 
-                            style={{ width: '45%' }} 
+                        <Input
+                            style={{ width: '45%' }}
                             placeholder="Min Price"
                             type="number"
                         />
-                        <Input 
-                            style={{ width: '45%', marginLeft: '10%' }} 
+                        <Input
+                            style={{ width: '45%', marginLeft: '10%' }}
                             placeholder="Max Price"
                             type="number"
                         />
@@ -363,9 +375,9 @@ const AdminBookings = () => {
     );
 
     return (
-        <div className="p-6">
-<Card>
-                <div className="flex justify-between items-center mb-6">
+        <div className="p-0">
+            <Card style={{ height: '100%', margin: 0 }} bodyStyle={{ padding: '0px', height: 'calc(100% - 2px)' }}>
+                <div className="flex justify-between items-center mb-6 px-6">
                     <Title level={3}>Admin Booking Reports</Title>
                     <Space>
                         <Button
@@ -384,15 +396,34 @@ const AdminBookings = () => {
                         <Tooltip title="Refresh Data">
                             <Button
                                 icon={<ReloadOutlined />}
-                                onClick={() => fetchBookings(pagination.current, pagination.pageSize, filters)}
+                                onClick={() => fetchBookings(filters)}
                             />
                         </Tooltip>
                     </Space>
                 </div>
 
-                {Object.keys(filters).length > 0 && (
-                    <div className="mb-4">
+                {/* Search Bar */}
+                <div className="mb-4 px-6">
+                    <Search
+                        placeholder="Search by booking ID, user name, email, phone, or package"
+                        allowClear
+                        enterButton={<SearchOutlined />}
+                        size="large"
+                        value={searchText}
+                        onChange={(e) => setSearchText(e.target.value)}
+                        style={{ width: '100%', maxWidth: 600 }}
+                    />
+                </div>
+
+                {/* Active Filters Display */}
+                {(Object.keys(filters).length > 0 || searchText) && (
+                    <div className="mb-4 px-6">
                         <Space wrap>
+                            {searchText && (
+                                <Tag closable onClose={() => setSearchText("")}>
+                                    Search: {searchText}
+                                </Tag>
+                            )}
                             {Object.entries(filters).map(([key, value]) => (
                                 <Tag key={key} closable onClose={() => {
                                     const newFilters = { ...filters };
@@ -409,20 +440,32 @@ const AdminBookings = () => {
                     </div>
                 )}
 
+                {/* Total Count Display */}
+                <div className="mb-4 px-6">
+                    <Space>
+                        <Title level={5} style={{ margin: 0 }}>
+                            Total Bookings: {filteredBookings.length}
+                        </Title>
+                        {filteredBookings.length !== bookings.length && (
+                            <Title level={5} style={{ margin: 0, color: '#1890ff' }}>
+                                (Filtered from {bookings.length})
+                            </Title>
+                        )}
+                    </Space>
+                </div>
+
                 <Table
                     columns={columns}
-                    dataSource={bookings}
+                    className=""
+                    dataSource={filteredBookings}
                     rowKey="bookingId"
                     loading={loading}
-                    pagination={{
-                        ...pagination,
-                        onChange: (page, pageSize) => {
-                            fetchBookings(page, pageSize, filters);
-                        },
-                        showSizeChanger: true,
-                        showTotal: (total) => `Total ${total} bookings`,
+                    pagination={false} // Disable pagination
+                    scroll={{ 
+                        x: true,
+                        y: 'calc(100vh - 350px)' // Reduced from 400px to accommodate the reduced padding
                     }}
-                    scroll={{ x: true }}
+                    size="middle"
                 />
             </Card>
 
@@ -455,8 +498,8 @@ const AdminBookings = () => {
                             <Descriptions.Item label="Status">
                                 <Tag color={
                                     selectedBooking.status === "Confirmed" ? "green" :
-                                    selectedBooking.status === "Pending" ? "gold" :
-                                    selectedBooking.status === "Canceled" ? "red" : "blue"
+                                        selectedBooking.status === "Pending" ? "gold" :
+                                            selectedBooking.status === "Canceled" ? "red" : "blue"
                                 }>
                                     {selectedBooking.status}
                                 </Tag>
@@ -499,13 +542,13 @@ const AdminBookings = () => {
                                 ₹{selectedBooking.packageId?.discountedPrice}
                             </Descriptions.Item>
                             <Descriptions.Item label="Start Date">
-                                {selectedBooking.packageId?.startDate ? 
-                                    new Date(selectedBooking.packageId.startDate).toLocaleDateString() : 
+                                {selectedBooking.packageId?.startDate ?
+                                    new Date(selectedBooking.packageId.startDate).toLocaleDateString() :
                                     "N/A"}
                             </Descriptions.Item>
                             <Descriptions.Item label="End Date">
-                                {selectedBooking.packageId?.endDate ? 
-                                    new Date(selectedBooking.packageId.endDate).toLocaleDateString() : 
+                                {selectedBooking.packageId?.endDate ?
+                                    new Date(selectedBooking.packageId.endDate).toLocaleDateString() :
                                     "N/A"}
                             </Descriptions.Item>
                         </Descriptions>
@@ -518,7 +561,7 @@ const AdminBookings = () => {
                                     <Descriptions.Item label="Name">
                                         {traveler.name}
                                     </Descriptions.Item>
-                                    <Descriptions.Item label="Name">
+                                    <Descriptions.Item label="Aadhar">
                                         {traveler.aadhar}
                                     </Descriptions.Item>
 

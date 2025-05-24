@@ -165,9 +165,9 @@ const CategoryManager = () => {
   ];
 
   return (
-    <div className="p-8 bg-gray-100 min-h-screen">
-      <div className="max-w-5xl mx-auto">
-        <h1 className="text-3xl font-bold text-gray-800 mb-8 text-center">Category Management</h1>
+    <div className="p-0 bg-gray-100 min-h-screen">
+      <div className="mx-auto">
+        {/* <h1 className="text-3xl font-bold text-gray-800 mb-8 text-center">Category Management</h1> */}
 
         {/* Category Form */}
         <Card className="mb-8">

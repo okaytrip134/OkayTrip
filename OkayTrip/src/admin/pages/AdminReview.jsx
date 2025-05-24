@@ -219,13 +219,13 @@ const AdminReviews = () => {
 
   return (
     <div style={{ 
-      padding: '24px', 
+      padding: '0px', 
       background: '#f0f2f5',
       minHeight: '100vh'
     }}>
       <Card 
         style={{ 
-          maxWidth: '1200px', 
+          maxWidth: '1440px', 
           margin: '0 auto',
           boxShadow: '0 4px 8px rgba(0,0,0,0.1)',
           borderRadius: '8px'

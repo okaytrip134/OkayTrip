@@ -177,7 +177,7 @@ const ViewCoupons = () => {
   };
 
   return (
-    <div className="p-6">
+    <div className="p-0">
       <Card
         title={
           <Title level={4} style={{ margin: 0 }}>

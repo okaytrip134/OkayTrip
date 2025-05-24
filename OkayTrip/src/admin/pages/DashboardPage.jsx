@@ -326,7 +326,7 @@ const DashboardPage = () => {
             </button>
           </Dropdown>
         </header>
-        <main className="p-6 overflow-auto">
+        <main className="overflow-auto">
           <Outlet />
         </main>
       </div>

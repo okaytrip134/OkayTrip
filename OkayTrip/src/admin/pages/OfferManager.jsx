@@ -312,9 +312,9 @@ const OffersManagement = () => {
   ];
 
   return (
-    <div className="bg-gray-50 min-h-screen p-6">
+    <div className="bg-gray-50 min-h-screen p-0">
       <Card 
-        className="max-w-6xl mx-auto shadow-md rounded-lg"
+        className="max-w-8xl mx-auto shadow-md rounded-lg"
         bordered={false}
         tabList={[
           { key: 'view', tab: 'View Offers' },
