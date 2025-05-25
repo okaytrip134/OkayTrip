@@ -79,7 +79,7 @@ const AdminBookings = () => {
         if (!searchText) {
             setFilteredBookings(bookings);
         } else {
-            const filtered = bookings.filter(booking => 
+            const filtered = bookings.filter(booking =>
                 booking.bookingId?.toLowerCase().includes(searchText.toLowerCase()) ||
                 booking.userId?.name?.toLowerCase().includes(searchText.toLowerCase()) ||
                 booking.packageId?.title?.toLowerCase().includes(searchText.toLowerCase()) ||
@@ -375,7 +375,8 @@ const AdminBookings = () => {
     );
 
     return (
-        <div className="p-0">
+        <div className="p-0 max-w-7xl mx-auto"
+        scroll     >
             <Card style={{ height: '100%', margin: 0 }} bodyStyle={{ padding: '0px', height: 'calc(100% - 2px)' }}>
                 <div className="flex justify-between items-center mb-6 px-6">
                     <Title level={3}>Admin Booking Reports</Title>
@@ -453,20 +454,24 @@ const AdminBookings = () => {
                         )}
                     </Space>
                 </div>
-
+                <div className="max-w-7xl"
+                scroll={false}
+                >
                 <Table
                     columns={columns}
-                    className=""
+                    // className="max-w-7xl mx-auto"
                     dataSource={filteredBookings}
                     rowKey="bookingId"
                     loading={loading}
                     pagination={false} // Disable pagination
-                    scroll={{ 
+                    scroll={{
                         x: true,
                         y: 'calc(100vh - 350px)' // Reduced from 400px to accommodate the reduced padding
                     }}
                     size="middle"
                 />
+                </div>
+
             </Card>
 
             <FilterModal />
