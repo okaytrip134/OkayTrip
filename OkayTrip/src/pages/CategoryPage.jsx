@@ -238,9 +238,9 @@ const CategoryPage = () => {
   };
 
   return (
-    <div className="w-full max-w-[1100px] mx-auto px-4 lg:px-4 py-4 bg-gray-50 min-h-screen">
+    <div className="w-full max-w-[1100px] mx-auto px-4 lg:px-0 py-4 bg-gray-50 min-h-screen">
       <h1 className="text-xl md:text-2xl font-bold mb-6">Packages in this {category}</h1>
-      
+
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 lg:gap-6 justify-items-center">
         {packages.map((pkg, index) => {
           const packageProps =
@@ -264,8 +264,8 @@ const CategoryPage = () => {
                 {(!pkg.isActive || isPackageDatePassed(pkg)) && (
                   <div className="absolute inset-0 flex items-center justify-center z-10">
                     <div className="bg-black bg-opacity-70 w-full h-full absolute rounded-t-2xl flex items-center justify-center">
-                      <div className="text-white text-2xl font-bold bg-orange-500 bg-opacity-90 px-6 py-3 rounded-lg transform shadow-lg">
-                        Coming Soon
+                      <div className="text-white text-7xl text-start font-bold text-opacity-80 px-6 py-3 rounded-lg transform shadow-lg">
+                        <h2>Coming <br /> <span>Soon</span></h2>
                       </div>
                     </div>
                   </div>
@@ -275,15 +275,15 @@ const CategoryPage = () => {
                 {pkg.isActive && pkg.availableSeats === 0 && (
                   <div className="absolute inset-0 flex items-center justify-center z-10">
                     <div className="bg-black bg-opacity-70 w-full h-full absolute rounded-t-2xl flex items-center justify-center">
-                      <div className="text-white text-2xl font-bold bg-red-600 bg-opacity-90 px-6 py-3 rounded-lg transform shadow-lg">
-                        Sold Out
+                      <div className="text-white text-6xl text-start font-bold text-opacity-80 px-6 py-3 rounded-lg transform shadow-lg">
+                        <h2>Seat Sold <br /> <span>Out</span></h2>
                       </div>
                     </div>
                   </div>
                 )}
               </div>
 
-              <div className={`bg-white rounded-b-2xl py-4 px-0 w-full ${!isPackageAvailable(pkg) ? 'opacity-60' : ''}`}>
+              <div className={`bg-white rounded-b-2xl py-4 px-4 lg:px-0 w-full ${!isPackageAvailable(pkg) ? 'opacity-60' : ''}`}>
                 <div className="flex items-center justify-between mb-2">
                   <p className="text-sm text-gray-500">{pkg.duration}</p>
                   <div className="flex items-center space-x-1 text-green-600 text-xs">
@@ -321,7 +321,7 @@ const CategoryPage = () => {
                       </div>
                     </div>
                   </div>
-                  
+
                   {/* Package Rating */}
                   <div className="flex items-center gap-2 ml-2">
                     <span className="flex items-center text-[#19ad6f] font-bold">
@@ -344,7 +344,7 @@ const CategoryPage = () => {
                     <span className="text-sm text-gray-500 line-through mr-2">
                       ₹{pkg.realPrice}
                     </span>
-                    
+
                     {pkg.realPrice > pkg.discountedPrice && (
                       <div className="flex items-center">
                         <span className="h-[24px] ml-[5px]">
@@ -366,15 +366,15 @@ const CategoryPage = () => {
                 </div>
 
                 <div className="flex flex-row justify-between gap-3 mt-4">
-                  <a 
-                    href="tel:+917542003073" 
+                  <a
+                    href="tel:+917542003073"
                     className={`flex items-center justify-center h-[51px] w-[51px] border rounded-md border-[#f37002] text-[#f37002] hover:bg-[#f37002] hover:text-white text-[14px] font-semibold transition-colors ${!isPackageAvailable(pkg) ? 'pointer-events-none opacity-70' : ''}`}
                   >
                     <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 16 16" fill="none">
                       <path d="M12.7538 10.1683L11.0772 9.9768C10.8801 9.95363 10.6802 9.97547 10.4927 10.0407C10.3052 10.1059 10.1349 10.2128 9.99464 10.3533L8.78006 11.5685C6.90617 10.615 5.38306 9.09099 4.43002 7.21606L5.6512 5.9942C5.93505 5.7102 6.07367 5.30732 6.02746 4.91104L5.83603 3.24667C5.80038 2.92436 5.64748 2.62643 5.40646 2.40963C5.16544 2.19283 4.85314 2.07232 4.52904 2.07104H3.38707C2.64116 2.07104 2.02067 2.69188 2.06688 3.43821C2.41673 9.07857 6.92519 13.5829 12.5558 13.933C13.3017 13.9792 13.9222 13.3584 13.9222 12.6121V11.4694C13.9288 10.809 13.4205 10.241 12.7538 10.1683Z" fill="currentColor"></path>
                     </svg>
                   </a>
-                  
+
                   <button
                     className={`flex-1 bg-[#f37002] text-white flex items-center justify-center h-[51px] border border-[#f37002] rounded-md text-[14px] font-semibold hover:bg-transparent hover:text-[#f37002] transition-colors ${!isPackageAvailable(pkg) ? 'opacity-70 cursor-not-allowed' : ''}`}
                     onClick={(e) => {
@@ -409,7 +409,7 @@ const CategoryPage = () => {
           No more packages to load
         </div>
       )}
-      
+
       {/* Show Authentication Popup */}
       {showAuthPopup && (
         <UserAuth

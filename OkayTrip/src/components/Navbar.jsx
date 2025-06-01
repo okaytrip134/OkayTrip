@@ -136,7 +136,7 @@ const Navbar = () => {
       <header
         className={"bg-white top-0 z-50 border-b-2 "}
       >
-        <div className="max-w-[1100px] mx-auto flex items-center justify-between px-0 py-4 ">
+        <div className="max-w-[1100px] mx-auto flex items-center justify-between px-4 lg:px-0 py-4 ">
           {/* Logo */}
           <div className="flex items-center">
             <Link to="/">

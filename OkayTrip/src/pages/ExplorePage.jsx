@@ -293,7 +293,7 @@ const ExplorePage = () => {
   };
 
   return (
-    <div className="px-4 py-8 bg-white min-h-screen max-w-[1100px] mx-auto" >
+    <div className="px-4 lg:px-0 py-8 bg-white min-h-screen max-w-[1100px] mx-auto" >
       {categories.length === 0 ? (
         <div></div>
       ) : (
@@ -349,8 +349,8 @@ const ExplorePage = () => {
                         {(!pkg.isActive || isPackageDatePassed(pkg)) && (
                           <div className="absolute inset-0 flex items-center justify-center z-10">
                             <div className="bg-black bg-opacity-70 w-full h-full absolute rounded-lg flex items-center justify-center">
-                              <div className="text-white text-2xl font-bold bg-orange-500 bg-opacity-90 px-6 py-3 rounded-lg transform shadow-lg">
-                                Coming Soon
+                              <div className="text-white text-7xl text-start font-bold text-opacity-80 px-6 py-3 rounded-lg transform shadow-lg">
+                                <h2>Coming <br /> <span>Soon</span></h2>
                               </div>
                             </div>
                           </div>
@@ -361,8 +361,8 @@ const ExplorePage = () => {
                         {pkg.isActive && pkg.availableSeats === 0 && (
                           <div className="absolute inset-0 flex items-center justify-center z-10">
                             <div className="bg-black bg-opacity-70 w-full h-full absolute rounded-lg flex items-center justify-center">
-                              <div className="text-white text-2xl font-bold bg-red-600 bg-opacity-90 px-6 py-3 rounded-lg transform shadow-lg">
-                                Seat Sold Out
+                              <div className="text-white text-6xl text-start font-bold text-opacity-80 px-6 py-3 rounded-lg transform shadow-lg">
+                                <h2>Seat Sold <br /> <span>Out</span></h2>
                               </div>
                             </div>
                           </div>
@@ -383,7 +383,7 @@ const ExplorePage = () => {
 
                         {/* Content Element 2: Title */}
                         <div className="content-element mb-0 h-14 overflow-hidden">
-                          <h3 className="text-lg font-semibold text-gray-800">{pkg.title}</h3>
+                          <h3 className="text-base font-medium text-gray-800">{pkg.title}</h3>
                         </div>
 
                         {/* Content Element 3: Date */}
@@ -414,7 +414,7 @@ const ExplorePage = () => {
                           </div>
                           {/* Package Rating */}
                           <div className="package_rating flex items-center justify-end gap-2">
-                            <span className="flex items-center text-[#f39c12] font-bold">
+                            <span className="flex items-center text-[#19ad6f] font-bold">
                               {(packageRatings[pkg._id]?.averageRating || 4.3).toFixed(1)}
                               <span className="flex ml-1">
                                 <FaStar size={16} />
@@ -479,10 +479,10 @@ const ExplorePage = () => {
                               width: 'calc(100% - 61px)'
                             }}
                           >
-                        <span className="">
-                          {!pkg.isActive || isPackageDatePassed(pkg) ? "Coming Soon" :
-                            pkg.availableSeats === 0 ? "Sold Out" : "View Details"}
-                        </span>
+                            <span className="">
+                              {!pkg.isActive || isPackageDatePassed(pkg) ? "Coming Soon" :
+                                pkg.availableSeats === 0 ? "Sold Out" : "View Details"}
+                            </span>
                           </div>
                         </div>
                       </div>
