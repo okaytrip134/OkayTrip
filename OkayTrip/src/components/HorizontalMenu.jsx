@@ -140,7 +140,7 @@ const HorizontalMenu = () => {
   };
 
   const getItemClassName = (index) => {
-    let baseClass = "flex flex-col items-center justify-center min-w-[80px] mx-1 transition-all duration-300 ease-in-out";
+    let baseClass = "flex flex-col items-center justify-center min-w-[80px] mx-0 transition-all duration-300 ease-in-out";
     
     if (animatingItems.has(index)) {
       if (slideDirection === "right") {
@@ -155,7 +155,7 @@ const HorizontalMenu = () => {
 
   return (
     <div className="sticky top-0 z-20 border-b bg-white shadow-sm">
-      <div className="max-w-[1280px] mx-auto flex items-center justify-between px-3 py-3 md:px-8 lg:px-12">
+      <div className="max-w-[1100px] mx-auto flex items-center justify-between px-0 py-3 ">
         {/* Left Scroll Button */}
         {scrollPosition > 0 && (
           <button
@@ -172,7 +172,7 @@ const HorizontalMenu = () => {
         {/* Categories List */}
         <div
           ref={menuRef}
-          className="flex items-center space-x-4 overflow-x-auto scrollbar-hide flex-grow px-2 cursor-pointer scroll-smooth"
+          className="flex items-center space-x-2 overflow-x-auto scrollbar-hide flex-grow px-0 cursor-pointer scroll-smooth"
           style={{ scrollBehavior: "smooth" }}
         >
           <div

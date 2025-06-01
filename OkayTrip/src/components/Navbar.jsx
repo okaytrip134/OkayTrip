@@ -33,30 +33,30 @@ const Navbar = () => {
   const handleLogout = () => {
     localStorage.removeItem("userToken");
     localStorage.removeItem("userName");
-    localStorage.removeItem("tokenExpiry");
+    localStorage.removeItem("tokenExpiry"); 
     setIsLoggedIn(false);
     setUserName("");
     setShowDropdown(false);
     toast.success("Logged out successfully!"); // ✅ react-hot-toast notification
-    navigate("/");
+    navigate("/"); 
   };
-
+  
   const checkTokenExpiry = () => {
     const token = localStorage.getItem("userToken");
     const name = localStorage.getItem("userName");
     const tokenExpiry = localStorage.getItem("tokenExpiry");
-
+  
     if (!token || !tokenExpiry) {
       setIsLoggedIn(false);
       setUserName("");
       return;
     }
-
+  
     const expiryTime = Number(tokenExpiry); // Convert string to number
     const currentTime = Date.now();
-
+  
     console.log("Current Time:", currentTime, "Stored Expiry:", expiryTime); // Debugging
-
+  
     if (currentTime >= expiryTime) {
       console.warn("Token expired, logging out...");
       handleLogout();
@@ -65,17 +65,17 @@ const Navbar = () => {
       setUserName(name || "User");
     }
   };
-
+  
   // ✅ Run only when the component mounts
   useEffect(() => {
     checkTokenExpiry();
-
+  
     // ✅ Periodically check token expiry every 1 minute
     const interval = setInterval(checkTokenExpiry, 60000);
-
+  
     return () => clearInterval(interval); // Cleanup on unmount
   }, []);
-
+  
 
   const places = [
     "destinations",
@@ -131,13 +131,12 @@ const Navbar = () => {
 
   return (
     <>
-      <Toaster position="top-right" reverseOrder={false} /> {/* ✅ react-hot-toast Toaster */}
+       <Toaster position="top-right" reverseOrder={false} /> {/* ✅ react-hot-toast Toaster */}
       <TopSaleBar />
       <header
-        className={`bg-white top-0 z-50 border-b-2 ${isSticky ? "sticky" : ""
-          }`}
+        className={"bg-white top-0 z-50 border-b-2 "}
       >
-        <div className="max-w-[1440px] mx-auto flex items-center justify-between px-4 py-4 md:px-[50px] lg:px-[100px]">
+        <div className="max-w-[1100px] mx-auto flex items-center justify-between px-0 py-4 ">
           {/* Logo */}
           <div className="flex items-center">
             <Link to="/">
@@ -174,11 +173,11 @@ const Navbar = () => {
                 className="flex items-center space-x-2 cursor-pointer"
                 onClick={() => setShowDropdown(!showDropdown)}
               >
-                <div className="bg-orange-500 text-white rounded-full h-6 w-6 md:h-8 md:w-8 flex items-center justify-center text-sm font-bold">
+                <div className="bg-orange-500 text-white rounded-full h-8 w-8 flex items-center justify-center text-sm font-bold">
                   {userName.slice(0, 1).toUpperCase()}
                 </div>
                 <div className="flex items-center">
-                  <span className="text-gray-700 font-medium text-[10px] md:text-[15px]">Hi, {userName.slice(0, 7)}</span>
+                  <span className="text-gray-700 font-medium">Hi, {userName.slice(0, 7)}</span>
                   <RiArrowDropDownFill className="text-xl ml-1" />
                 </div>
               </div>
@@ -218,13 +217,13 @@ const Navbar = () => {
 
         {/* Login/Signup Popup */}
         {showAuthPopup && (
-          <UserAuth onClose={() => {
-            setShowAuthPopup(false);
-            if (localStorage.getItem("userToken")) {
-              setIsLoggedIn(true);
-              setUserName(localStorage.getItem("userName"));
+          <UserAuth onClose={() => { 
+            setShowAuthPopup(false); 
+            if (localStorage.getItem("userToken")) { 
+              setIsLoggedIn(true); 
+              setUserName(localStorage.getItem("userName")); 
               toast.success("Login Successful!");
-            }
+            } 
           }} />
         )}
         {/* Search Popup */}
