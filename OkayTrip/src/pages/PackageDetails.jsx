@@ -16,8 +16,7 @@ import "react-loading-skeleton/dist/skeleton.css";
 import { FaAngleDown, FaChevronCircleLeft, FaChevronLeft, FaChevronRight, FaStar } from "react-icons/fa";
 import RelatedPackages from "../components/RelatedPackages";
 import ReviewsSection from "../components/ReviewsSections";
-import { toast, ToastContainer } from "react-toastify";
-import "react-toastify/dist/ReactToastify.css";
+import toast, { Toaster } from "react-hot-toast";
 import { Helmet } from "react-helmet";
 // import { FaStar, FaRegStar, FaCamera } from "react-icons/fa";  
 
@@ -64,7 +63,7 @@ const PackageDetailsPage = () => {
     // fetchAverageRating();
   }, [packageId]);
   const getTotalReviewCount = () => {
-    return Object.values(ratingStats).reduce((sum, count) => sum + count, 0);
+    return Object.values(ratingStats).reduce((sum, count) => sum + count, 20);
   };
 
   const fetchReviews = async () => {
@@ -177,7 +176,7 @@ const PackageDetailsPage = () => {
 
       const data = await response.json();
       if (response.ok) {
-        toast.success("Password reset successful!", { autoClose: 3000 });
+        toast.success("Enquiry Submitted Successfully!");
       } else {
         alert(data.error || "Failed to submit enquiry");
       }
@@ -186,6 +185,9 @@ const PackageDetailsPage = () => {
       alert("Something went wrong.");
     }
   };
+
+
+
   return (
     <>
       <Helmet>
@@ -193,9 +195,9 @@ const PackageDetailsPage = () => {
         <meta name="description" content={packageData.metaDescription} />
         <meta name="keywords" content={packageData.metaKeywords} />
       </Helmet>
-      <div className=" lg:px-2 py-2 min-h-screen max-w-[1400px] mx-auto">
+      <div className=" lg:px-0 py-8 min-h-screen max-w-[1100px] mx-auto">
         {/* Main Content */}
-        <div className="bg-white rounded p-2 md:p-6 mb-8">
+        <div className="bg-white rounded p-2 md:p-0 mb-8">
           {/* Images */}
           <div className="mb-6">
             {/* Desktop view (hidden on mobile) */}
@@ -919,259 +921,277 @@ const PackageDetailsPage = () => {
 
               </div>
             </div>
-            {/* Right Section */}
-            <div className="TourPackage_body_right hidden md:block">
-              <div className="tour_packageright_wrapper"
+{/* Right Section */}
+<div className="TourPackage_body_right hidden md:block w-full max-w-[450px] flex-shrink-0">
+  <div className="tour_packageright_wrapper"
+    style={{
+      display: 'flex',
+      flexDirection: "column",
+      gap: "20px",
+      transition: "all 0.3s ease-in-out",
+      width: "100%",
+      maxWidth: "370px",
+    }}
+  >
+    <div className="pricing_card w-full"
+      style={{
+        padding: "15px",
+        border: "1px solid #e0e0e0",
+        borderRadius: "10px",
+        boxSizing: "border-box",
+      }}
+    >
+      <div className="pricing_top"
+        style={{
+          display: "flex",
+          flexDirection: "row",
+          justifyContent: "space-between",
+          gap: "10px",
+          marginBottom: "10px",
+          flexWrap: "wrap",
+        }}
+      >
+        <div className="pricing_left_section flex-1 min-w-0">
+          <div>
+            <div className="productpricing_currentprice"
+              style={{
+                display: "flex",
+                alignItems: "baseline",
+                gap: "5px",
+                flexWrap: "wrap",
+              }}
+            >
+              <div className="package_actual_price"
                 style={{
-                  display: 'flex',
-                  flexDirection: "column",
-                  gap: "20px",
-                  transition: "all 0.3s ease-in-out",
+                  fontSize: '20px', // Slightly smaller for better fit
+                  fontWeight: 600,
+                  lineHeight: '32px',
+                  color: '#202020',
+                  whiteSpace: 'nowrap',
                 }}
               >
-                {/* Pricing */}
-                <div className="pricing_card w-full"
-                  style={{
-                    padding: "15px",
-                    border: "1px solid #e0e0e0",
-                    borderRadius: "10px",
-                  }}
-                >
-                  <div className="pricing_top"
-                    style={{
-                      display: "flex",
-                      flexDirection: "row",
-                      justifyContent: "space-between",
-                      gap: "10px",
-                      marginBottom: "10px",
-                      flexWrap: "wrap",
-                    }}
-                  >
-                    <div className="pricing_left_section">
-                      <div>
-                        <div className="productpricing_currentprice"
-                          style={{
-                            display: "flex",
-                            alignItems: "baseline",
-                            gap: "5px",
-                          }}
-                        >
-                          <div className="package_actual_price"
-                            style={{
-                              fontSize: '22px',
-                              fontWeight: 600,
-                              lineHeight: '38px',
-                              color: '#202020'
-                            }}
-                          >
-                            ₹ {packageData.discountedPrice}
-                          </div>
-                        </div>
-                        <div className="package_dicounted_price line-through"
-                          style={{
-                            fontSize: '18px',
-                            lineHeight: '27px',
-                            color: '#515151',
-                          }}
-                        >
-                          ₹ {packageData.realPrice}
-                        </div>
-                      </div>
-                    </div>
-                    <div className="flex flex-col gap-2 mt-2">
-                      <div className="text-lg font-semibold">Available Seats: {packageData.availableSeats}</div>
-                      {averageRating !== null ? (
-                        <div className="package_rating flex items-center justify-end gap-2">
-                          {/* <span className="text-black font-semibold">Rating:</span> */}
-                          <span className="flex items-center text-[#f39c12] font-bold">
-                            {averageRating.toFixed(1)}
-                            <span className="flex ml-1">
-                              <FaStar
-                                size={16}
-                              />
-
-                            </span>
-                          </span>
-                          <span className="text-gray-600 text-sm">({getTotalReviewCount()})</span>
-                        </div>
-                      ) : (
-                        <div className="text-gray-500">4.5 (<FaStar size={16} />)</div>
-                      )}
-                    </div>
-
-                  </div>
-                  <div className="pricing_bottom border-t border-[#e0e0e0] pt-4">
-                    <button className="Booking_button hover:bg-transparent hover:text-[#f37002] bg-[#f37002] text-white"
-                      style={{
-                        display: 'flex',
-                        justifyContent: 'center',
-                        alignItems: 'center',
-                        width: '100%',
-                        height: '51px',
-                        borderRadius: '7px',
-                        border: '1px solid #f37002',
-                        fontSize: '20px',
-                        fontWeight: '600',
-                        cursor: 'pointer'
-                      }}
-                      onClick={handleBooking}
-                    >
-                      <span>Book Now</span>
-                    </button>
-                  </div>
-                </div>
-
-                {/*Lead Form */}
-                <div className="StickyForm_package shadow-sm w-full"
-                  style={{
-                    position: 'sticky',
-                    top: '10px',
-                    zIndex: 3,
-                    display: 'flex',
-                    flexDirection: 'column',
-                    gap: '20px',
-                    transition: "all 0.3s ease-in-out"
-                  }}
-                >
-                  <div className="productEnquiryform_wrapper px-[5px] py-[15px] border border-[#e0e0e0] rounded-lg mt-[10px] w-full">
-                    <div className="LeadForm_infoBOx px-3">
-                      <div className="LeadFormProductName text-[#515151] text-[14px] font-bold truncate">
-                        {packageData.title}
-                      </div>
-
-                      <div className="LeadForm_priceWrapper flex flex-wrap items-center mt-1">
-                        <div className="package_actual_price font-semibold text-[15px] text-gray-900 mr-2">
-                          ₹ {packageData.discountedPrice}
-                        </div>
-                        <div className="package_dicounted_price line-through text-[12px] text-gray-500 mr-2">
-                          ₹ {packageData.realPrice}
-                        </div>
-
-                        {packageData.realPrice > packageData.discountedPrice && (
-                          <div className="flex items-center">
-                            <span className="LeadForm_SavePrice_leftBorderICon h-[24px]">
-                              <svg width="4" height="24" viewBox="0 0 4 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                <path d="M2.65992 3L0 6L2.65992 9L0 12L2.65992 15L0 18L2.65992 21L0 24H3.5V0H0L2.65992 3Z" fill="#E5F1E8"></path>
-                              </svg>
-                            </span>
-                            <span className="LeadForm_saveprice"
-                              style={{
-                                display: 'flex',
-                                alignItems: 'center',
-                                padding: '5px 2px',
-                                color: '#0b822a',
-                                fontSize: '9px',
-                                fontWeight: '500',
-                                lineHeight: '14px',
-                                textTransform: "capitalize",
-                                background: 'linear-gradient(90deg, #0b822a1c 3.64%, #0b822a1a)',
-                              }}
-                            >
-                              Save ₹{(packageData.realPrice - packageData.discountedPrice).toLocaleString()}
-                            </span>
-                            <span className="LeadForm_savePrice_RightBorderIcon"
-                              style={{
-                                transform: 'rotate(180deg)',
-                                height: '24px'
-                              }}
-                            >
-                              <svg width="4" height="24" viewBox="0 0 4 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                <path d="M2.65992 3L0 6L2.65992 9L0 12L2.65992 15L0 18L2.65992 21L0 24H3.5V0H0L2.65992 3Z" fill="#E5F1E8"></path>
-                              </svg>
-                            </span>
-                          </div>
-                        )}
-                      </div>
-                    </div>
-
-                    {/* Lead Form structure */}
-                    <div className="w-full mx-auto p-4">
-                      <form className="flex flex-col space-y-4" onSubmit={handleSubmit}>
-                        <input
-                          type="text"
-                          placeholder="Full Name*"
-                          className="w-full px-4 py-3 rounded border border-gray-300 focus:outline-none focus:ring-2 focus:ring-orange-400"
-                          required
-                          value={fullName}
-                          onChange={(e) => setFullName(e.target.value)}
-                        />
-
-                        <input
-                          type="email"
-                          placeholder="Email*"
-                          className="w-full px-4 py-3 rounded border border-gray-300 focus:outline-none focus:ring-2 focus:ring-orange-400"
-                          required
-                          value={email}
-                          onChange={(e) => setEmail(e.target.value)}
-                        />
-
-                        {/* Phone Input */}
-                        <div className="flex space-x-2">
-                          <select className="w-1/4 px-2 py-3 rounded border border-gray-300 focus:outline-none focus:ring-2 focus:ring-orange-400">
-                            <option value="+91">+91</option>
-                          </select>
-                          <input
-                            type="tel"
-                            placeholder="Your Phone*"
-                            className="w-3/4 px-4 py-3 rounded border border-gray-300 focus:outline-none focus:ring-2 focus:ring-orange-400"
-                            required
-                            value={phone}
-                            onChange={(e) => setPhone(e.target.value)}
-                          />
-                        </div>
-
-                        {/* Travel Date & Traveller Count */}
-                        <div className="flex space-x-2">
-                          <input
-                            type="text"
-                            placeholder="Travel Date*"
-                            onFocus={(e) => (e.target.type = 'date')}
-                            onBlur={(e) => (e.target.type = 'text')}
-                            className="w-1/2 px-4 py-3 rounded border border-gray-300 focus:outline-none focus:ring-2 focus:ring-orange-400"
-                            required
-                            value={travelDate}
-                            onChange={(e) => setTravelDate(e.target.value)}
-                          />
-                          <input
-                            type="number"
-                            placeholder="Traveller Count*"
-                            className="w-1/2 px-4 py-3 rounded border border-gray-300 focus:outline-none focus:ring-2 focus:ring-orange-400"
-                            required
-                            value={travellerCount}
-                            onChange={(e) => setTravellerCount(e.target.value)}
-                          />
-                        </div>
-
-                        <textarea
-                          placeholder="Message..."
-                          rows="3"
-                          className="w-full px-4 py-3 rounded border border-gray-300 focus:outline-none focus:ring-2 focus:ring-orange-400 resize-none"
-                          value={message}
-                          onChange={(e) => setMessage(e.target.value)}
-                        ></textarea>
-
-                        <button className="Booking_button bg-transparent text-[#f37002] hover:bg-[#f37002] hover:text-white"
-                          style={{
-                            display: 'flex',
-                            justifyContent: 'center',
-                            alignItems: 'center',
-                            width: '100%',
-                            height: '51px',
-                            borderRadius: '7px',
-                            border: '1px solid #f37002',
-                            fontSize: '20px',
-                            fontWeight: '600',
-                            cursor: 'pointer'
-                          }}
-                        >
-                          <span>Enquiry Now</span>
-                        </button>
-                      </form>
-                    </div>
-                  </div>
-                </div>
+                ₹ {packageData.discountedPrice}
               </div>
             </div>
+            <div className="package_dicounted_price line-through"
+              style={{
+                fontSize: '16px', // Slightly smaller
+                lineHeight: '24px',
+                color: '#515151',
+                whiteSpace: 'nowrap',
+              }}
+            >
+              ₹ {packageData.realPrice}
+            </div>
+          </div>
+        </div>
+        <div className="flex flex-col gap-2 mt-2 flex-shrink-0">
+          <div className="text-base font-semibold text-right">
+            Available Seats: {packageData.availableSeats}
+          </div>
+          {averageRating !== null ? (
+            <div className="package_rating flex items-center justify-end gap-2">
+              <span className="flex items-center text-[#f39c12] font-bold text-sm">
+                {averageRating.toFixed(1)}
+                <span className="flex ml-1">
+                  <FaStar size={14} />
+                </span>
+              </span>
+              <span className="text-gray-600 text-xs">({getTotalReviewCount()})</span>
+            </div>
+          ) : (
+            <div className="text-gray-500 text-sm flex items-center justify-end gap-1">
+              4.5 <FaStar size={14} />
+            </div>
+          )}
+        </div>
+      </div>
+      <div className="pricing_bottom border-t border-[#e0e0e0] pt-4">
+        <button className="Booking_button hover:bg-transparent hover:text-[#f37002] bg-[#f37002] text-white"
+          style={{
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center',
+            width: '100%',
+            height: '48px', // Slightly smaller height
+            borderRadius: '7px',
+            border: '1px solid #f37002',
+            fontSize: '18px', // Smaller font size
+            fontWeight: '600',
+            cursor: 'pointer',
+            boxSizing: 'border-box',
+          }}
+          onClick={handleBooking}
+        >
+          <span>Book Now</span>
+        </button>
+      </div>
+    </div>
+
+    {/*Lead Form */}
+    <div className="StickyForm_package shadow-sm w-full"
+      style={{
+        position: 'sticky',
+        top: '10px',
+        zIndex: 3,
+        display: 'flex',
+        flexDirection: 'column',
+        gap: '20px',
+        transition: "all 0.3s ease-in-out",
+        maxWidth: "370px",
+      }}
+    >
+      <div className="productEnquiryform_wrapper px-[5px] py-[15px] border border-[#e0e0e0] rounded-lg mt-[10px] w-full"
+        style={{ boxSizing: "border-box" }}
+      >
+        <div className="LeadForm_infoBOx px-3">
+          <div className="LeadFormProductName text-[#515151] text-[13px] font-bold truncate">
+            {packageData.title}
+          </div>
+
+          <div className="LeadForm_priceWrapper flex flex-wrap items-center mt-1">
+            <div className="package_actual_price font-semibold text-[14px] text-gray-900 mr-2">
+              ₹ {packageData.discountedPrice}
+            </div>
+            <div className="package_dicounted_price line-through text-[11px] text-gray-500 mr-2">
+              ₹ {packageData.realPrice}
+            </div>
+
+            {packageData.realPrice > packageData.discountedPrice && (
+              <div className="flex items-center flex-shrink-0">
+                <span className="LeadForm_SavePrice_leftBorderICon h-[20px]">
+                  <svg width="3" height="20" viewBox="0 0 4 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M2.65992 3L0 6L2.65992 9L0 12L2.65992 15L0 18L2.65992 21L0 24H3.5V0H0L2.65992 3Z" fill="#E5F1E8"></path>
+                  </svg>
+                </span>
+                <span className="LeadForm_saveprice"
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    padding: '3px 6px',
+                    color: '#0b822a',
+                    fontSize: '8px',
+                    fontWeight: '500',
+                    lineHeight: '12px',
+                    textTransform: "capitalize",
+                    background: 'linear-gradient(90deg, #0b822a1c 3.64%, #0b822a1a)',
+                    whiteSpace: 'nowrap',
+                  }}
+                >
+                  Save ₹{(packageData.realPrice - packageData.discountedPrice).toLocaleString()}
+                </span>
+                <span className="LeadForm_savePrice_RightBorderIcon"
+                  style={{
+                    transform: 'rotate(180deg)',
+                    height: '20px'
+                  }}
+                >
+                  <svg width="3" height="20" viewBox="0 0 4 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M2.65992 3L0 6L2.65992 9L0 12L2.65992 15L0 18L2.65992 21L0 24H3.5V0H0L2.65992 3Z" fill="#E5F1E8"></path>
+                  </svg>
+                </span>
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* Lead Form structure */}
+        <div className="w-full mx-auto p-3"> {/* Reduced padding */}
+          <form className="flex flex-col space-y-3" onSubmit={handleSubmit}> {/* Reduced spacing */}
+            <input
+              type="text"
+              placeholder="Full Name*"
+              className="w-full px-3 py-2.5 rounded border border-gray-300 focus:outline-none focus:ring-2 focus:ring-orange-400 text-sm"
+              required
+              value={fullName}
+              onChange={(e) => setFullName(e.target.value)}
+              style={{ boxSizing: 'border-box' }}
+            />
+
+            <input
+              type="email"
+              placeholder="Email*"
+              className="w-full px-3 py-2.5 rounded border border-gray-300 focus:outline-none focus:ring-2 focus:ring-orange-400 text-sm"
+              required
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              style={{ boxSizing: 'border-box' }}
+            />
+
+            {/* Phone Input */}
+            <div className="flex space-x-2">
+              <select className="w-1/4 px-2 py-2.5 rounded border border-gray-300 focus:outline-none focus:ring-2 focus:ring-orange-400 text-sm"
+                style={{ boxSizing: 'border-box' }}
+              >
+                <option value="+91">+91</option>
+              </select>
+              <input
+                type="tel"
+                placeholder="Your Phone*"
+                className="w-3/4 px-3 py-2.5 rounded border border-gray-300 focus:outline-none focus:ring-2 focus:ring-orange-400 text-sm"
+                required
+                value={phone}
+                onChange={(e) => setPhone(e.target.value)}
+                style={{ boxSizing: 'border-box' }}
+              />
+            </div>
+
+            {/* Travel Date & Traveller Count */}
+            <div className="flex space-x-2">
+              <input
+                type="text"
+                placeholder="Travel Date*"
+                onFocus={(e) => (e.target.type = 'date')}
+                onBlur={(e) => (e.target.type = 'text')}
+                className="w-1/2 px-3 py-2.5 rounded border border-gray-300 focus:outline-none focus:ring-2 focus:ring-orange-400 text-sm"
+                required
+                value={travelDate}
+                onChange={(e) => setTravelDate(e.target.value)}
+                style={{ boxSizing: 'border-box' }}
+              />
+              <input
+                type="number"
+                placeholder="Traveller Count*"
+                className="w-1/2 px-3 py-2.5 rounded border border-gray-300 focus:outline-none focus:ring-2 focus:ring-orange-400 text-sm"
+                required
+                value={travellerCount}
+                onChange={(e) => setTravellerCount(e.target.value)}
+                style={{ boxSizing: 'border-box' }}
+              />
+            </div>
+
+            <textarea
+              placeholder="Message..."
+              rows="3"
+              className="w-full px-3 py-2.5 rounded border border-gray-300 focus:outline-none focus:ring-2 focus:ring-orange-400 resize-none text-sm"
+              value={message}
+              onChange={(e) => setMessage(e.target.value)}
+              style={{ boxSizing: 'border-box' }}
+            ></textarea>
+
+            <button className="Booking_button bg-transparent text-[#f37002] hover:bg-[#f37002] hover:text-white"
+              style={{
+                display: 'flex',
+                justifyContent: 'center',
+                alignItems: 'center',
+                width: '100%',
+                height: '48px', // Reduced height
+                borderRadius: '7px',
+                border: '1px solid #f37002',
+                fontSize: '18px', // Reduced font size
+                fontWeight: '600',
+                cursor: 'pointer',
+                boxSizing: 'border-box',
+              }}
+            >
+              <span>Enquiry Now</span>
+            </button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
           </div>
 
           <div className="TourPackage_endOfTripContainer container flex items-center mt-5">
