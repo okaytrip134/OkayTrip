@@ -293,7 +293,7 @@ const ExplorePage = () => {
   };
 
   return (
-    <div className="px-4 md:px-8 lg:px-32 py-8 bg-white min-h-screen max-w-[1440px] mx-auto" >
+    <div className="px-4 py-8 bg-white min-h-screen max-w-[1100px] mx-auto" >
       {categories.length === 0 ? (
         <div></div>
       ) : (

@@ -2,7 +2,7 @@ import React, { useEffect, useState, useRef, useCallback } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import axios from "axios";
 import UserAuth from "../components/UserAuth";
-import { FaStar } from "react-icons/fa"; // Add this import which was missing
+import { FaStar } from "react-icons/fa";
 
 // Skeleton Component
 const PackageSkeleton = () => (
@@ -200,10 +200,12 @@ const CategoryPage = () => {
   // Only render the UI after all hooks have been called
   if (loading && !packages.length) {
     return (
-      <div className="px-4 lg:px-32 py-4 bg-gray-50 min-h-screen">
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+      <div className="w-full max-w-[1100px] mx-auto px-4 lg:px-8 py-4 bg-gray-50 min-h-screen">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 lg:gap-6 justify-items-center">
           {[...Array(6)].map((_, index) => (
-            <PackageSkeleton key={index} />
+            <div key={index} className="w-full max-w-[350px]">
+              <PackageSkeleton />
+            </div>
           ))}
         </div>
       </div>
@@ -217,27 +219,29 @@ const CategoryPage = () => {
       </div>
     );
   }
+
   const isPackageDatePassed = (pkg) => {
     if (!pkg.endDate) return false;
     const endDate = new Date(pkg.endDate);
     const today = new Date();
     return endDate < today;
   };
+
   const isPackageAvailable = (pkg) => {
     return pkg.isActive && pkg.availableSeats > 0 && !isPackageDatePassed(pkg);
   };
-
-  // Update the handlePackageClick function to match the ExplorePage logic
 
   const handlePackageClick = (pkg) => {
     if (isPackageAvailable(pkg)) {
       window.location.href = `/package/${pkg._id}`;
     }
   };
+
   return (
-    <div className="ml-4 mr-[14px] lg:px-32 py-4 bg-gray-50 min-h-screen max-w-[1440px] mx-auto">
-      <h1 className="text-[1.179rem] md:text-2xl font-bold mb-6">Packages in this {category}</h1>
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+    <div className="w-full max-w-[1100px] mx-auto px-4 lg:px-4 py-4 bg-gray-50 min-h-screen">
+      <h1 className="text-xl md:text-2xl font-bold mb-6">Packages in this {category}</h1>
+      
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 lg:gap-6 justify-items-center">
         {packages.map((pkg, index) => {
           const packageProps =
             index === packages.length - 1
@@ -248,7 +252,7 @@ const CategoryPage = () => {
             <div
               key={pkg._id}
               {...packageProps}
-              className="rounded transition snap-center w-[289px] md:w-[374px] cursor-pointer relative"
+              className="w-full max-w-[350px] rounded transition cursor-pointer relative bg-white shadow-sm hover:shadow-md"
               onClick={() => handlePackageClick(pkg)}
             >
               <div className="relative">
@@ -259,7 +263,7 @@ const CategoryPage = () => {
 
                 {(!pkg.isActive || isPackageDatePassed(pkg)) && (
                   <div className="absolute inset-0 flex items-center justify-center z-10">
-                    <div className="bg-black bg-opacity-70 w-full h-full absolute rounded-lg flex items-center justify-center">
+                    <div className="bg-black bg-opacity-70 w-full h-full absolute rounded-t-2xl flex items-center justify-center">
                       <div className="text-white text-2xl font-bold bg-orange-500 bg-opacity-90 px-6 py-3 rounded-lg transform shadow-lg">
                         Coming Soon
                       </div>
@@ -267,11 +271,10 @@ const CategoryPage = () => {
                   </div>
                 )}
 
-
                 {/* Sold Out Overlay when no seats available */}
                 {pkg.isActive && pkg.availableSeats === 0 && (
                   <div className="absolute inset-0 flex items-center justify-center z-10">
-                    <div className="bg-black bg-opacity-70 w-full h-full absolute rounded-lg flex items-center justify-center">
+                    <div className="bg-black bg-opacity-70 w-full h-full absolute rounded-t-2xl flex items-center justify-center">
                       <div className="text-white text-2xl font-bold bg-red-600 bg-opacity-90 px-6 py-3 rounded-lg transform shadow-lg">
                         Sold Out
                       </div>
@@ -280,10 +283,9 @@ const CategoryPage = () => {
                 )}
               </div>
 
-              <div className={`bg-white rounded-b py-4 px-2 w-full ${!isPackageAvailable(pkg) ? 'opacity-60' : ''}`}>
+              <div className={`bg-white rounded-b-2xl py-4 px-0 w-full ${!isPackageAvailable(pkg) ? 'opacity-60' : ''}`}>
                 <div className="flex items-center justify-between mb-2">
                   <p className="text-sm text-gray-500">{pkg.duration}</p>
-
                   <div className="flex items-center space-x-1 text-green-600 text-xs">
                     <span className="text-gray-400">Available Seats</span>
                     <span>{pkg.availableSeats}</span>
@@ -292,35 +294,37 @@ const CategoryPage = () => {
 
                 {/* Content Element 2: Title */}
                 <div className="content-element mb-2 h-14 overflow-hidden">
-                  <h3 className="text-lg font-semibold text-gray-800">{pkg.title}</h3>
+                  <h3 className="text-base font-medium text-gray-800 line-clamp-2">{pkg.title}</h3>
                 </div>
 
-                <p className="text-sm text-gray-500 mb-2">
-                  {new Date(pkg.startDate).toLocaleDateString()} - {" "}
+                <p className="text-sm text-gray-500 mb-0">
+                  {new Date(pkg.startDate).toLocaleDateString()} - {" "}/
                   {new Date(pkg.endDate).toLocaleDateString()}
                 </p>
+
                 {/* Element: 6 */}
-                <div className="flex justify-between">
+                <div className="flex justify-between items-center mb-0">
                   <div
-                    className="flex w-full relative rounded-md mb-[2px]"
+                    className="flex flex-1 relative rounded-md"
                     style={{
                       background: 'linear-gradient(180deg, rgba(255, 186, 10, .1), rgba(255, 186, 10, 0));'
                     }}
                   >
-                    <div className="productcard_destinationListBOx flex items-center overflow-hidden, gap-[5px] h-8 my-0 mr-32px ml-7px">
-                      <div className="flex w-max items-center gap-1">
+                    <div className="flex items-center overflow-hidden gap-[5px] h-8 px-0">
+                      <div className="flex items-center gap-1">
                         <span className="flex items-center text-xs font-semibold text-[#000]">
                           {pkg.duration.split(" ")[0]}
                         </span>
-                        <span className="flex items-center text-xs font-normal text-[#515151] w-max">
+                        <span className="flex items-center text-xs font-normal text-[#515151] truncate">
                           {pkg.categoryId ? pkg.categoryId.name : "Category not available"}
                         </span>
                       </div>
                     </div>
                   </div>
+                  
                   {/* Package Rating */}
-                  <div className="package_rating flex items-center content-end gap-2">
-                    <span className="flex items-center text-[#f39c12] font-bold">
+                  <div className="flex items-center gap-2 ml-2">
+                    <span className="flex items-center text-[#19ad6f] font-bold">
                       {(packageRatings[pkg._id]?.averageRating || 4.3).toFixed(1)}
                       <span className="flex ml-1">
                         <FaStar size={16} />
@@ -332,57 +336,47 @@ const CategoryPage = () => {
                   </div>
                 </div>
 
-                <div className="flex items-center justify-between mb-4">
-                  <div className="flex items-center space-x-2">
-                    <span className="text-lg font-bold text-green-600">
+                <div className="flex items-center justify-start mb-4 flex-wrap">
+                  <div className="flex items-center">
+                    <span className="text-lg font-bold text-green-600 mr-2">
                       ₹{pkg.discountedPrice}
                     </span>
-                    <span className="text-sm text-gray-500 line-through">
+                    <span className="text-sm text-gray-500 line-through mr-2">
                       ₹{pkg.realPrice}
                     </span>
-                    <span className="LeadForm_SavePrice_leftBorderICon h-[24px] ml-[5px]"><svg width="4" height="24" viewBox="0 0 4 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M2.65992 3L0 6L2.65992 9L0 12L2.65992 15L0 18L2.65992 21L0 24H3.5V0H0L2.65992 3Z" fill="#E5F1E8"></path></svg>
-                    </span>
+                    
                     {pkg.realPrice > pkg.discountedPrice && (
-                      <span className="LeadForm_saveprice"
-                        style={{
-                          display: 'flex',
-                          alignItems: 'center',
-                          padding: '5px 2px',
-                          color: '#0b822a',
-                          fontSize: '9px',
-                          fontWeight: '500',
-                          lineHeight: '14px',
-                          textTransform: "capitalize",
-                          background: 'linear-gradient(90deg, #0b822a1c 3.64%, #0b822a1a)',
-                          gap: '3px',
-                          marginLeft: '-.5px',
-                          marginRight: '-.5px'
-                        }}
-                      >
-                        Save ₹{(pkg.realPrice - pkg.discountedPrice).toLocaleString()}
-                      </span>
+                      <div className="flex items-center">
+                        <span className="h-[24px] ml-[5px]">
+                          <svg width="4" height="24" viewBox="0 0 4 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M2.65992 3L0 6L2.65992 9L0 12L2.65992 15L0 18L2.65992 21L0 24H3.5V0H0L2.65992 3Z" fill="#E5F1E8"></path>
+                          </svg>
+                        </span>
+                        <span className="text-[#0b822a] text-[9px] font-medium bg-gradient-to-r from-[#0b822a1c] to-[#0b822a1a] px-2 py-1 rounded">
+                          Save ₹{(pkg.realPrice - pkg.discountedPrice).toLocaleString()}
+                        </span>
+                        <span className="h-[24px] rotate-180">
+                          <svg width="4" height="24" viewBox="0 0 4 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M2.65992 3L0 6L2.65992 9L0 12L2.65992 15L0 18L2.65992 21L0 24H3.5V0H0L2.65992 3Z" fill="#E5F1E8"></path>
+                          </svg>
+                        </span>
+                      </div>
                     )}
-                    <span className="LeadForm_savePrice_RightBorderIcon"
-                      style={{
-                        transform: 'rotate(180deg)',
-                        height: '24px',
-                        margin: '0'
-                      }}
-                    >
-                      <svg width="4" height="24" viewBox="0 0 4 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M2.65992 3L0 6L2.65992 9L0 12L2.65992 15L0 18L2.65992 21L0 24H3.5V0H0L2.65992 3Z" fill="#E5F1E8"></path></svg>
-                    </span>
                   </div>
                 </div>
-                <div className="ProductCard_ButtonContainer flex flex-row justify-between mt-[10px]">
-                  <a href="tel:+917542003073" className={`flex items-center h-[51px] w-[51px] border rounded-md border-solid border-[#f37002] text-[#f37002] hover:bg-[#f37002] hover:text-white justify-center text-[14px] font-semibold ${!isPackageAvailable(pkg) ? 'pointer-events-none opacity-70' : ''}`}>
-                    <div className="flex items-center justify-center">
-                      <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 16 16" fill="none"><path d="M12.7538 10.1683L11.0772 9.9768C10.8801 9.95363 10.6802 9.97547 10.4927 10.0407C10.3052 10.1059 10.1349 10.2128 9.99464 10.3533L8.78006 11.5685C6.90617 10.615 5.38306 9.09099 4.43002 7.21606L5.6512 5.9942C5.93505 5.7102 6.07367 5.30732 6.02746 4.91104L5.83603 3.24667C5.80038 2.92436 5.64748 2.62643 5.40646 2.40963C5.16544 2.19283 4.85314 2.07232 4.52904 2.07104H3.38707C2.64116 2.07104 2.02067 2.69188 2.06688 3.43821C2.41673 9.07857 6.92519 13.5829 12.5558 13.933C13.3017 13.9792 13.9222 13.3584 13.9222 12.6121V11.4694C13.9288 10.809 13.4205 10.241 12.7538 10.1683Z" fill="var(--primary, #f37002)"></path></svg>
-                    </div>
+
+                <div className="flex flex-row justify-between gap-3 mt-4">
+                  <a 
+                    href="tel:+917542003073" 
+                    className={`flex items-center justify-center h-[51px] w-[51px] border rounded-md border-[#f37002] text-[#f37002] hover:bg-[#f37002] hover:text-white text-[14px] font-semibold transition-colors ${!isPackageAvailable(pkg) ? 'pointer-events-none opacity-70' : ''}`}
+                  >
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 16 16" fill="none">
+                      <path d="M12.7538 10.1683L11.0772 9.9768C10.8801 9.95363 10.6802 9.97547 10.4927 10.0407C10.3052 10.1059 10.1349 10.2128 9.99464 10.3533L8.78006 11.5685C6.90617 10.615 5.38306 9.09099 4.43002 7.21606L5.6512 5.9942C5.93505 5.7102 6.07367 5.30732 6.02746 4.91104L5.83603 3.24667C5.80038 2.92436 5.64748 2.62643 5.40646 2.40963C5.16544 2.19283 4.85314 2.07232 4.52904 2.07104H3.38707C2.64116 2.07104 2.02067 2.69188 2.06688 3.43821C2.41673 9.07857 6.92519 13.5829 12.5558 13.933C13.3017 13.9792 13.9222 13.3584 13.9222 12.6121V11.4694C13.9288 10.809 13.4205 10.241 12.7538 10.1683Z" fill="currentColor"></path>
+                    </svg>
                   </a>
-                  <div className={`productCard_Button bg-[#f37002] text-white flex items-center justify-center h-[51px] border border-solid border-[#f37002] rounded-md text-[14px] font-semibold hover:bg-transparent hover:text-[#f37002] ${!isPackageAvailable(pkg) ? 'opacity-70 cursor-not-allowed' : ''}`}
-                    style={{
-                      width: 'calc(100% - 61px)'
-                    }}
+                  
+                  <button
+                    className={`flex-1 bg-[#f37002] text-white flex items-center justify-center h-[51px] border border-[#f37002] rounded-md text-[14px] font-semibold hover:bg-transparent hover:text-[#f37002] transition-colors ${!isPackageAvailable(pkg) ? 'opacity-70 cursor-not-allowed' : ''}`}
                     onClick={(e) => {
                       e.stopPropagation(); // Prevent navigation to package details
                       if (isPackageAvailable(pkg)) {
@@ -390,11 +384,11 @@ const CategoryPage = () => {
                       }
                     }}
                   >
-                        <span className="">
-                          {!pkg.isActive || isPackageDatePassed(pkg) ? "Coming Soon" :
-                            pkg.availableSeats === 0 ? "Sold Out" : "View Details"}
-                        </span>
-                  </div>
+                    <span>
+                      {!pkg.isActive || isPackageDatePassed(pkg) ? "Coming Soon" :
+                        pkg.availableSeats === 0 ? "Sold Out" : "View Details"}
+                    </span>
+                  </button>
                 </div>
               </div>
             </div>
@@ -403,9 +397,9 @@ const CategoryPage = () => {
 
         {loading && (
           <>
-            <PackageSkeleton />
-            <PackageSkeleton />
-            <PackageSkeleton />
+            <div className="w-full max-w-[350px]"><PackageSkeleton /></div>
+            <div className="w-full max-w-[350px]"><PackageSkeleton /></div>
+            <div className="w-full max-w-[350px]"><PackageSkeleton /></div>
           </>
         )}
       </div>
@@ -415,6 +409,7 @@ const CategoryPage = () => {
           No more packages to load
         </div>
       )}
+      
       {/* Show Authentication Popup */}
       {showAuthPopup && (
         <UserAuth
