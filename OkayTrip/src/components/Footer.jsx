@@ -168,7 +168,7 @@ const Footer = () => {
                       alt={pkg.name}
                       className="w-full h-16 object-cover transition-transform duration-300 ease-in-out group-hover:scale-110"
                     />
-                    <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-20 text-white text-sm font-bold">
+                    <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-20 text-white text-sm font-medium">
                       {pkg.name}
                     </div>
                   </div>
