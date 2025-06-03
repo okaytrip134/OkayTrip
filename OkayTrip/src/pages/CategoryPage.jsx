@@ -221,7 +221,7 @@ const CategoryPage = () => {
   }
 
   const isPackageDatePassed = (pkg) => {
-    if (!pkg.endDate) return false;
+    if (!pkg.endDate || isNaN(new Date(pkg.endDate))) return false; // Fully ignore invalid/missing date
     const endDate = new Date(pkg.endDate);
     const today = new Date();
     return endDate < today;
@@ -297,11 +297,13 @@ const CategoryPage = () => {
                   <h3 className="text-base font-medium text-gray-800 line-clamp-2">{pkg.title}</h3>
                 </div>
 
-                <p className="text-sm text-gray-500 mb-0">
-                  {new Date(pkg.startDate).toLocaleDateString()} - {" "}/
-                  {new Date(pkg.endDate).toLocaleDateString()}
-                </p>
 
+                {pkg.startDate && pkg.endDate && (
+                  <p className="text-sm text-gray-500 mb-0">
+                    {new Date(pkg.startDate).toLocaleDateString()} - {" "}/
+                    {new Date(pkg.endDate).toLocaleDateString()}
+                  </p>
+                )}
                 {/* Element: 6 */}
                 <div className="flex justify-between items-center mb-0">
                   <div

@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import axios from "axios";
 import {
   Form, Input, Select, Button, Upload, InputNumber,
-  Card, message, List, Divider
+  Card, message, List, Divider, Radio
 } from "antd";
 import {
   UploadOutlined, DeleteOutlined, PlusOutlined
@@ -167,11 +167,15 @@ const PackageForm = ({ visible, onClose, onSuccess, selectedPackage }) => {
     const packageData = new FormData();
 
     // Format dates before submission
-    const formattedData = {
-      ...formData,
-      startDate: formData.startDate ? moment(formData.startDate).format('YYYY-MM-DD') : null,
-      endDate: formData.endDate ? moment(formData.endDate).format('YYYY-MM-DD') : null
-    };
+    const formattedData = { ...formData };
+
+    if (formData.startDate && formData.endDate) {
+      formattedData.startDate = moment(formData.startDate).format('YYYY-MM-DD');
+      formattedData.endDate = moment(formData.endDate).format('YYYY-MM-DD');
+    } else {
+      delete formattedData.startDate;
+      delete formattedData.endDate;
+    }
 
     for (let key in formattedData) {
       if (key === "images") {
@@ -354,36 +358,58 @@ const PackageForm = ({ visible, onClose, onSuccess, selectedPackage }) => {
                 placeholder="E.g., 5 days & 4 nights"
               />
             </Form.Item>
-            <Form.Item label="Trip Dates" required>
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label>Start Date</label>
-                  <DatePicker
-                    selected={formData.startDate}
-                    onChange={handleStartDateChange}
-                    selectsStart
-                    startDate={formData.startDate}
-                    endDate={formData.endDate}
-                    minDate={new Date()}
-                    className="w-full p-2 border rounded"
-                    dateFormat="yyyy-MM-dd"
-                  />
-                </div>
-                <div>
-                  <label>End Date</label>
-                  <DatePicker
-                    selected={formData.endDate}
-                    onChange={handleEndDateChange}
-                    selectsEnd
-                    startDate={formData.startDate}
-                    endDate={formData.endDate}
-                    minDate={formData.startDate || new Date()}
-                    className="w-full p-2 border rounded"
-                    dateFormat="yyyy-MM-dd"
-                  />
-                </div>
-              </div>
+            {/* Trip Dates Toggle */}
+            <Form.Item label="Include Trip Dates?">
+              <Radio.Group
+                value={formData.startDate !== null && formData.endDate !== null}
+                onChange={(e) => {
+                  const useDates = e.target.value;
+                  if (!useDates) {
+                    setFormData({ ...formData, startDate: null, endDate: null });
+                  } else {
+                    setFormData({ ...formData, startDate: new Date(), endDate: new Date() });
+                  }
+                }}
+              >
+                <Radio value={true}>Yes</Radio>
+                <Radio value={false}>No</Radio>
+              </Radio.Group>
             </Form.Item>
+
+            {/* Conditionally Show Date Fields */}
+            {formData.startDate !== null && formData.endDate !== null && (
+              <Form.Item label="Trip Dates">
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label>Start Date</label>
+                    <DatePicker
+                      selected={formData.startDate}
+                      onChange={handleStartDateChange}
+                      selectsStart
+                      startDate={formData.startDate}
+                      endDate={formData.endDate}
+                      minDate={new Date()}
+                      className="w-full p-2 border rounded"
+                      dateFormat="yyyy-MM-dd"
+                    />
+                  </div>
+                  <div>
+                    <label>End Date</label>
+                    <DatePicker
+                      selected={formData.endDate}
+                      onChange={handleEndDateChange}
+                      selectsEnd
+                      startDate={formData.startDate}
+                      endDate={formData.endDate}
+                      minDate={formData.startDate || new Date()}
+                      className="w-full p-2 border rounded"
+                      dateFormat="yyyy-MM-dd"
+                    />
+                  </div>
+                </div>
+              </Form.Item>
+            )}
+
 
             <div className="grid grid-cols-2 gap-4">
               <Form.Item label="Total Seats" required>

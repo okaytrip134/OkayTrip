@@ -8,8 +8,8 @@ const packageSchema = new mongoose.Schema({
   realPrice: { type: Number, required: true },
   discountedPrice: { type: Number, required: true },
   duration: { type: String, required: true }, // "5 days & 4 nights"
-  startDate: { type: Date, required: true },
-  endDate: { type: Date, required: true },
+  startDate: { type: Date, required: false },
+  endDate: { type: Date, required: false },
   totalSeats: { type: Number, required: true }, // Fixed, never decreases
   availableSeats: { type: Number, required: true }, // Decreases on booking
   inclusions: [{ type: String }], // Array of inclusions

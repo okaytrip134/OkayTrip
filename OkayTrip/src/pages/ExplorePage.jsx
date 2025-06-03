@@ -261,12 +261,12 @@ const ExplorePage = () => {
       }
     });
   }, [categories]);
-  const isPackageDatePassed = (pkg) => {
-    if (!pkg.endDate) return false;
-    const endDate = new Date(pkg.endDate);
-    const today = new Date();
-    return endDate < today;
-  };
+const isPackageDatePassed = (pkg) => {
+  if (!pkg.endDate || isNaN(new Date(pkg.endDate))) return false; // Fully ignore invalid/missing date
+  const endDate = new Date(pkg.endDate);
+  const today = new Date();
+  return endDate < today;
+};
   const scrollCarousel = (categoryId, direction) => {
     const carousel = document.getElementById(`carousel-${categoryId}`);
     if (!carousel) return;
@@ -388,10 +388,12 @@ const ExplorePage = () => {
 
                         {/* Content Element 3: Date */}
                         <div className="content-element mb-0">
-                          <p className="text-sm text-gray-500">
-                            {new Date(pkg.startDate).toLocaleDateString()} -{" "}
-                            {new Date(pkg.endDate).toLocaleDateString()}
-                          </p>
+                          {pkg.startDate && pkg.endDate && (
+                            <p className="text-sm text-gray-500">
+                              {new Date(pkg.startDate).toLocaleDateString()} -{" "}
+                              {new Date(pkg.endDate).toLocaleDateString()}
+                            </p>
+                          )}
                         </div>
                         {/* Element: 6 */}
                         <div className="flex justify-between">
