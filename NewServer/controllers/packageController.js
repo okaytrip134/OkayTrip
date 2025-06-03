@@ -1,6 +1,6 @@
 const Package = require("../models/package");
 const Booking = require("../models/booking");
-const Package = require("../models/package");
+// const Package = require("../models/package");
 const path = require("path");
 const fs = require("fs");
 const sharp = require("sharp");
