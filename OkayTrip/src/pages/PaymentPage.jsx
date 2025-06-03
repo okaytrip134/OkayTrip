@@ -95,16 +95,8 @@ const PaymentPage = () => {
         handler: async function (response) {
           try {
             setLoadingRedirect(true);
-            console.log("Confirm Booking Payload:", {
-              packageId,
-              bookingId: data.bookingId,
-              paymentId: response.razorpay_payment_id,
-              amount: totalAmount,
-              paymentType,
-              seatsToBook: location.state?.numSeats,
-              travelers: location.state?.travelers,
-            });
-            await axios.post(
+
+            const confirmRes = await axios.post(
               `${import.meta.env.VITE_APP_API_URL}/api/bookings/confirm`,
               {
                 packageId,
@@ -112,32 +104,39 @@ const PaymentPage = () => {
                 paymentId: response.razorpay_payment_id,
                 amount: totalAmount,
                 paymentType,
-                seatsToBook: location.state.numSeats,
-                travelers: location.state.travelers,
+                seatsToBook: location.state?.numSeats || 1,
+                travelers: location.state?.travelers || [],
               },
               {
                 headers: { Authorization: `Bearer ${userToken}` },
               }
             );
 
-            toast.success("Payment Successful! Redirecting...");
+            if (confirmRes.data.success) {
+              toast.success("Payment Successful! Redirecting...");
 
-            setTimeout(() => {
-              navigate("/booking-success", {
-                state: {
-                  bookingId: data.bookingId,
-                  paymentId: response.razorpay_payment_id,
-                  packageTitle,
-                  amount: totalAmount,
-                },
-              });
-            }, 3000);
+              setTimeout(() => {
+                navigate("/booking-success", {
+                  state: {
+                    bookingId: data.bookingId,
+                    paymentId: response.razorpay_payment_id,
+                    packageTitle,
+                    amount: totalAmount,
+                  },
+                });
+              }, 3000);
+            } else {
+              console.error("Booking API response but not successful:", confirmRes.data);
+              toast.error("Payment succeeded but booking failed. Please contact support.");
+              setLoadingRedirect(false);
+            }
           } catch (error) {
-            console.error("Error confirming booking:", error);
-            toast.error("Error confirming booking. Please contact support.");
+            console.error("Error in booking confirm API:", error);
+            toast.error("Payment succeeded but booking failed. Please contact support.");
             setLoadingRedirect(false);
           }
-        },
+        }
+        ,
         prefill: {
           name: localStorage.getItem("userName"),
           email: localStorage.getItem("userEmail"),

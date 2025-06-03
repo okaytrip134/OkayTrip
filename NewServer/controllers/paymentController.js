@@ -2,6 +2,18 @@ const Razorpay = require("razorpay");
 const Booking = require("../models/booking");
 const crypto = require("crypto");
 require("dotenv").config(); // Load environment variables
+const Counter = require("../models/counter"); // Make sure path is correct
+
+const getNextBookingNumber = async () => {
+  const result = await Counter.findOneAndUpdate(
+    { name: "bookingId" },
+    { $inc: { value: 1 } },
+    { new: true, upsert: true }
+  );
+
+  const padded = String(result.value).padStart(6, "0");
+  return `OKB${padded}`;
+};
 
 // ✅ Initialize Razorpay with Correct API Keys
 const razorpay = new Razorpay({
@@ -9,7 +21,6 @@ const razorpay = new Razorpay({
   key_secret: process.env.RAZORPAY_KEY_SECRET,
 });
 
-let bookingCounter = 1; // Resets if server restarts
 
 exports.initiatePayment = async (req, res) => {
   try {
@@ -18,7 +29,7 @@ exports.initiatePayment = async (req, res) => {
       return res.status(400).json({ success: false, message: "Amount is required" });
     }
 
-    const bookingId = `OKB${String(bookingCounter++).padStart(6, "0")}`;
+    const bookingId = await getNextBookingNumber();
     console.log("Generated Booking ID:", bookingId);
 
     const order = await razorpay.orders.create({
@@ -46,6 +57,18 @@ exports.confirmBooking = async (req, res) => {
     const { packageId, bookingId, paymentId, amount, paymentType } = req.body;
     const userId = req.user.id;
 
+    // ✅ Check if booking already exists
+    const existingBooking = await Booking.findOne({ bookingId });
+
+    if (existingBooking) {
+      return res.status(200).json({
+        success: true,
+        message: "Booking already confirmed",
+        booking: existingBooking,
+      });
+    }
+
+    // ✅ Create new booking
     const newBooking = new Booking({
       userId,
       packageId,
@@ -58,8 +81,22 @@ exports.confirmBooking = async (req, res) => {
 
     await newBooking.save();
 
-    res.json({ success: true, message: "Booking Confirmed", booking: newBooking });
+    res.status(200).json({
+      success: true,
+      message: "Booking confirmed successfully",
+      booking: newBooking,
+    });
   } catch (error) {
+    // ✅ Graceful handling of duplicate error (just in case)
+    if (error.code === 11000 && error.keyPattern?.bookingId) {
+      const fallbackBooking = await Booking.findOne({ bookingId });
+      return res.status(200).json({
+        success: true,
+        message: "Duplicate booking (already saved)",
+        booking: fallbackBooking,
+      });
+    }
+
     console.error("Booking Confirmation Error:", error);
     res.status(500).json({ success: false, message: "Booking confirmation failed" });
   }
