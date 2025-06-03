@@ -1,3 +1,4 @@
+// ✅ Your imports remain unchanged
 import React, { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import axios from "axios";
@@ -5,7 +6,7 @@ import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import logo from "../assets/Logo/Trip ok new 2 black-01.png";
 import { FaLock } from "react-icons/fa";
-import { Spin } from "antd"; // ✅ Ant Design Loader
+import { Spin } from "antd";
 
 const PaymentPage = () => {
   const location = useLocation();
@@ -57,7 +58,7 @@ const PaymentPage = () => {
     }
   }, [packageId, safeAmount, navigate]);
 
-  // ✅ Tax Calculation (18% GST) if Full Payment
+  // Tax & amount calculation
   const baseAmount = paymentType === "full" ? safeAmount / 1.18 : safeAmount;
   const taxAmount = paymentType === "full" ? baseAmount * 0.18 : 0;
   const totalAmount = baseAmount + taxAmount;
@@ -75,15 +76,16 @@ const PaymentPage = () => {
     try {
       const { data } = await axios.post(
         `${import.meta.env.VITE_APP_API_URL}/api/payment/payment`,
-        { packageId, packageTitle, amount: totalAmount, paymentType },
-        { headers: { Authorization: `Bearer ${userToken}` } }
+        { amount: totalAmount },
+        {
+          headers: {
+            Authorization: `Bearer ${userToken}`,
+          },
+        }
       );
 
-      console.log("Payment API Response:", data); // ✅ Debug this
+      if (!data.success) throw new Error(data.message || "Payment initiation failed");
 
-      if (!data.success) {
-        throw new Error(data.message || "Payment initiation failed");
-      }
       const options = {
         key: import.meta.env.VITE_RAZORPAY_KEY_ID,
         amount: data.amount,
@@ -100,7 +102,6 @@ const PaymentPage = () => {
               `${import.meta.env.VITE_APP_API_URL}/api/bookings/confirm`,
               {
                 packageId,
-                bookingId: data.bookingId,
                 paymentId: response.razorpay_payment_id,
                 amount: totalAmount,
                 paymentType,
@@ -118,7 +119,7 @@ const PaymentPage = () => {
               setTimeout(() => {
                 navigate("/booking-success", {
                   state: {
-                    bookingId: data.bookingId,
+                    bookingId: confirmRes.data.booking.bookingId,
                     paymentId: response.razorpay_payment_id,
                     packageTitle,
                     amount: totalAmount,
@@ -126,17 +127,14 @@ const PaymentPage = () => {
                 });
               }, 3000);
             } else {
-              console.error("Booking API response but not successful:", confirmRes.data);
               toast.error("Payment succeeded but booking failed. Please contact support.");
               setLoadingRedirect(false);
             }
           } catch (error) {
-            console.error("Error in booking confirm API:", error);
             toast.error("Payment succeeded but booking failed. Please contact support.");
             setLoadingRedirect(false);
           }
-        }
-        ,
+        },
         prefill: {
           name: localStorage.getItem("userName"),
           email: localStorage.getItem("userEmail"),
@@ -150,10 +148,8 @@ const PaymentPage = () => {
       const razorpay = new window.Razorpay(options);
       razorpay.open();
     } catch (error) {
-      console.error("Error initiating payment:", error.response?.data || error.message);
-      toast.error(error.response?.data?.message || "Payment failed. Please try again.");
       console.error("Error initiating payment:", error);
-      toast.error("Payment failed. Please try again.");
+      toast.error(error.response?.data?.message || "Payment failed. Please try again.");
     }
   };
 
@@ -193,8 +189,9 @@ const PaymentPage = () => {
           </div>
 
           <button
-            className={`mt-6 w-full py-3 rounded-lg text-white font-semibold text-lg transition-all ${isScriptLoaded ? "bg-orange-500 hover:bg-orange-600" : "bg-gray-400"
-              }`}
+            className={`mt-6 w-full py-3 rounded-lg text-white font-semibold text-lg transition-all ${
+              isScriptLoaded ? "bg-orange-500 hover:bg-orange-600" : "bg-gray-400"
+            }`}
             onClick={handlePayment}
             disabled={!isScriptLoaded}
           >

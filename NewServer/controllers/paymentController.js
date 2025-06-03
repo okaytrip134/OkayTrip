@@ -1,27 +1,25 @@
 const Razorpay = require("razorpay");
 const Booking = require("../models/booking");
-const crypto = require("crypto");
-require("dotenv").config(); // Load environment variables
-const Counter = require("../models/counter"); // Make sure path is correct
+const Counter = require("../models/counter");
+require("dotenv").config();
 
+// Razorpay Initialization
+const razorpay = new Razorpay({
+  key_id: process.env.RAZORPAY_KEY_ID,
+  key_secret: process.env.RAZORPAY_KEY_SECRET,
+});
+
+// Generate unique padded booking ID
 const getNextBookingNumber = async () => {
   const result = await Counter.findOneAndUpdate(
     { name: "bookingId" },
     { $inc: { value: 1 } },
     { new: true, upsert: true }
   );
-
-  const padded = String(result.value).padStart(6, "0");
-  return `OKB${padded}`;
+  return `OKB${String(result.value).padStart(6, "0")}`;
 };
 
-// ✅ Initialize Razorpay with Correct API Keys
-const razorpay = new Razorpay({
-  key_id: process.env.RAZORPAY_KEY_ID,
-  key_secret: process.env.RAZORPAY_KEY_SECRET,
-});
-
-
+// ✅ 1. Initiate Razorpay Order (NO bookingId generated here)
 exports.initiatePayment = async (req, res) => {
   try {
     const { amount } = req.body;
@@ -29,20 +27,16 @@ exports.initiatePayment = async (req, res) => {
       return res.status(400).json({ success: false, message: "Amount is required" });
     }
 
-    const bookingId = await getNextBookingNumber();
-    console.log("Generated Booking ID:", bookingId);
-
     const order = await razorpay.orders.create({
       amount: amount * 100,
       currency: "INR",
-      receipt: bookingId,
+      receipt: `TEMP-${Date.now()}`, // temporary unique value
       payment_capture: 1,
     });
 
     res.json({
       success: true,
       orderId: order.id,
-      bookingId,
       amount: order.amount,
     });
   } catch (error) {
@@ -51,24 +45,25 @@ exports.initiatePayment = async (req, res) => {
   }
 };
 
-// **Confirm Booking**
+// ✅ 2. Confirm Booking — this is where bookingId is generated
 exports.confirmBooking = async (req, res) => {
   try {
-    const { packageId, bookingId, paymentId, amount, paymentType } = req.body;
+    const { packageId, paymentId, amount, paymentType } = req.body;
     const userId = req.user.id;
 
-    // ✅ Check if booking already exists
-    const existingBooking = await Booking.findOne({ bookingId });
+    // Generate unique bookingId safely here
+    const bookingId = await getNextBookingNumber();
 
-    if (existingBooking) {
+    // Double-check: prevent race-condition duplicate
+    const existing = await Booking.findOne({ bookingId });
+    if (existing) {
       return res.status(200).json({
         success: true,
-        message: "Booking already confirmed",
-        booking: existingBooking,
+        message: "Booking already exists",
+        booking: existing,
       });
     }
 
-    // ✅ Create new booking
     const newBooking = new Booking({
       userId,
       packageId,
@@ -87,13 +82,12 @@ exports.confirmBooking = async (req, res) => {
       booking: newBooking,
     });
   } catch (error) {
-    // ✅ Graceful handling of duplicate error (just in case)
     if (error.code === 11000 && error.keyPattern?.bookingId) {
-      const fallbackBooking = await Booking.findOne({ bookingId });
+      const existing = await Booking.findOne({ bookingId: error.keyValue.bookingId });
       return res.status(200).json({
         success: true,
-        message: "Duplicate booking (already saved)",
-        booking: fallbackBooking,
+        message: "Booking already saved (duplicate handled)",
+        booking: existing,
       });
     }
 
