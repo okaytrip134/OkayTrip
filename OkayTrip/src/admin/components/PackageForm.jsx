@@ -46,6 +46,7 @@ const PackageForm = ({ visible, onClose, onSuccess, selectedPackage }) => {
   const [newExclusion, setNewExclusion] = useState("");
   const [newTripHighlight, setNewTripHighlight] = useState("");
   const [newItineraryEntry, setNewItineraryEntry] = useState({ title: "", description: "" });
+  const [useDates, setUseDates] = useState(false);  
 
   const adminToken = localStorage.getItem("adminToken");
 
@@ -85,7 +86,7 @@ const PackageForm = ({ visible, onClose, onSuccess, selectedPackage }) => {
         metaKeywords: selectedPackage.metaKeywords || "",
         slug: selectedPackage.slug || ""
       });
-
+      setUseDates(!!selectedPackage.startDate && !!selectedPackage.endDate);
       if (selectedPackage.images && selectedPackage.images.length > 0) {
         const initialFileList = selectedPackage.images.map((url, index) => ({
           uid: `-${index}`,
@@ -360,56 +361,74 @@ const PackageForm = ({ visible, onClose, onSuccess, selectedPackage }) => {
               />
             </Form.Item>
             {/* Trip Dates Toggle */}
-            <Form.Item label="Include Trip Dates?">
-              <Radio.Group
-                value={formData.startDate !== null && formData.endDate !== null}
-                onChange={(e) => {
-                  const useDates = e.target.value;
-                  if (!useDates) {
-                    setFormData({ ...formData, startDate: null, endDate: null });
-                  } else {
-                    setFormData({ ...formData, startDate: new Date(), endDate: new Date() });
-                  }
-                }}
-              >
-                <Radio value={true}>Yes</Radio>
-                <Radio value={false}>No</Radio>
-              </Radio.Group>
-            </Form.Item>
+{/* Trip Dates Toggle */}
+<Form.Item label="Include Trip Dates?">
+  <Radio.Group
+    value={useDates}
+    onChange={(e) => {
+      const selected = e.target.value;
+      setUseDates(selected);
 
-            {/* Conditionally Show Date Fields */}
-            {formData.startDate !== null && formData.endDate !== null && (
-              <Form.Item label="Trip Dates">
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <label>Start Date</label>
-                    <DatePicker
-                      selected={formData.startDate}
-                      onChange={handleStartDateChange}
-                      selectsStart
-                      startDate={formData.startDate}
-                      endDate={formData.endDate}
-                      minDate={new Date()}
-                      className="w-full p-2 border rounded"
-                      dateFormat="yyyy-MM-dd"
-                    />
-                  </div>
-                  <div>
-                    <label>End Date</label>
-                    <DatePicker
-                      selected={formData.endDate}
-                      onChange={handleEndDateChange}
-                      selectsEnd
-                      startDate={formData.startDate}
-                      endDate={formData.endDate}
-                      minDate={formData.startDate || new Date()}
-                      className="w-full p-2 border rounded"
-                      dateFormat="yyyy-MM-dd"
-                    />
-                  </div>
-                </div>
-              </Form.Item>
-            )}
+      if (!selected) {
+        setFormData({ ...formData, startDate: null, endDate: null });
+      } else {
+        setFormData({ 
+          ...formData, 
+          startDate: formData.startDate || new Date(), 
+          endDate: formData.endDate || new Date() 
+        });
+      }
+    }}
+  >
+    <Radio value={true}>Yes</Radio>
+    <Radio value={false}>No</Radio>
+  </Radio.Group>
+</Form.Item>
+
+{/* Conditionally Show Date Fields */}
+{useDates && (
+  <Form.Item label="Trip Dates">
+    <div className="grid grid-cols-2 gap-4">
+      <div>
+        <label>Start Date</label>
+        <DatePicker
+          selected={formData.startDate}
+          onChange={(date) =>
+            setFormData({
+              ...formData,
+              startDate: date,
+              endDate: formData.endDate && formData.endDate < date ? null : formData.endDate
+            })
+          }
+          selectsStart
+          startDate={formData.startDate}
+          endDate={formData.endDate}
+          minDate={new Date()}
+          className="w-full p-2 border rounded"
+          dateFormat="yyyy-MM-dd"
+        />
+      </div>
+      <div>
+        <label>End Date</label>
+        <DatePicker
+          selected={formData.endDate}
+          onChange={(date) =>
+            setFormData({
+              ...formData,
+              endDate: date
+            })
+          }
+          selectsEnd
+          startDate={formData.startDate}
+          endDate={formData.endDate}
+          minDate={formData.startDate || new Date()}
+          className="w-full p-2 border rounded"
+          dateFormat="yyyy-MM-dd"
+        />
+      </div>
+    </div>
+  </Form.Item>
+)}
 
 
             <div className="grid grid-cols-2 gap-4">
