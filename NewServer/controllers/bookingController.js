@@ -1,9 +1,19 @@
 const Booking = require("../models/booking");
 const Package = require("../models/package");
+const Counter = require("../models/counter");
+
+const getNextBookingNumber = async () => {
+  const result = await Counter.findOneAndUpdate(
+    { name: "bookingId" },
+    { $inc: { value: 1 } },
+    { new: true, upsert: true }
+  );
+  return `OKB${String(result.value).padStart(6, "0")}`;
+};
 
 exports.confirmBooking = async (req, res) => {
   try {
-    const { packageId, bookingId, paymentId, amount, paymentType, seatsToBook, travelers } = req.body;
+    const { packageId, paymentId, amount, paymentType, seatsToBook, travelers } = req.body;
     const userId = req.user.id;
 
     if (!seatsToBook || seatsToBook <= 0) {
@@ -23,6 +33,9 @@ exports.confirmBooking = async (req, res) => {
       return res.status(400).json({ message: "All traveler details must be provided." });
     }
 
+    // ✅ Generate bookingId here (IMPORTANT)
+    const bookingId = await getNextBookingNumber();
+
     packageData.availableSeats -= seatsToBook;
     await packageData.save();
 
@@ -34,17 +47,31 @@ exports.confirmBooking = async (req, res) => {
       amount,
       paymentType,
       seatsBooked: seatsToBook,
-      travelers, // ✅ Store traveler details in database
+      travelers,
+      status: "Confirmed",
     });
 
     await newBooking.save();
-    res.json({ success: true, message: "Booking Confirmed", booking: newBooking });
+
+    res.status(200).json({
+      success: true,
+      message: "Booking confirmed successfully",
+      booking: newBooking,
+    });
   } catch (error) {
+    if (error.code === 11000 && error.keyPattern?.bookingId) {
+      const existing = await Booking.findOne({ bookingId: error.keyValue.bookingId });
+      return res.status(200).json({
+        success: true,
+        message: "Booking already saved (duplicate handled)",
+        booking: existing,
+      });
+    }
+
     console.error("Booking Confirmation Error:", error);
     res.status(500).json({ success: false, message: "Booking confirmation failed" });
   }
 };
-
 exports.getUserBookings = async (req, res) => {
   try {
     const userId = req.user.id; // Extract user ID from auth middleware

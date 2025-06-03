@@ -45,32 +45,12 @@ exports.initiatePayment = async (req, res) => {
   }
 };
 
+// ✅ 2. Confirm Booking — this is where bookingId is generated
 exports.confirmBooking = async (req, res) => {
   try {
-    const { packageId, paymentId, amount, paymentType, seatsToBook, travelers } = req.body;
+    const { packageId, paymentId, amount, paymentType } = req.body;
     const userId = req.user.id;
 
-    if (!seatsToBook || seatsToBook <= 0) {
-      return res.status(400).json({ message: "Invalid number of seats to book." });
-    }
-
-    const packageData = await Package.findById(packageId);
-    if (!packageData) {
-      return res.status(404).json({ success: false, message: "Package not found" });
-    }
-
-    if (packageData.availableSeats < seatsToBook) {
-      return res.status(400).json({ message: "Not enough available seats." });
-    }
-
-    if (seatsToBook > 1 && (!travelers || travelers.length !== seatsToBook)) {
-      return res.status(400).json({ message: "All traveler details must be provided." });
-    }
-
-    packageData.availableSeats -= seatsToBook;
-    await packageData.save();
-
-    // ✅ Generate bookingId here
     const bookingId = await getNextBookingNumber();
 
     const newBooking = new Booking({
@@ -80,8 +60,6 @@ exports.confirmBooking = async (req, res) => {
       paymentId,
       amount,
       paymentType,
-      seatsBooked: seatsToBook,
-      travelers,
       status: "Confirmed",
     });
 
