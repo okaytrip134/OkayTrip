@@ -99,7 +99,7 @@ const PaymentPage = () => {
             setLoadingRedirect(true);
 
             const confirmRes = await axios.post(
-              `${import.meta.env.VITE_APP_API_URL}/api/payment//confirm-booking`,
+              `${import.meta.env.VITE_APP_API_URL}/api/payment/confirm-booking`,
               {
                 packageId,
                 paymentId: response.razorpay_payment_id,
