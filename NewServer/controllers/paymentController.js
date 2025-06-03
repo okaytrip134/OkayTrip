@@ -51,18 +51,7 @@ exports.confirmBooking = async (req, res) => {
     const { packageId, paymentId, amount, paymentType } = req.body;
     const userId = req.user.id;
 
-    // Generate unique bookingId safely here
     const bookingId = await getNextBookingNumber();
-
-    // Double-check: prevent race-condition duplicate
-    const existing = await Booking.findOne({ bookingId });
-    if (existing) {
-      return res.status(200).json({
-        success: true,
-        message: "Booking already exists",
-        booking: existing,
-      });
-    }
 
     const newBooking = new Booking({
       userId,
