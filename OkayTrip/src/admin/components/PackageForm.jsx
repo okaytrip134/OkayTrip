@@ -173,9 +173,10 @@ const PackageForm = ({ visible, onClose, onSuccess, selectedPackage }) => {
       formattedData.startDate = moment(formData.startDate).format('YYYY-MM-DD');
       formattedData.endDate = moment(formData.endDate).format('YYYY-MM-DD');
     } else {
-      delete formattedData.startDate;
-      delete formattedData.endDate;
+      formattedData.startDate = null;
+      formattedData.endDate = null;
     }
+
 
     for (let key in formattedData) {
       if (key === "images") {

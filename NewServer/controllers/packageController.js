@@ -108,7 +108,7 @@ exports.getAllPackages = async (req, res) => {
 exports.getPackagesByCategory = async (req, res) => {
   const { categoryId } = req.params;
   try {
-    const packages = await Package.find({ categoryId})
+    const packages = await Package.find({ categoryId })
       .populate("categoryId", "name");
     res.status(200).json(packages);
   } catch (error) {
@@ -181,8 +181,10 @@ exports.updatePackage = async (req, res) => {
     packageData.realPrice = realPrice !== undefined ? realPrice : packageData.realPrice;
     packageData.discountedPrice = discountedPrice !== undefined ? discountedPrice : packageData.discountedPrice;
     packageData.duration = duration !== undefined ? duration : packageData.duration;
-    packageData.startDate = startDate !== undefined ? startDate : packageData.startDate;
-    packageData.endDate = endDate !== undefined ? endDate : packageData.endDate;
+    const cleanedStartDate = startDate === "null" ? null : startDate;
+    const cleanedEndDate = endDate === "null" ? null : endDate;
+    packageData.startDate = cleanedStartDate !== undefined ? cleanedStartDate : packageData.startDate;
+    packageData.endDate = cleanedEndDate !== undefined ? cleanedEndDate : packageData.endDate;
     packageData.inclusions = inclusions !== undefined ? (Array.isArray(inclusions) ? inclusions : JSON.parse(inclusions)) : packageData.inclusions;
     packageData.exclusions = exclusions !== undefined ? (Array.isArray(exclusions) ? exclusions : JSON.parse(exclusions)) : packageData.exclusions;
     packageData.tripHighlights = tripHighlights !== undefined ? (Array.isArray(tripHighlights) ? tripHighlights : JSON.parse(tripHighlights)) : packageData.tripHighlights;
@@ -285,7 +287,7 @@ exports.searchPackages = async (req, res) => {
   try {
     const { duration, minPrice, maxPrice, page = 1, limit = 10 } = req.query;
     const query = {};
-    
+
     // Parse duration filter (e.g., "2 to 3 Days")
     if (duration) {
       const durationMatch = duration.match(/(\d+)\s*to\s*(\d+)/);
@@ -301,28 +303,28 @@ exports.searchPackages = async (req, res) => {
         query.duration = duration;
       }
     }
-    
+
     // Price range filter
     if (minPrice || maxPrice) {
       query.discountedPrice = {};
       if (minPrice) query.discountedPrice.$gte = parseInt(minPrice);
       if (maxPrice) query.discountedPrice.$lte = parseInt(maxPrice);
     }
-    
+
     // Only show active packages
     query.isActive = true;
-    
+
     const skip = (parseInt(page) - 1) * parseInt(limit);
-    
+
     const packages = await Package.find(query)
       .populate("categoryId", "name")
       .skip(skip)
       .limit(parseInt(limit));
-      
+
     const totalPackages = await Package.countDocuments(query);
-    
-    res.status(200).json({ 
-      packages, 
+
+    res.status(200).json({
+      packages,
       totalPackages,
       currentPage: parseInt(page),
       totalPages: Math.ceil(totalPackages / parseInt(limit))
