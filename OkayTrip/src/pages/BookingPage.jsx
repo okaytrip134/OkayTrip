@@ -578,10 +578,10 @@ const BookingPage = () => {
                 <h4 className="font-bold text-lg mb-2">Need Help?</h4>
                 <p className="text-sm mb-4 opacity-90">Our travel experts are here to assist you</p>
                 <div className="space-y-2 text-sm">
-                  <div className="flex items-center">
+                  {/* <div className="flex items-center">
                     <span className="mr-2">📞</span>
                     <span>Call: +91 1234567890</span>
-                  </div>
+                  </div> */}
                   <div className="flex items-center">
                     <span className="mr-2">✉️</span>
                     <span>Email: support@okaytrip.in</span>
