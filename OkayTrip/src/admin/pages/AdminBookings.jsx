@@ -70,21 +70,28 @@ const AdminBookings = () => {
         }
     }, [searchText, bookings]);
 
-    const handleStatusChange = async (bookingId, newStatus) => {
-        try {
-            await axios.put(
-                `${import.meta.env.VITE_APP_API_URL}/api/admin/bookings/${bookingId}/status`,
-                { status: newStatus },
-                {
-                    headers: { Authorization: `Bearer ${localStorage.getItem("adminToken")}` },
-                }
-            );
-            message.success(`Booking status updated to ${newStatus}`);
-            fetchBookings(filters);
-        } catch (error) {
-            message.error("Failed to update booking status");
-        }
-    };
+const handleStatusChange = async (bookingId, newStatus) => {
+    try {
+        // Find the booking in the state
+        const booking = bookings.find(b => b.bookingId === bookingId);
+        
+        // If payment is full, status must be Confirmed
+        const statusToUpdate = booking.paymentType === 'full' ? 'Confirmed' : newStatus;
+
+        await axios.put(
+            `${import.meta.env.VITE_APP_API_URL}/api/admin/bookings/${bookingId}/status`,
+            { status: statusToUpdate },
+            {
+                headers: { Authorization: `Bearer ${localStorage.getItem("adminToken")}` },
+            }
+        );
+        
+        message.success(`Booking status updated to ${statusToUpdate}`);
+        fetchBookings(filters);
+    } catch (error) {
+        message.error("Failed to update booking status");
+    }
+};
 
     const handleCancelBooking = (bookingId) => {
         confirm({
@@ -450,18 +457,27 @@ const AdminBookings = () => {
                                         <td className="px-4 py-3 border-r border-gray-300">
                                             {booking.packageId?.title || "N/A"}
                                         </td>
-                                        <td className="px-4 py-3 border-r border-gray-300">
-                                            <select
-                                                value={booking.status}
-                                                onChange={(e) => handleStatusChange(booking.bookingId, e.target.value)}
-                                                className={`px-2 py-1 rounded-full text-xs border-none ${getStatusColor(booking.status)}`}
-                                            >
-                                                <option value="Pending">Pending</option>
-                                                <option value="Confirmed">Confirmed</option>
-                                                <option value="Canceled">Canceled</option>
-                                                <option value="Completed">Completed</option>
-                                            </select>
-                                        </td>
+<td className="px-4 py-3 border-r border-gray-300">
+    <select
+        value={booking.status || (booking.paymentType === 'full' ? 'Confirmed' : 'Pending')}
+        onChange={(e) => handleStatusChange(booking.bookingId, e.target.value)}
+        className={`px-2 py-1 rounded-full text-xs border-none ${
+            getStatusColor(booking.status || (booking.paymentType === 'full' ? 'Confirmed' : 'Pending'))
+        }`}
+        disabled={booking.paymentType === 'full'}
+    >
+        {booking.paymentType === 'full' ? (
+            <option value="Confirmed">Confirmed</option>
+        ) : (
+            <>
+                <option value="Pending">Pending</option>
+                <option value="Confirmed">Confirmed</option>
+                <option value="Canceled">Canceled</option>
+                <option value="Completed">Completed</option>
+            </>
+        )}
+    </select>
+</td>
                                         <td className="px-4 py-3">
                                             <div className="flex space-x-2">
                                                 <button
@@ -486,6 +502,13 @@ const AdminBookings = () => {
                                                     <X size={14} />
                                                     Cancel
                                                 </button>
+                                                        <button
+            onClick={() => handleDelete(booking.bookingId)}
+            className="px-3 py-1 bg-red-600 text-white rounded-md hover:bg-red-700 text-sm flex items-center gap-1"
+        >
+            <Trash2 size={14} />
+            Delete
+        </button>
                                             </div>
                                         </td>
                                     </tr>

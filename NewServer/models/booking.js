@@ -16,7 +16,7 @@ const bookingSchema = new mongoose.Schema({
       aadhar: { type: String, required: true }
     }
   ], // ✅ Store traveler details
-  status: { type: String, default: "Confirmed" },
+  status: { type: String },
 }, { timestamps: true });
 
 module.exports = mongoose.model("Booking", bookingSchema);
