@@ -243,3 +243,56 @@ exports.deleteUser = async (req, res) => {
     res.status(500).json({ message: "Internal server error" });
   }
 };
+// Google Auth - Get User or Create if doesn't exist
+exports.googleAuth = async (req, res) => {
+  try {
+    const { googleId, email, name } = req.body;
+
+    // Check if user exists with this googleId
+    let user = await User.findOne({ googleId });
+
+    if (!user) {
+      // If user doesn't exist, create a new one
+      user = new User({
+        googleId,
+        email,
+        name,
+        // Password is not required for Google-authenticated users
+      });
+
+      await user.save();
+    }
+
+    const expiresIn = 10 * 60 * 60;
+    const token = jwt.sign(
+      { id: user._id, email: user.email, role: user.role },
+      process.env.JWT_SECRET,
+      { expiresIn }
+    );
+
+    res.status(200).json({
+      token,
+      expiresIn,
+      user: { name: user.name, email: user.email, phone: user.phone },
+    });
+  } catch (error) {
+    console.error("Error in googleAuth:", error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+};
+
+// Check if Google user exists
+exports.checkGoogleUser = async (req, res) => {
+  try {
+    const { googleId } = req.body;
+    const user = await User.findOne({ googleId });
+
+    if (user) {
+      return res.status(200).json({ exists: true });
+    }
+    res.status(200).json({ exists: false });
+  } catch (error) {
+    console.error("Error checking Google user:", error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+};

@@ -5,7 +5,9 @@ const {
   getAllUsers,
   sendOTP,
   verifyOTPAndResetPassword,
-  verifyOnlyOTP
+  verifyOnlyOTP,
+  googleAuth,
+  checkGoogleUser
 } = require("../../controllers/userController");
 const authMiddleware = require("../../middlewares/authMiddleware");
 
@@ -19,7 +21,9 @@ router.post("/login", loginUser);
 router.post("/send-otp", sendOTP);
 router.post("/reset-password-otp", verifyOTPAndResetPassword);
 router.post("/verify-otp", verifyOnlyOTP);
-
+// Add these routes after the existing ones
+router.post("/google-auth", googleAuth);
+router.post("/check-google-user", checkGoogleUser);
 // Other Routes
 router.get("/all", authMiddleware, getAllUsers);
 
