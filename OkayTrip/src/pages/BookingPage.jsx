@@ -88,7 +88,7 @@ const BookingPage = () => {
     let baseAmount = 0;
 
     if (selectedPayment === "advance") {
-      baseAmount = 2000;
+      baseAmount = 1500;
     } else if (selectedPayment === "partial") {
       baseAmount = base * 0.5 * travelerCount;
     } else if (selectedPayment === "full") {
@@ -374,7 +374,7 @@ const BookingPage = () => {
                 {[
                   { value: "full", label: "Full Payment", subtitle: "Pay complete amount now", icon: <FaCheckCircle />, badge: "Most Popular", badgeColor: "bg-green-500" },
                   { value: "partial", label: "Partial Payment", subtitle: "Pay 50% now, rest later", icon: <FaRegCreditCard />, badge: "Flexible", badgeColor: "bg-blue-500" },
-                  { value: "advance", label: "Advance Payment", subtitle: "Pay ₹2000 now, rest later", icon: <FaWallet />, badge: "Budget Friendly", badgeColor: "bg-purple-500" },
+                  { value: "advance", label: "Advance Payment", subtitle: "Pay ₹1500 now, rest later", icon: <FaWallet />, badge: "Budget Friendly", badgeColor: "bg-purple-500" },
                 ].map((option) => (
                   <div
                     key={option.value}
@@ -546,7 +546,7 @@ const BookingPage = () => {
                   <p className="text-sm text-gray-600 capitalize">
                     {selectedPayment === "full" && "Full Payment - Pay complete amount now"}
                     {selectedPayment === "partial" && "Partial Payment - Pay 50% now"}
-                    {selectedPayment === "advance" && "Advance Payment - Pay ₹2000 now"}
+                    {selectedPayment === "advance" && "Advance Payment - Pay ₹1500 now"}
                   </p>
                 </div>
 
