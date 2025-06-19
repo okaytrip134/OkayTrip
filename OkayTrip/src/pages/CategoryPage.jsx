@@ -67,10 +67,10 @@ const CategoryPage = () => {
 
   const handleBooking = (packageId) => {
     if (!userToken) {
-      setSelectedPackageId(packageId); // Store package ID
-      setShowAuthPopup(true); // Show login popup
+      setSelectedPackageId(packageId); 
+      setShowAuthPopup(true); 
     } else {
-      navigate(`/booking/${packageId}`); // Redirect if logged in
+      navigate(`/booking/${packageId}`); 
     }
   };
 
@@ -197,10 +197,9 @@ const CategoryPage = () => {
     [loading, hasMore]
   );
 
-  // Only render the UI after all hooks have been called
   if (loading && !packages.length) {
     return (
-      <div className="w-full max-w-[1100px] mx-auto px-4 lg:px-8 py-4 bg-gray-50 min-h-screen">
+      <div className="w-full max-w-[1100px] mx-auto px-4 lg:px-8 py-4 min-h-screen">
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 lg:gap-6 justify-items-center">
           {[...Array(6)].map((_, index) => (
             <div key={index} className="w-full max-w-[350px]">
@@ -238,7 +237,7 @@ const CategoryPage = () => {
   };
 
   return (
-    <div className="w-full max-w-[1100px] mx-auto px-4 lg:px-0 py-4 bg-gray-50 min-h-screen">
+    <div className="w-full max-w-[1100px] mx-auto px-4 lg:px-0 py-4 min-h-screen">
       <h1 className="text-xl md:text-2xl font-bold mb-6">Packages in this {category}</h1>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 lg:gap-6 justify-items-center">

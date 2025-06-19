@@ -185,7 +185,7 @@ const HorizontalMenu = () => {
               <img
                 src={explore}
                 alt="Explore"
-                className="w-6 h-6 transform transition-transform duration-300 group-hover:scale-110"
+                className="w-8 h-8 transform transition-transform duration-300 group-hover:scale-110"
               />
             </div>
             <div className="text-xs mt-1 font-medium border-b-2 border-transparent group-hover:border-orange-500 transition-all duration-300">
@@ -206,7 +206,7 @@ const HorizontalMenu = () => {
                 <img
                   src={`${import.meta.env.VITE_APP_API_URL}${category.svgPath}`}
                   alt={category.name}
-                  className="w-6 h-6 transform transition-transform duration-300 group-hover:scale-110"
+                  className="w-8 h-8 transform transition-transform duration-300 group-hover:scale-110"
                 />
                 {category.isTrending && (
                   <div className="absolute top-1 right-[-1.75rem] bg-orange-500 text-white text-[6px] font-semibold px-1 py-[1px] rounded-full shadow">
