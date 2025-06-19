@@ -251,7 +251,7 @@ const CategoryPage = () => {
             <div
               key={pkg._id}
               {...packageProps}
-              className="w-full max-w-[350px] rounded transition cursor-pointer relative bg-white shadow-sm hover:shadow-md"
+              className="w-full max-w-[350px] rounded relative bg-white"
               onClick={() => handlePackageClick(pkg)}
             >
               <div className="relative">
