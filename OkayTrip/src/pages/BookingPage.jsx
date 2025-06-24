@@ -88,14 +88,14 @@ const BookingPage = () => {
     let baseAmount = 0;
 
     if (selectedPayment === "advance") {
-      baseAmount = 1500;
+      baseAmount = 1500 * travelerCount; // ✅ FIX: Multiply by traveler count
     } else if (selectedPayment === "partial") {
       baseAmount = base * 0.5 * travelerCount;
     } else if (selectedPayment === "full") {
       baseAmount = base * travelerCount;
     }
 
-    // ✅ Tax logic for ALL cases
+    // ✅ Tax logic
     const surcharge = baseAmount * 0.02;
     const gstOnSurcharge = surcharge * 0.18;
     const taxAmount = surcharge + gstOnSurcharge;
@@ -109,6 +109,7 @@ const BookingPage = () => {
       travelerCount,
     };
   };
+
 
   const { baseAmount, taxAmount, totalAmount, travelerCount } = calculatePaymentAmount();
 
@@ -173,10 +174,10 @@ const BookingPage = () => {
         {/* Header Section with Logo */}
         <div className="text-center mb-8">
           <div className="flex items-center justify-center mb-1">
-          
-              <div className="flex items-cente">
-                <img src={logo} alt="OkayTrip" className="h-20 w-30" />
-              </div>
+
+            <div className="flex items-cente">
+              <img src={logo} alt="OkayTrip" className="h-20 w-30" />
+            </div>
             {/* </div> */}
           </div>
           <h1 className="text-4xl font-bold text-gray-800 mb-2">Complete Your Booking</h1>
@@ -228,7 +229,7 @@ const BookingPage = () => {
                   <p className="text-gray-600">Choose your travel companion preference</p>
                 </div>
               </div>
-              
+
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 {[
                   { value: "solo", label: "Solo Traveler", description: "1 person", icon: <FaUser />, color: "blue" },
@@ -237,11 +238,10 @@ const BookingPage = () => {
                 ].map((option) => (
                   <div
                     key={option.value}
-                    className={`relative border-2 rounded-xl p-6 cursor-pointer transition-all duration-300 hover:shadow-md ${
-                      groupType === option.value
+                    className={`relative border-2 rounded-xl p-6 cursor-pointer transition-all duration-300 hover:shadow-md ${groupType === option.value
                         ? "border-orange-500 bg-orange-50 shadow-lg transform scale-105"
                         : "border-gray-200 hover:border-gray-300"
-                    }`}
+                      }`}
                     onClick={() => setGroupType(option.value)}
                   >
                     <div className="text-center">
@@ -308,7 +308,7 @@ const BookingPage = () => {
                           Traveler {index + 1} {index === 0 && <span className="bg-green-100 text-green-700 px-2 py-1 rounded-full text-xs ml-2">Primary</span>}
                         </h4>
                       </div>
-                      
+
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
                           <label className="block text-sm font-medium text-gray-700 mb-2">Full Name *</label>
@@ -345,11 +345,23 @@ const BookingPage = () => {
                         <div>
                           <label className="block text-sm font-medium text-gray-700 mb-2">Aadhar Number *</label>
                           <input
-                            placeholder="12-digit Aadhar number"
-                            className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all"
-                            value={traveler.aadhar}
-                            onChange={(e) => handleInputChange(index, "aadhar", e.target.value)}
+                            type="text"
+                            placeholder="XXXX-XXXX-XXXX"
+                            maxLength={14} // 12 digits + 2 hyphens
+                            className="border border-gray-300 rounded-md px-4 py-2 w-full focus:outline-none focus:ring-2 focus:ring-orange-500"
+                            value={traveler.aadhaar}
+                            onChange={(e) => {
+                              const raw = e.target.value.replace(/\D/g, "").substring(0, 12); // ✅ Remove all non-digits
+                              const formatted = raw.replace(/(\d{4})(\d{0,4})(\d{0,4})/, function (_, g1, g2, g3) {
+                                return [g1, g2, g3].filter(Boolean).join("-");
+                              });
+
+                              const updatedTravelers = [...travelers];
+                              updatedTravelers[index].aadhaar = formatted;
+                              setTravelers(updatedTravelers);
+                            }}
                           />
+
                         </div>
                       </div>
                     </div>
@@ -378,11 +390,10 @@ const BookingPage = () => {
                 ].map((option) => (
                   <div
                     key={option.value}
-                    className={`relative border-2 rounded-xl p-6 cursor-pointer transition-all duration-300 ${
-                      selectedPayment === option.value
+                    className={`relative border-2 rounded-xl p-6 cursor-pointer transition-all duration-300 ${selectedPayment === option.value
                         ? "border-orange-500 bg-orange-50 shadow-lg"
                         : "border-gray-200 hover:border-gray-300 hover:shadow-md"
-                    }`}
+                      }`}
                     onClick={() => setSelectedPayment(option.value)}
                   >
                     <div className="flex items-center justify-between">
@@ -510,7 +521,7 @@ const BookingPage = () => {
             <div className="sticky top-8">
               <div className="bg-white rounded-2xl shadow-lg p-6 border border-gray-100">
                 <h3 className="text-xl font-bold text-gray-800 mb-6 text-center">Booking Summary</h3>
-                
+
                 {/* Package Info */}
                 <div className="mb-6 p-4 bg-gray-50 rounded-lg">
                   <h4 className="font-semibold text-gray-800 mb-2">{packageData.title}</h4>
@@ -552,11 +563,10 @@ const BookingPage = () => {
 
                 {/* Proceed Button */}
                 <button
-                  className={`w-full py-4 rounded-xl text-white font-bold text-lg transition-all duration-300 ${
-                    agreedToPolicy 
+                  className={`w-full py-4 rounded-xl text-white font-bold text-lg transition-all duration-300 ${agreedToPolicy
                       ? "bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 shadow-lg hover:shadow-xl transform hover:-translate-y-1"
                       : "bg-gray-400 cursor-not-allowed"
-                  }`}
+                    }`}
                   onClick={handleProceedToPayment}
                   disabled={!agreedToPolicy}
                 >

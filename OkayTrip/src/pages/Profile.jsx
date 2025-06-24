@@ -6,6 +6,7 @@ import SupportAndFAQs from "./SupportAndFAQs";
 import UserFooter from "../users/UserFooter"; // Correctly imported
 import ProfileBookings from "./ProfileBooking";
 import UserCoupons from "./PurchasedCoupon";
+import WalletPage from "../components/Okaywallet";
 
 const Profile = () => {
   const API_URL = "http://localhost:8000";
@@ -37,13 +38,14 @@ const Profile = () => {
         </div>
 
         {/* Main Content */}
-        <div className="flex-grow p-6">
+        <div className="flex-grow p-2 md:p-4 lg:p-6">
           {activeTab === "profile" && (
             <UserProfileContent activeTab={activeTab} user={user} />
           )}
           {activeTab === "support" && <SupportAndFAQs />}
           {activeTab === "bookings" && <ProfileBookings />}
           {activeTab === "usercoupons" && <UserCoupons/>}
+          {activeTab === "userwallet" && <WalletPage/>}
         </div>
       </div>
       <UserFooter /> {/* Footer correctly placed */}
@@ -52,3 +54,4 @@ const Profile = () => {
 };
 
 export default Profile;
+  

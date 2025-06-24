@@ -28,7 +28,7 @@ exports.initiatePayment = async (req, res) => {
     }
 
     const order = await razorpay.orders.create({
-      amount: amount * 100,
+      amount: Math.round(amount * 100),
       currency: "INR",
       receipt: `TEMP-${Date.now()}`, // temporary unique value
       payment_capture: 1,
