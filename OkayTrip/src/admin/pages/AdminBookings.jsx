@@ -1,12 +1,12 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { message, Modal } from "antd";
-import { 
-    Search, 
-    Download, 
-    RefreshCw, 
-    Eye, 
-    X, 
+import {
+    Search,
+    Download,
+    RefreshCw,
+    Eye,
+    X,
     Filter,
     Trash2
 } from "lucide-react";
@@ -70,28 +70,28 @@ const AdminBookings = () => {
         }
     }, [searchText, bookings]);
 
-const handleStatusChange = async (bookingId, newStatus) => {
-    try {
-        // Find the booking in the state
-        const booking = bookings.find(b => b.bookingId === bookingId);
-        
-        // If payment is full, status must be Confirmed
-        const statusToUpdate = booking.paymentType === 'full' ? 'Confirmed' : newStatus;
+    const handleStatusChange = async (bookingId, newStatus) => {
+        try {
+            // Find the booking in the state
+            const booking = bookings.find(b => b.bookingId === bookingId);
 
-        await axios.put(
-            `${import.meta.env.VITE_APP_API_URL}/api/admin/bookings/${bookingId}/status`,
-            { status: statusToUpdate },
-            {
-                headers: { Authorization: `Bearer ${localStorage.getItem("adminToken")}` },
-            }
-        );
-        
-        message.success(`Booking status updated to ${statusToUpdate}`);
-        fetchBookings(filters);
-    } catch (error) {
-        message.error("Failed to update booking status");
-    }
-};
+            // If payment is full, status must be Confirmed
+            const statusToUpdate = booking.paymentType === 'full' ? 'Confirmed' : newStatus;
+
+            await axios.put(
+                `${import.meta.env.VITE_APP_API_URL}/api/admin/bookings/${bookingId}/status`,
+                { status: statusToUpdate },
+                {
+                    headers: { Authorization: `Bearer ${localStorage.getItem("adminToken")}` },
+                }
+            );
+
+            message.success(`Booking status updated to ${statusToUpdate}`);
+            fetchBookings(filters);
+        } catch (error) {
+            message.error("Failed to update booking status");
+        }
+    };
 
     const handleCancelBooking = (bookingId) => {
         confirm({
@@ -189,26 +189,26 @@ const handleStatusChange = async (bookingId, newStatus) => {
             <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
                 <div className="bg-white rounded-lg p-6 w-full max-w-md mx-4">
                     <h3 className="text-lg font-semibold mb-4">Filter Bookings</h3>
-                    
+
                     <div className="space-y-4">
                         <div>
                             <label className="block text-sm font-medium mb-1">Search</label>
-                            <input 
-                                type="text" 
+                            <input
+                                type="text"
                                 placeholder="Search by booking ID, user name, or package"
                                 className="w-full p-2 border border-gray-300 rounded-md"
                             />
                         </div>
                     </div>
-                    
+
                     <div className="flex justify-end space-x-2 mt-6">
-                        <button 
+                        <button
                             onClick={clearFilters}
                             className="px-4 py-2 border border-gray-300 rounded-md hover:bg-gray-50"
                         >
                             Clear Filters
                         </button>
-                        <button 
+                        <button
                             onClick={() => setIsFilterModalVisible(false)}
                             className="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600"
                         >
@@ -228,14 +228,14 @@ const handleStatusChange = async (bookingId, newStatus) => {
                 <div className="bg-white rounded-lg p-6 w-full max-w-4xl mx-4 max-h-[90vh] overflow-y-auto">
                     <div className="flex justify-between items-center mb-4">
                         <h3 className="text-lg font-semibold">Booking Details</h3>
-                        <button 
+                        <button
                             onClick={() => setIsModalVisible(false)}
                             className="text-gray-500 hover:text-gray-700"
                         >
                             <X size={20} />
                         </button>
                     </div>
-                    
+
                     <div className="space-y-6">
                         {/* Booking Information */}
                         <div>
@@ -245,12 +245,13 @@ const handleStatusChange = async (bookingId, newStatus) => {
                                 <div><strong>Payment ID:</strong> {selectedBooking.paymentId}</div>
                                 <div><strong>Booking Date:</strong> {new Date(selectedBooking.createdAt).toLocaleString('en-IN')}</div>
                                 <div>
-                                    <strong>Status:</strong> 
+                                    <strong>Status:</strong>
                                     <span className={`ml-2 px-2 py-1 rounded-full text-xs ${getStatusColor(selectedBooking.status)}`}>
                                         {selectedBooking.status}
                                     </span>
                                 </div>
                                 <div><strong>Payment Type:</strong> {selectedBooking.paymentType}</div>
+                                <div><strong>Payment Mode:</strong> {selectedBooking.paymentMethod || "N/A"}</div>
                                 <div><strong>Amount:</strong> ₹{selectedBooking.amount}</div>
                             </div>
                         </div>
@@ -295,9 +296,9 @@ const handleStatusChange = async (bookingId, newStatus) => {
                             </div>
                         )}
                     </div>
-                    
+
                     <div className="flex justify-end mt-6">
-                        <button 
+                        <button
                             onClick={() => setIsModalVisible(false)}
                             className="px-4 py-2 bg-gray-500 text-white rounded-md hover:bg-gray-600"
                         >
@@ -358,7 +359,7 @@ const handleStatusChange = async (bookingId, newStatus) => {
                         {searchText && (
                             <span className="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm flex items-center gap-2">
                                 Search: {searchText}
-                                <button 
+                                <button
                                     onClick={() => setSearchText("")}
                                     className="text-blue-600 hover:text-blue-800"
                                 >
@@ -369,7 +370,7 @@ const handleStatusChange = async (bookingId, newStatus) => {
                         {Object.entries(filters).map(([key, value]) => (
                             <span key={key} className="bg-gray-100 text-gray-800 px-3 py-1 rounded-full text-sm flex items-center gap-2">
                                 {key}: {value}
-                                <button 
+                                <button
                                     onClick={() => {
                                         const newFilters = { ...filters };
                                         delete newFilters[key];
@@ -381,7 +382,7 @@ const handleStatusChange = async (bookingId, newStatus) => {
                                 </button>
                             </span>
                         ))}
-                        <button 
+                        <button
                             onClick={clearFilters}
                             className="text-red-600 hover:text-red-800 text-sm"
                         >
@@ -435,11 +436,10 @@ const handleStatusChange = async (bookingId, newStatus) => {
                                 </tr>
                             ) : (
                                 filteredBookings.map((booking, index) => (
-                                    <tr 
-                                        key={booking.bookingId} 
-                                        className={`border-b border-gray-200  ${
-                                            index % 2 === 0 ? 'bg-gray-100' : 'bg-gray-200'
-                                        }`}
+                                    <tr
+                                        key={booking.bookingId}
+                                        className={`border-b border-gray-200  ${index % 2 === 0 ? 'bg-gray-100' : 'bg-gray-200'
+                                            }`}
                                     >
                                         <td className="px-4 py-3 border-r border-gray-300">
                                             {booking.createdAt ? new Date(booking.createdAt).toLocaleDateString('en-IN', {
@@ -457,27 +457,26 @@ const handleStatusChange = async (bookingId, newStatus) => {
                                         <td className="px-4 py-3 border-r border-gray-300">
                                             {booking.packageId?.title || "N/A"}
                                         </td>
-<td className="px-4 py-3 border-r border-gray-300">
-    <select
-        value={booking.status || (booking.paymentType === 'full' ? 'Confirmed' : 'Pending')}
-        onChange={(e) => handleStatusChange(booking.bookingId, e.target.value)}
-        className={`px-2 py-1 rounded-full text-xs border-none ${
-            getStatusColor(booking.status || (booking.paymentType === 'full' ? 'Confirmed' : 'Pending'))
-        }`}
-        disabled={booking.paymentType === 'full'}
-    >
-        {booking.paymentType === 'full' ? (
-            <option value="Confirmed">Confirmed</option>
-        ) : (
-            <>
-                <option value="Pending">Pending</option>
-                <option value="Confirmed">Confirmed</option>
-                <option value="Canceled">Canceled</option>
-                <option value="Completed">Completed</option>
-            </>
-        )}
-    </select>
-</td>
+                                        <td className="px-4 py-3 border-r border-gray-300">
+                                            <select
+                                                value={booking.status || (booking.paymentType === 'full' ? 'Confirmed' : 'Pending')}
+                                                onChange={(e) => handleStatusChange(booking.bookingId, e.target.value)}
+                                                className={`px-2 py-1 rounded-full text-xs border-none ${getStatusColor(booking.status || (booking.paymentType === 'full' ? 'Confirmed' : 'Pending'))
+                                                    }`}
+                                                disabled={booking.paymentType === 'full'}
+                                            >
+                                                {booking.paymentType === 'full' ? (
+                                                    <option value="Confirmed">Confirmed</option>
+                                                ) : (
+                                                    <>
+                                                        <option value="Pending">Pending</option>
+                                                        <option value="Confirmed">Confirmed</option>
+                                                        <option value="Canceled">Canceled</option>
+                                                        <option value="Completed">Completed</option>
+                                                    </>
+                                                )}
+                                            </select>
+                                        </td>
                                         <td className="px-4 py-3">
                                             <div className="flex space-x-2">
                                                 <button
@@ -493,22 +492,21 @@ const handleStatusChange = async (bookingId, newStatus) => {
                                                 <button
                                                     onClick={() => handleCancelBooking(booking.bookingId)}
                                                     disabled={booking.status === "Canceled"}
-                                                    className={`px-3 py-1 rounded-md text-sm flex items-center gap-1 ${
-                                                        booking.status === "Canceled" 
-                                                            ? 'bg-gray-300 text-gray-500 cursor-not-allowed' 
+                                                    className={`px-3 py-1 rounded-md text-sm flex items-center gap-1 ${booking.status === "Canceled"
+                                                            ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
                                                             : 'bg-red-500 text-white hover:bg-red-600'
-                                                    }`}
+                                                        }`}
                                                 >
                                                     <X size={14} />
                                                     Cancel
                                                 </button>
-                                                        <button
-            onClick={() => handleDelete(booking.bookingId)}
-            className="px-3 py-1 bg-red-600 text-white rounded-md hover:bg-red-700 text-sm flex items-center gap-1"
-        >
-            <Trash2 size={14} />
-            Delete
-        </button>
+                                                <button
+                                                    onClick={() => handleDelete(booking.bookingId)}
+                                                    className="px-3 py-1 bg-red-600 text-white rounded-md hover:bg-red-700 text-sm flex items-center gap-1"
+                                                >
+                                                    <Trash2 size={14} />
+                                                    Delete
+                                                </button>
                                             </div>
                                         </td>
                                     </tr>

@@ -349,7 +349,7 @@ const BookingPage = () => {
                             placeholder="XXXX-XXXX-XXXX"
                             maxLength={14} // 12 digits + 2 hyphens
                             className="border border-gray-300 rounded-md px-4 py-2 w-full focus:outline-none focus:ring-2 focus:ring-orange-500"
-                            value={traveler.aadhaar}
+                            value={travelers.aadhar}
                             onChange={(e) => {
                               const raw = e.target.value.replace(/\D/g, "").substring(0, 12); // ✅ Remove all non-digits
                               const formatted = raw.replace(/(\d{4})(\d{0,4})(\d{0,4})/, function (_, g1, g2, g3) {

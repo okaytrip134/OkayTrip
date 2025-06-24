@@ -1,6 +1,14 @@
 const Booking = require("../models/booking");
 const Package = require("../models/package");
 const Counter = require("../models/counter");
+const Razorpay = require("razorpay"); // ✅ Add Razorpay import
+require("dotenv").config(); // Load environment variables
+
+// ✅ Initialize Razorpay with Correct API Keys
+const razorpay = new Razorpay({
+  key_id: process.env.RAZORPAY_KEY_ID,
+  key_secret: process.env.RAZORPAY_KEY_SECRET,
+});
 
 const getNextBookingNumber = async () => {
   const result = await Counter.findOneAndUpdate(
@@ -33,7 +41,15 @@ exports.confirmBooking = async (req, res) => {
       return res.status(400).json({ message: "All traveler details must be provided." });
     }
 
-    // ✅ Generate bookingId here (IMPORTANT)
+    // ✅ Fetch Razorpay Payment Method (upi, card, wallet, etc.)
+    let paymentMethod = "unknown";
+    try {
+      const razorpayPayment = await razorpay.payments.fetch(paymentId);
+      paymentMethod = razorpayPayment?.method || "unknown";
+    } catch (err) {
+      console.error("Error fetching payment method:", err.message);
+    }
+
     const bookingId = await getNextBookingNumber();
 
     packageData.availableSeats -= seatsToBook;
@@ -46,6 +62,7 @@ exports.confirmBooking = async (req, res) => {
       paymentId,
       amount,
       paymentType,
+      paymentMethod, // ✅ Save to DB
       seatsBooked: seatsToBook,
       travelers,
       status: "Confirmed",
@@ -72,6 +89,7 @@ exports.confirmBooking = async (req, res) => {
     res.status(500).json({ success: false, message: "Booking confirmation failed" });
   }
 };
+
 exports.getUserBookings = async (req, res) => {
   try {
     const userId = req.user.id; // Extract user ID from auth middleware

@@ -8,6 +8,7 @@ const bookingSchema = new mongoose.Schema({
   amount: { type: Number, required: true },
   paymentType: { type: String, enum: ["full", "partial", "advance"], required: true },
   seatsBooked: { type: Number, required: true }, // ✅ Store number of seats booked
+  paymentMethod: { type: String }, // like upi, card, wallet, etc.
   travelers: [
     {
       name: { type: String, required: true },
