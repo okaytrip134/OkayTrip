@@ -7,6 +7,8 @@ import "react-toastify/dist/ReactToastify.css";
 import logo from "../assets/Logo/Trip ok new 2 black-01.png";
 import { FaLock } from "react-icons/fa";
 import { Spin } from "antd";
+import { Player } from "@lottiefiles/react-lottie-player";
+import successTick from "../animation/successTick.json"; // path to your JSON
 
 const PaymentPage = () => {
   const location = useLocation();
@@ -157,8 +159,14 @@ const PaymentPage = () => {
     <div className="max-w-3xl mx-auto p-8 min-h-screen flex flex-col justify-center items-center bg-gray-50">
       {loadingRedirect ? (
         <div className="flex flex-col items-center justify-center">
-          <Spin size="large" />
-          <p className="text-gray-600 mt-4">Processing your booking, please wait...</p>
+          <Player
+            autoplay
+            loop={false}
+            src={successTick}
+            style={{ height: "200px", width: "200px" }}
+          />
+          <p className="text-green-600 font-semibold text-xl mt-4">Payment Successful!</p>
+          <p className="text-gray-600 text-sm">Redirecting to booking confirmation...</p>
         </div>
       ) : (
         <div className="bg-white shadow-lg rounded-lg p-6 w-full max-w-lg text-center border border-gray-200">

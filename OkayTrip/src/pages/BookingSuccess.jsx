@@ -2,6 +2,7 @@ import React, { useEffect, useRef } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { FaCheckCircle, FaPrint, FaHome } from "react-icons/fa";
 import logo from "../assets/Logo/Trip ok new 2 black-01.png"; // ✅ Import company logo
+import { motion } from "framer-motion";
 
 const BookingSuccess = () => {
   const location = useLocation();
@@ -24,7 +25,12 @@ const BookingSuccess = () => {
 
   return (
     <div className="max-w-3xl mx-auto p-8 min-h-screen flex flex-col justify-center items-center bg-gray-50">
-      <div className="bg-white shadow-lg rounded-lg p-6 w-full max-w-lg text-center border border-gray-200">
+      <motion.div
+        initial={{ opacity: 0, scale: 0.9 }}
+        animate={{ opacity: 1, scale: 1 }}
+        transition={{ duration: 0.5 }}
+        className="bg-white shadow-lg rounded-lg p-6 w-full max-w-lg text-center border border-gray-200"
+      >
         <FaCheckCircle className="text-green-500 text-5xl mx-auto mb-4" />
         <h1 className="text-2xl font-bold text-gray-900 mb-2">Booking Successful!</h1>
         <p className="text-gray-600 mb-4">Thank you for your payment. Your booking has been confirmed.</p>
@@ -70,7 +76,7 @@ const BookingSuccess = () => {
         <p className="text-gray-400 text-sm mt-4 no-print">
           You can download and print this invoice for your records.
         </p>
-      </div>
+      </motion.div>
 
       {/* ✅ CSS for Printing */}
       <style>
