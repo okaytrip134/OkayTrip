@@ -239,8 +239,8 @@ const BookingPage = () => {
                   <div
                     key={option.value}
                     className={`relative border-2 rounded-xl p-6 cursor-pointer transition-all duration-300 hover:shadow-md ${groupType === option.value
-                        ? "border-orange-500 bg-orange-50 shadow-lg transform scale-105"
-                        : "border-gray-200 hover:border-gray-300"
+                      ? "border-orange-500 bg-orange-50 shadow-lg transform scale-105"
+                      : "border-gray-200 hover:border-gray-300"
                       }`}
                     onClick={() => setGroupType(option.value)}
                   >
@@ -345,21 +345,22 @@ const BookingPage = () => {
                         <div>
                           <label className="block text-sm font-medium text-gray-700 mb-2">Aadhar Number *</label>
                           <input
-  type="text"
-  placeholder="XXXX-XXXX-XXXX"
-  maxLength={14} // 12 digits + 2 hyphens
-  className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all"
-  value={travelers.aadhar}  // ✅ use consistent key
-  onChange={(e) => {
-    const raw = e.target.value.replace(/\D/g, "").substring(0, 12); // remove non-digits
-    const formatted = raw.replace(/(\d{4})(\d{0,4})(\d{0,4})/, (_, g1, g2, g3) =>
-      [g1, g2, g3].filter(Boolean).join("-")
-    );
-    const updated = [...travelers];
-    updated[index].aadhar = formatted;
-    setTravelers(updated);
-  }}
-/>
+                            type="text"
+                            placeholder="XXXX-XXXX-XXXX"
+                            maxLength={14} // 12 digits + 2 hyphens
+                            className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all"
+                            value={traveler.aadhar}  // ✅ use consistent key
+                            onChange={(e) => {
+                              const raw = e.target.value.replace(/\D/g, "").substring(0, 12); // remove non-digits
+                              const formatted = raw.replace(/(\d{4})(\d{0,4})(\d{0,4})/, (_, g1, g2, g3) =>
+                                [g1, g2, g3].filter(Boolean).join("-")
+                              );
+                              const updated = [...travelers];
+                              updated[index].aadhar = formatted;
+                              setTravelers(updated);
+                            }}
+                          />
+
 
                         </div>
                       </div>
@@ -390,8 +391,8 @@ const BookingPage = () => {
                   <div
                     key={option.value}
                     className={`relative border-2 rounded-xl p-6 cursor-pointer transition-all duration-300 ${selectedPayment === option.value
-                        ? "border-orange-500 bg-orange-50 shadow-lg"
-                        : "border-gray-200 hover:border-gray-300 hover:shadow-md"
+                      ? "border-orange-500 bg-orange-50 shadow-lg"
+                      : "border-gray-200 hover:border-gray-300 hover:shadow-md"
                       }`}
                     onClick={() => setSelectedPayment(option.value)}
                   >
@@ -563,8 +564,8 @@ const BookingPage = () => {
                 {/* Proceed Button */}
                 <button
                   className={`w-full py-4 rounded-xl text-white font-bold text-lg transition-all duration-300 ${agreedToPolicy
-                      ? "bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 shadow-lg hover:shadow-xl transform hover:-translate-y-1"
-                      : "bg-gray-400 cursor-not-allowed"
+                    ? "bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 shadow-lg hover:shadow-xl transform hover:-translate-y-1"
+                    : "bg-gray-400 cursor-not-allowed"
                     }`}
                   onClick={handleProceedToPayment}
                   disabled={!agreedToPolicy}
