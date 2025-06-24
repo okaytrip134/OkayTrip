@@ -345,22 +345,21 @@ const BookingPage = () => {
                         <div>
                           <label className="block text-sm font-medium text-gray-700 mb-2">Aadhar Number *</label>
                           <input
-                            type="text"
-                            placeholder="XXXX-XXXX-XXXX"
-                            maxLength={14} // 12 digits + 2 hyphens
-                            className="border border-gray-300 rounded-md px-4 py-2 w-full focus:outline-none focus:ring-2 focus:ring-orange-500"
-                            value={travelers.aadhar}
-                            onChange={(e) => {
-                              const raw = e.target.value.replace(/\D/g, "").substring(0, 12); // ✅ Remove all non-digits
-                              const formatted = raw.replace(/(\d{4})(\d{0,4})(\d{0,4})/, function (_, g1, g2, g3) {
-                                return [g1, g2, g3].filter(Boolean).join("-");
-                              });
-
-                              const updatedTravelers = [...travelers];
-                              updatedTravelers[index].aadhaar = formatted;
-                              setTravelers(updatedTravelers);
-                            }}
-                          />
+  type="text"
+  placeholder="XXXX-XXXX-XXXX"
+  maxLength={14} // 12 digits + 2 hyphens
+  className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all"
+  value={travelers.aadhar}  // ✅ use consistent key
+  onChange={(e) => {
+    const raw = e.target.value.replace(/\D/g, "").substring(0, 12); // remove non-digits
+    const formatted = raw.replace(/(\d{4})(\d{0,4})(\d{0,4})/, (_, g1, g2, g3) =>
+      [g1, g2, g3].filter(Boolean).join("-")
+    );
+    const updated = [...travelers];
+    updated[index].aadhar = formatted;
+    setTravelers(updated);
+  }}
+/>
 
                         </div>
                       </div>
