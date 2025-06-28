@@ -1,24 +1,22 @@
 import React, { useEffect, useRef } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { FaCheckCircle, FaPrint, FaHome } from "react-icons/fa";
-import logo from "../assets/Logo/Trip ok new 2 black-01.png"; // ✅ Import company logo
+import logo from "../assets/Logo/Trip ok new 2 black-01.png";
 import { motion } from "framer-motion";
 
 const BookingSuccess = () => {
   const location = useLocation();
   const navigate = useNavigate();
-  const invoiceRef = useRef(); // ✅ Ref for printing
+  const invoiceRef = useRef();
 
-  // ✅ Extract payment details from location state
   const { bookingId, paymentId, packageTitle, amount } = location.state || {};
 
   useEffect(() => {
     if (!bookingId || !paymentId || !packageTitle || !amount) {
-      navigate("/"); // Redirect to home if accessed without data
+      navigate("/");
     }
   }, [bookingId, paymentId, packageTitle, amount, navigate]);
 
-  // ✅ Function to Print Invoice (only prints the invoice div)
   const handlePrintInvoice = () => {
     window.print();
   };
@@ -31,13 +29,14 @@ const BookingSuccess = () => {
         transition={{ duration: 0.5 }}
         className="bg-white shadow-lg rounded-lg p-6 w-full max-w-lg text-center border border-gray-200"
       >
-        <FaCheckCircle className="text-green-500 text-5xl mx-auto mb-4" />
+        {/* ✅ Static Icon Only */}
+        {/* <FaCheckCircle className="text-green-500 text-5xl mx-auto mb-4" /> */}
+        <img src="/checklist.png" alt="booking success" className="w-14 h-14 mb-4 mx-auto" />
         <h1 className="text-2xl font-bold text-gray-900 mb-2">Booking Successful!</h1>
         <p className="text-gray-600 mb-4">Thank you for your payment. Your booking has been confirmed.</p>
 
         {/* ✅ Invoice Section */}
         <div ref={invoiceRef} className="bg-gray-100 p-6 rounded-lg text-left shadow-md invoice">
-          {/* ✅ Company Logo */}
           <div className="flex justify-between items-center mb-4">
             <img src={logo} alt="Company Logo" className="h-12" />
             <p className="text-sm text-gray-500">Invoice # {bookingId}</p>
@@ -56,7 +55,7 @@ const BookingSuccess = () => {
           </div>
         </div>
 
-        {/* ✅ Print & Home Buttons */}
+        {/* ✅ Buttons */}
         <div className="flex flex-col md:flex-row gap-3 mt-6 no-print">
           <button
             onClick={handlePrintInvoice}
@@ -83,10 +82,10 @@ const BookingSuccess = () => {
         {`
           @media print {
             body * {
-              visibility: hidden; /* Hide everything */
+              visibility: hidden;
             }
             .invoice, .invoice * {
-              visibility: visible; /* Show only the invoice */
+              visibility: visible;
             }
             .invoice {
               position: absolute;
@@ -97,7 +96,7 @@ const BookingSuccess = () => {
               box-shadow: none;
             }
             .no-print {
-              display: none; /* Hide buttons during print */
+              display: none;
             }
           }
         `}

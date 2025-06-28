@@ -360,8 +360,6 @@ const BookingPage = () => {
                               setTravelers(updated);
                             }}
                           />
-
-
                         </div>
                       </div>
                     </div>
