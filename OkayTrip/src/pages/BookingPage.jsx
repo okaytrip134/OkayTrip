@@ -19,7 +19,9 @@ const BookingPage = () => {
   const [discountAmount, setDiscountAmount] = useState(0);
   const [finalAmount, setFinalAmount] = useState(0); // initialize to 0, then update after calculation
   // fallback if no coupon
+  const [availableCoupons, setAvailableCoupons] = useState([]);
   const [couponApplied, setCouponApplied] = useState(false);
+  const [loadingCoupons, setLoadingCoupons] = useState(false);
 
 
   const navigate = useNavigate();
@@ -124,7 +126,24 @@ const BookingPage = () => {
     setFinalAmount(totalAmount);
   }, [totalAmount]);
 
+  useEffect(() => {
+    if (totalAmount > 0) {
+      const fetchAvailableCoupons = async () => {
+        setLoadingCoupons(true);
+        try {
+          const { data } = await axios.get(`${import.meta.env.VITE_APP_API_URL}/api/discount/`);
+          const filtered = data.filter(c => totalAmount >= c.minOrderAmount);
+          setAvailableCoupons(filtered);
+        } catch (error) {
+          console.error("Failed to fetch available coupons", error);
+        } finally {
+          setLoadingCoupons(false);
+        }
+      };
 
+      fetchAvailableCoupons();
+    }
+  }, [totalAmount]);
   const handleInputChange = (index, field, value) => {
     const updatedTravelers = [...travelers];
     updatedTravelers[index][field] = value;
@@ -605,13 +624,39 @@ const BookingPage = () => {
                     <span className="font-semibold">₹{taxAmount.toFixed(2)}</span>
                   </div>
 
-                  {/* Add discount row when coupon is applied */}
-                  {couponApplied && (
-                    <div className="flex justify-between items-center py-2 border-b border-gray-100">
-                      <span className="text-gray-600">Discount</span>
-                      <span className="font-semibold text-green-600">-₹{discountAmount.toFixed(2)}</span>
+                  {/* Available Coupons Section */}
+                  {loadingCoupons ? (
+                    <div className="text-center py-4">Loading coupons...</div>
+                  ) : availableCoupons.length > 0 ? (
+                    <div className="mb-4 p-4 bg-gray-50 border border-gray-200 rounded-lg shadow-sm">
+                      <h4 className="text-sm font-semibold text-gray-700 mb-2">Available Coupons</h4>
+                      <div className="flex flex-wrap gap-3">
+                        {availableCoupons.map((coupon) => {
+                          const isEligible = totalAmount >= coupon.minOrderAmount;
+                          return (
+                            <div
+                              key={coupon._id}
+                              title={isEligible ? `Get ${coupon.discountType === 'flat' ? `₹${coupon.discountValue}` : `${coupon.discountValue}% off`}` : `Minimum order ₹${coupon.minOrderAmount}`}
+                              className={`px-3 py-2 rounded-md text-sm font-medium border transition-all ${isEligible
+                                ? 'bg-green-100 text-green-800 border-green-300 hover:bg-green-200 cursor-pointer'
+                                : 'bg-gray-100 text-gray-400 border-gray-200 cursor-not-allowed opacity-60'
+                                }`}
+                              onClick={() => {
+                                if (isEligible && !couponApplied) {
+                                  setCouponCode(coupon.code);
+                                }
+                              }}
+                            >
+                              {coupon.code}
+                            </div>
+                          );
+                        })}
+                      </div>
                     </div>
+                  ) : (
+                    <div className="text-gray-500 text-sm">No coupons available</div>
                   )}
+
 
                   <div className="flex justify-between items-center py-3 bg-orange-50 rounded-lg px-4 border-2 border-orange-200">
                     <span className="text-lg font-bold text-gray-800">Total Payable</span>
@@ -688,9 +733,9 @@ const BookingPage = () => {
                 <p className="text-sm mb-4 opacity-90">Our travel experts are here to assist you</p>
                 <div className="space-y-2 text-sm">
                   {/* <div className="flex items-center">
-                    <span className="mr-2">📞</span>
-                    <span>Call: +91 1234567890</span>
-                  </div> */}
+                      <span className="mr-2">📞</span>
+                      <span>Call: +91 1234567890</span>
+                    </div> */}
                   <div className="flex items-center">
                     <span className="mr-2">✉️</span>
                     <span>Email: support@okaytrip.in</span>
