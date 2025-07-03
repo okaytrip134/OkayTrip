@@ -56,9 +56,11 @@ const UserAuth = ({ onClose }) => {
       if (isLogin) {
         localStorage.setItem("userToken", data.token);
         localStorage.setItem("userName", data.user.name);
+        localStorage.setItem("userData", JSON.stringify(data.user)); // ✅ this adds _id
         const decodedToken = JSON.parse(atob(data.token.split(".")[1]));
         localStorage.setItem("tokenExpiry", decodedToken.exp * 1000);
-      } else {
+      }
+      else {
         toast.success("Signup successful!");
       }
       onClose();
@@ -200,78 +202,79 @@ const UserAuth = ({ onClose }) => {
                     Forgot Password?
                   </button>
                 </div>
-                  <GoogleOAuthProvider clientId={import.meta.env.VITE_APP_GOOGLE_CLIENT_ID}>
-                    <GoogleLogin
-                      onSuccess={async (credentialResponse) => {
-                        try {
-                          // Decode the JWT token to get user info
-                          const decodedToken = JSON.parse(atob(credentialResponse.credential.split('.')[1]));
+                <GoogleOAuthProvider clientId={import.meta.env.VITE_APP_GOOGLE_CLIENT_ID}>
+                  <GoogleLogin
+                    onSuccess={async (credentialResponse) => {
+                      try {
+                        // Decode the JWT token to get user info
+                        const decodedToken = JSON.parse(atob(credentialResponse.credential.split('.')[1]));
 
-                          // Check if user exists
-                          const { data: checkData } = await axios.post(
-                            `${import.meta.env.VITE_APP_API_URL}/api/user/auth/check-google-user`,
-                            { googleId: decodedToken.sub }
+                        // Check if user exists
+                        const { data: checkData } = await axios.post(
+                          `${import.meta.env.VITE_APP_API_URL}/api/user/auth/check-google-user`,
+                          { googleId: decodedToken.sub }
+                        );
+
+                        if (checkData.exists) {
+                          // User exists, log them in
+                          const { data } = await axios.post(
+                            `${import.meta.env.VITE_APP_API_URL}/api/user/auth/google-auth`,
+                            {
+                              googleId: decodedToken.sub,
+                              email: decodedToken.email,
+                              name: decodedToken.name
+                            }
                           );
 
-                          if (checkData.exists) {
-                            // User exists, log them in
-                            const { data } = await axios.post(
-                              `${import.meta.env.VITE_APP_API_URL}/api/user/auth/google-auth`,
-                              {
-                                googleId: decodedToken.sub,
-                                email: decodedToken.email,
-                                name: decodedToken.name
-                              }
-                            );
+                          localStorage.setItem("userToken", data.token);
+                          localStorage.setItem("userName", data.user.name);
+                          const tokenExpiry = JSON.parse(atob(data.token.split(".")[1])).exp * 1000;
+                          localStorage.setItem("tokenExpiry", tokenExpiry);
+                          onClose();
+                        } else {
+                          // New user - create account and log in
+                          const { data } = await axios.post(
+                            `${import.meta.env.VITE_APP_API_URL}/api/user/auth/google-auth`,
+                            {
+                              googleId: decodedToken.sub,
+                              email: decodedToken.email,
+                              name: decodedToken.name,
 
-                            localStorage.setItem("userToken", data.token);
-                            localStorage.setItem("userName", data.user.name);
-                           const tokenExpiry = JSON.parse(atob(data.token.split(".")[1])).exp * 1000;
-                            localStorage.setItem("tokenExpiry", tokenExpiry);
-                            onClose();
-                          } else {
-                            // New user - create account and log in
-                            const { data } = await axios.post(
-                              `${import.meta.env.VITE_APP_API_URL}/api/user/auth/google-auth`,
-                              {
-                                googleId: decodedToken.sub,
-                                email: decodedToken.email,
-                                name: decodedToken.name,
-                                
-                              }
-                            );
+                            }
+                          );
 
-                            localStorage.setItem("userToken", data.token);
-                            localStorage.setItem("userName", data.user.name);
+                          localStorage.setItem("userToken", data.token);
+                          localStorage.setItem("userName", data.user.name);
+                          localStorage.setItem("userData", JSON.stringify(data.user)); // ✅ Store _id
                           const tokenExpiry = JSON.parse(atob(data.token.split(".")[1])).exp * 1000;
 
-                            localStorage.setItem("tokenExpiry", tokenExpiry);
-                            onClose();
-                            toast.success("Google account linked successfully!");
-                          }
-                        } catch (error) {
-                          console.error("Google login error:", error);
-                          toast.error("Failed to authenticate with Google");
+                          localStorage.setItem("tokenExpiry", tokenExpiry);
+                          onClose();
+                          toast.success("Google account linked successfully!");
                         }
-                      }}
-                      onError={() => {
-                        toast.error("Google login failed");
-                      }}
-                      render={({ onClick }) => (
-                        <button
-                          onClick={onClick}
-                          className="w-full mt-4 px-6 py-3 rounded-full bg-gray-100 text-gray-700 font-bold hover:bg-gray-200 flex items-center justify-center"
-                        >
-                          <img
-                            src="https://img.icons8.com/color/48/google-logo.png"
-                            alt="Google Icon"
-                            className="w-5 h-5 mr-2"
-                          />
-                          {isLogin ? "Sign in with Google" : "Sign up with Google"}
-                        </button>
-                      )}
-                    />
-                  </GoogleOAuthProvider>
+                      } catch (error) {
+                        console.error("Google login error:", error);
+                        toast.error("Failed to authenticate with Google");
+                      }
+                    }}
+                    onError={() => {
+                      toast.error("Google login failed");
+                    }}
+                    render={({ onClick }) => (
+                      <button
+                        onClick={onClick}
+                        className="w-full mt-4 px-6 py-3 rounded-full bg-gray-100 text-gray-700 font-bold hover:bg-gray-200 flex items-center justify-center"
+                      >
+                        <img
+                          src="https://img.icons8.com/color/48/google-logo.png"
+                          alt="Google Icon"
+                          className="w-5 h-5 mr-2"
+                        />
+                        {isLogin ? "Sign in with Google" : "Sign up with Google"}
+                      </button>
+                    )}
+                  />
+                </GoogleOAuthProvider>
 
                 <div className="mt-6 text-center">
                   <h3 className="text-lg font-bold text-gray-700 mb-2">Book With Confidence</h3>
