@@ -52,8 +52,14 @@ exports.loginUser = async (req, res) => {
     res.status(200).json({
       token,
       expiresIn,
-      user: { name: user.name, email: user.email, phone: user.phone },
+      user: {
+        _id: user._id,
+        name: user.name,
+        email: user.email,
+        phone: user.phone,
+      },
     });
+
   } catch (error) {
     console.error("Error in loginUser:", error);
     res.status(500).json({ message: "Internal server error" });
@@ -273,7 +279,12 @@ exports.googleAuth = async (req, res) => {
     res.status(200).json({
       token,
       expiresIn,
-      user: { name: user.name, email: user.email, phone: user.phone },
+      user: {
+        _id: user._id,
+        name: user.name,
+        email: user.email,
+        phone: user.phone,
+      },
     });
   } catch (error) {
     console.error("Error in googleAuth:", error);

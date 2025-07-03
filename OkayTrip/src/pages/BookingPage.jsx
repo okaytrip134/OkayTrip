@@ -3,6 +3,8 @@ import { useParams, useNavigate } from "react-router-dom";
 import axios from "axios";
 import { FaRegCreditCard, FaWallet, FaCheckCircle, FaUsers, FaUser, FaCrown, FaMapMarkerAlt, FaClock, FaCalendarAlt } from "react-icons/fa";
 import logo from "../assets/Logo/Trip ok new 2 black-01.png"
+import { toast, ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 const BookingPage = () => {
   const { packageId } = useParams();
   const [packageData, setPackageData] = useState(null);
@@ -13,6 +15,12 @@ const BookingPage = () => {
   const [groupType, setGroupType] = useState("solo"); // 'solo', 'duo', or 'squad'
   const [numSeats, setNumSeats] = useState(1); // Only used when groupType is 'squad'
   const [travelers, setTravelers] = useState([]);
+  const [couponCode, setCouponCode] = useState("");
+  const [discountAmount, setDiscountAmount] = useState(0);
+  const [finalAmount, setFinalAmount] = useState(0); // initialize to 0, then update after calculation
+  // fallback if no coupon
+  const [couponApplied, setCouponApplied] = useState(false);
+
 
   const navigate = useNavigate();
   const userToken = localStorage.getItem("userToken");
@@ -112,11 +120,64 @@ const BookingPage = () => {
 
 
   const { baseAmount, taxAmount, totalAmount, travelerCount } = calculatePaymentAmount();
+  useEffect(() => {
+    setFinalAmount(totalAmount);
+  }, [totalAmount]);
+
 
   const handleInputChange = (index, field, value) => {
     const updatedTravelers = [...travelers];
     updatedTravelers[index][field] = value;
     setTravelers(updatedTravelers);
+  };
+  const handleApplyCoupon = async () => {
+    const user = JSON.parse(localStorage.getItem("userData"));
+    if (!couponCode.trim()) {
+      toast.error("Please enter a coupon code");
+      return;
+    }
+
+    try {
+      const requestData = {
+        code: couponCode.trim().toUpperCase(),
+        userId: user?._id,
+        totalAmount: totalAmount, // Changed from grandTotal to totalAmount
+        packageId: packageId // Added package ID
+      };
+
+      console.log("Applying coupon with data:", requestData); // Debug log
+
+      const { data } = await axios.post(
+        `${import.meta.env.VITE_APP_API_URL}/api/discount/apply`,
+        requestData,
+        {
+          headers: {
+            'Authorization': `Bearer ${userToken}`,
+            'Content-Type': 'application/json'
+          }
+        }
+      );
+
+      if (data.success) {
+        setDiscountAmount(data.discountAmount);
+        setFinalAmount(data.finalAmount);
+        setCouponApplied(true);
+        toast.success(data.message);
+      } else {
+        toast.error(data.message || "Failed to apply coupon");
+      }
+    } catch (error) {
+      console.error("Coupon error details:", {
+        status: error.response?.status,
+        data: error.response?.data,
+        error: error.message
+      });
+
+      const errorMessage = error.response?.data?.message ||
+        error.response?.data?.error ||
+        "Failed to apply coupon. Please try again.";
+      toast.error(errorMessage);
+    }
   };
 
   const handleProceedToPayment = () => {
@@ -543,9 +604,20 @@ const BookingPage = () => {
                     <span className="text-gray-600">Taxes & Fees</span>
                     <span className="font-semibold">₹{taxAmount.toFixed(2)}</span>
                   </div>
+
+                  {/* Add discount row when coupon is applied */}
+                  {couponApplied && (
+                    <div className="flex justify-between items-center py-2 border-b border-gray-100">
+                      <span className="text-gray-600">Discount</span>
+                      <span className="font-semibold text-green-600">-₹{discountAmount.toFixed(2)}</span>
+                    </div>
+                  )}
+
                   <div className="flex justify-between items-center py-3 bg-orange-50 rounded-lg px-4 border-2 border-orange-200">
                     <span className="text-lg font-bold text-gray-800">Total Payable</span>
-                    <span className="text-2xl font-bold text-orange-600">₹{totalAmount.toFixed(2)}</span>
+                    <span className="text-2xl font-bold text-orange-600">
+                      ₹{couponApplied ? finalAmount.toFixed(2) : totalAmount.toFixed(2)}
+                    </span>
                   </div>
                 </div>
 
@@ -558,6 +630,35 @@ const BookingPage = () => {
                     {selectedPayment === "advance" && "Advance Payment - Pay ₹1500 now"}
                   </p>
                 </div>
+                <div className="mt-4">
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Have a Coupon?
+                  </label>
+                  <div className="flex items-center space-x-2">
+                    <input
+                      type="text"
+                      value={couponCode}
+                      onChange={(e) => setCouponCode(e.target.value)}
+                      disabled={couponApplied}
+                      className="border px-3 py-2 rounded w-full"
+                      placeholder="Enter coupon code"
+                    />
+                    <button
+                      onClick={handleApplyCoupon}
+                      disabled={couponApplied}
+                      className="bg-green-500 hover:bg-green-600 text-white font-semibold px-4 py-2 rounded"
+                    >
+                      {couponApplied ? "Applied" : "Apply"}
+                    </button>
+                  </div>
+
+                  {couponApplied && (
+                    <p className="text-green-600 text-sm mt-2">
+                      Coupon applied successfully! You saved ₹{discountAmount}
+                    </p>
+                  )}
+                </div>
+
 
                 {/* Proceed Button */}
                 <button

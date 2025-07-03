@@ -142,7 +142,8 @@ const DashboardPage = () => {
         { name: "Banners", icon: <PictureOutlined/>, path: "/admin/dashboard/banner" },
         { name: "Reviews", icon: <FaComment />, path: "/admin/dashboard/Admin-reviews" },
         { name: "Blogs", icon: <SvgIcon src={packages} alt="Management" />, path: "/admin/dashboard/blogs" },
-        { name: "Top Sale Bar", icon: <BarChartOutlined />, path: "/admin/dashboard/top-sale-bar" },
+        { name: "Discount Coupon", icon: <SvgIcon src={packages} alt="Discount Coupon" />, path: "/admin/dashboard/discount-coupon" },
+        // { name: "Top Sale Bar", icon: <BarChartOutlined />, path: "/admin/dashboard/top-sale-bar" },
         { name: "Offer Management", icon: <GiftOutlined />, path: "/admin/dashboard/offer-manager" },
         { name: "Coupon Management", icon: <TagOutlined />, path: "/admin/dashboard/coupon-manager" },
       ]

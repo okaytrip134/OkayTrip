@@ -9,6 +9,7 @@ const reviewRoutes = require("./user/reviewRoutes")
 const leadRoutes = require("./user/leadRouter")
 const couponRoutes = require("./user/couponRoutes")
 const contactRoutes = require("./user/contactRoutes")
+const discountRoutes = require('./user/discountRoutes')
 const router = express.Router();
 
 // User Routes
@@ -21,6 +22,7 @@ router.use("/reviews", reviewRoutes)
 router.use("/leads", leadRoutes)
 router.use("/coupon", couponRoutes)
 router.use("/contact-form", contactRoutes)
+router.use("/discount", discountRoutes)
 // Admin Routes
 router.use("/admin", adminRoutes)
 module.exports = router;

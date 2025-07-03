@@ -15,6 +15,7 @@ import OffersManagement from "./pages/OfferManager";
 import CouponsManagement from "./pages/CouponManager";
 import AdminBlogs from "./pages/AdminBlogs";
 import AdminContactEnquiries from "./pages/AdminContactEnquiry";
+import CreateDiscountCoupon from "./pages/CreateDiscountCoupon";
 
 
 const AppAdmin = () => {
@@ -37,7 +38,7 @@ const AppAdmin = () => {
             <Route path="Offer-Manager" element={<OffersManagement />} />
             <Route path="Coupon-Manager" element={<CouponsManagement/>} />
             <Route path="blogs" element={<AdminBlogs/>} />
-
+            <Route path="discount-coupon" element={<CreateDiscountCoupon/>}/>
             <Route path="contact-enquiry" element={<AdminContactEnquiries/>}  />
           </Route>
         </Route>
