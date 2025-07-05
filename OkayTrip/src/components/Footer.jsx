@@ -206,7 +206,7 @@ const Footer = () => {
           © 2025 OkayTrip All rights reserved.
         </p>
         <p className="text-gray-500 text-base max-w- mx-auto mt-2 px-6">
-          The content and images used on this site are copyright protected and copyright vests with the respective owners. Unauthorized use is prohibited and punishable by law.
+          The content and use for images used on this site are copyright protected and copyright vests with the respective owners. Unauthorized use is prohibited and punishable by law.
         </p>
       </div>
     </footer>
